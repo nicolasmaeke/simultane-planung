@@ -52,8 +52,8 @@ public class ConfigurationHelper {
             } catch (FileNotFoundException e) {
                 // No config.properties available, create copy from
                 // config.properties.default and reload.
-                FilesystemHelper.getInstance().copyFile("config.properties.default", "config.properties");
-                loadConfiguration();
+                //FileSystemHelper.getInstance().copyFile("config.properties.default", "config.properties");
+                //loadConfiguration();
             }
         } else {
             throw new Exception("Properties instance already available.");
