@@ -18,6 +18,10 @@ import java.util.Vector;
 
 /**
  * Created by nilsolsen on 09.03.17.
+ * 
+ * ACHTUNG: NICHT BENUTZEN FUER DAS PROJEKT
+ * 
+ * 
  */
 public class ReadIn {
 
@@ -31,56 +35,29 @@ public class ReadIn {
     public double maxloading;
 
     // 1.1 Streckennetz und Ladeinfrastruktur
-
+    
+    /**
+     * irrelevant, da es bei uns keine unterschiedlichen Ladesysteme gibt
     // 1.1.1 Ladesysteme
     public Vector<Integer> ChargingID;
     public Vector<String> ChargingBezeichnung;
-
+	*/
+	
     // 1.1.2 Stoppoints
     public Vector<Integer> StopPointID;
     public Vector<String> StopPointCode;
     public Vector<String> StopPointName;
-    public Vector<Double> StopPointVehCapForCharging;
-    public Vector<Integer> StopPointChargingSystem; // Ladesysteme j von Stoppoint i: (i-1)*4 + j
-    public Vector<Integer> StopPointFastChargingCapability;
+    
+    /** Irrelevant aufgrund unserer Annahmen
+    	public Vector<Double> StopPointVehCapForCharging;
+    	public Vector<Integer> StopPointChargingSystem; // Ladesysteme j von Stoppoint i: (i-1)*4 + j
+    	public Vector<Integer> StopPointFastChargingCapability;
+    **/
 
     // 1.1.3 Linien
-    public Vector<Integer> LineID;
+    public Vector<Integer> LineID; // ID, CODE und NAME sind identisch
     public Vector<String> LineCODE;
     public Vector<String> LineNAME;
-
-    // 1.1.4 Fahrzeugtypen
-    public Vector<Integer> VehTypeID;
-    public Vector<String> VehTypeCode;
-    public Vector<String> VehTypeName;
-    public Vector<Integer> VehTypeVehCharakteristic;
-    public Vector<String> VehTypeVehClass;
-    public Vector<Double> VehTypeCurbWeightKg;
-    public Vector<Double> VehTypeVehCost;
-    public Vector<Double> VehTypeKmCost;
-    public Vector<Double> VehTypeHourCost;
-    public Vector<Double> VehTypeCapacity;
-    public Vector<Double> VehTypeBatteryCapacity;
-    public Vector<Double> VehTypeConServiceKm;
-    public Vector<Double> VehTypeConDeadKm;
-    public Vector<Double> VehTypeRechargingCost;
-    public Vector<Double> VehTypeSlowRechargingTime;
-    public Vector<Double> VehTypeFastRechargingTime;
-    public Vector<Integer> VehTypeChargingSystem; // new Vector<, welches die Ladesysteme enthält, mit denen ein Fahrzeugtyp geladen werden kann
-
-    // 1.1.5 Fahrzeugtypgruppen
-    public Vector<Integer> VehTypeGroupID;
-    public Vector<String> VehTypeGroupCODE;
-    public Vector<String> VehTypeGroupNAME;
-
-    // 1.1.6 Fahrzeugtyp zu Fahrzeugtypgruppe
-    public Vector<Integer> VehTypToVehTypeGroup; // A(i) = Fahrzeugtypgruppe von Fahrzeugtyp i
-
-    // 1.1.7 Fahrzeugkapazität (für Laden) zu Haltestelle
-    public Vector<Integer> CapVehTypeID; // (i,j): Fahrzeugtyp i kann an Haltestelle j geladen werden
-    public Vector<Integer> CapStoppointID; // (i,j): Fahrzeugtyp i kann an Haltestelle j geladen werden
-    public Vector<Double> CapIDMin; // 0
-    public Vector<Double> CapIDMax; // 1000 (unbegrenzt)
 
     // 1.1.8 Servicefahrten
     public Vector<Integer> SFID;
@@ -89,10 +66,10 @@ public class ReadIn {
     public Vector<Integer> SFToStopID;
     public Vector<Date> SFDepTime;
     public Vector<Date> SFArrTime;
-    public Vector<Integer> SFVehTypeGroupID;
+    //public Vector<Integer> SFVehTypeGroupID; es gibt keine unterschiedlichen Vehicle Types
     public Vector<Double> SFDistance;
 
-    // 1.1.9 Verbindungen
+    // 1.1.9 Verbindungen (Deadruntime)
     public Vector<Integer> FromStopID;
     public Vector<Integer> ToStopID;
     public Vector<Double> Distance;
@@ -121,54 +98,23 @@ public class ReadIn {
     public void Problem() {
 
         // depotnummer = dn;
-        ChargingID = new Vector<Integer>(0);
-        ChargingBezeichnung = new Vector<String>(0);
+        //ChargingID = new Vector<Integer>(0);
+        //ChargingBezeichnung = new Vector<String>(0);
 
         // 1.1.2 Stoppoints
         StopPointID = new Vector<Integer>(0);
         StopPointCode = new Vector<String>(0);
         StopPointName = new Vector<String>(0);
+        /**
         StopPointVehCapForCharging = new Vector<Double>(0);
         StopPointChargingSystem = new Vector<Integer>(0); // Ladesysteme j von Stoppoint i: i*4 + j
         StopPointFastChargingCapability = new Vector<Integer>(0);
+        **/
 
         // 1.1.3 Linien
         LineID = new Vector<Integer>(0);
         LineCODE = new Vector<String>(0);
         LineNAME = new Vector<String>(0);
-
-        // 1.1.4 Fahrzeugtypen
-        VehTypeID = new Vector<Integer>(0);
-        VehTypeCode = new Vector<String>(0);
-        VehTypeName = new Vector<String>(0);
-        VehTypeVehCharakteristic = new Vector<Integer>(0);
-        VehTypeVehClass = new Vector<String>(0);
-        VehTypeCurbWeightKg = new Vector<Double>(0);
-        VehTypeVehCost = new Vector<Double>(0);
-        VehTypeKmCost = new Vector<Double>(0);
-        VehTypeHourCost = new Vector<Double>(0);
-        VehTypeCapacity = new Vector<Double>(0);
-        VehTypeBatteryCapacity = new Vector<Double>(0);
-        VehTypeConServiceKm = new Vector<Double>(0);
-        VehTypeConDeadKm = new Vector<Double>(0);
-        VehTypeRechargingCost = new Vector<Double>(0);
-        VehTypeSlowRechargingTime = new Vector<Double>(0);
-        VehTypeFastRechargingTime = new Vector<Double>(0);
-        VehTypeChargingSystem = new Vector<Integer>(0); // new Vector<, welches die Ladesysteme enthält, mit denen ein Fahrzeugtyp geladen werden kann
-
-        // 1.1.5 Fahrzeugtypgruppen
-        VehTypeGroupID = new Vector<Integer>(0);
-        VehTypeGroupCODE = new Vector<String>(0);
-        VehTypeGroupNAME = new Vector<String>(0);
-
-        // 1.1.6 Fahrzeugtyp zu Fahrzeugtypgruppe
-        VehTypToVehTypeGroup = new Vector<Integer>(0); // A(i) = Fahrzeugtypgruppe von Fahrzeugtyp i
-
-        // 1.1.7 Fahrzeugkapazität (für Laden) zu Haltestelle
-        CapVehTypeID = new Vector<Integer>(0); // (i,j): Fahrzeugtyp i kann an Haltestelle j geladen werden
-        CapStoppointID = new Vector<Integer>(0); // (i,j): Fahrzeugtyp i kann an Haltestelle j geladen werden
-        CapIDMin = new Vector<Double>(0); // 0
-        CapIDMax = new Vector<Double>(0); // 1000 (unbegrenzt)
 
         // 1.1.8 Servicefahrten
         SFID = new Vector<Integer>(0);
@@ -177,7 +123,7 @@ public class ReadIn {
         SFToStopID = new Vector<Integer>(0);
         SFDepTime = new Vector<Date>(0);
         SFArrTime = new Vector<Date>(0);
-        SFVehTypeGroupID = new Vector<Integer>(0);
+        //SFVehTypeGroupID = new Vector<Integer>(0);
         SFDistance = new Vector<Double>(0);
 
         // 1.1.9 Verbindungen
@@ -230,8 +176,8 @@ public class ReadIn {
 
                     while (temp != null && !ersteszeichen.equals("*")) {
 
-                        ChargingID.add(Integer.parseInt(temp.split(";")[0]));
-                        ChargingBezeichnung.add(temp.split(";")[1]);
+                        //ChargingID.add(Integer.parseInt(temp.split(";")[0]));
+                        //ChargingBezeichnung.add(temp.split(";")[1]);
 
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -251,18 +197,25 @@ public class ReadIn {
                         StopPointCode.add(temp.split(";")[1]); // Code
                         StopPointName.add(temp.split(";")[2]); // Name
                         // StopPointVehCapForCharging.add(Double.parseDouble(temp.split(";")[3])); // Fahrzeugkapazität zum Laden
+                        /** 
+                         * Da wir davon ausgehen, 
+                         * dass unbegrenzt viele Busse an einer Ladestation aufgeladen werden können,
+                         * brauchen wir die Kapazität nicht zu bestimmen.
+                         * Außerdem gibt es bei uns keine unterschiedlichen Ladesysteme
+                         * und kein Schnellladefunktion 
+                         * 
                         if (Ladestation.elementAt(StopPointID.size() - 1) == 1) {
                             StopPointVehCapForCharging.add(1000.0);
                         } else {
                             StopPointVehCapForCharging.add(0.0);
                         }
-
+						
                         for (int k = 0; k < 4; k++) {
                             StopPointChargingSystem.add(1);
                         }
 
                         StopPointFastChargingCapability.add(1);
-
+						**/
 
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -290,6 +243,9 @@ public class ReadIn {
                     continue;
                 }
 
+                /** Brauchen wir nicht einlesen:
+                 * 
+                
                 if (BlockBegin.equals("$VEHICLETYPE")) // 4. Relation: Fahrzeugtypen
                 {
                     temp = reader.readLine(); // nächste Zeile
@@ -410,7 +366,8 @@ public class ReadIn {
                     }
                     continue;
                 }
-
+                
+                
                 if (BlockBegin.equals("$VEHTYPECAPTOSTOPPOINT")) // 7. Relation: Fahrzeugtyp zu Ladestation
                 {
 
@@ -448,6 +405,7 @@ public class ReadIn {
                     continue;
 
                 }
+                **/
 
                 if (BlockBegin.equals("$SERVICEJOURNEY")) // 8. Relation: Servicefahrten
                 {
@@ -483,7 +441,7 @@ public class ReadIn {
                         }
                         SFArrTime.add(zeit);
 
-                        SFVehTypeGroupID.add(Integer.parseInt(temp.split(";")[8]));
+                        //SFVehTypeGroupID.add(Integer.parseInt(temp.split(";")[8]));
                         SFDistance.add(Double.parseDouble(temp.split(";")[11]) / 1000);
 
                         temp = reader.readLine(); // nächste Zeile
@@ -520,4 +478,38 @@ public class ReadIn {
         }
 
     }
+    
+ // 1.1.4 Fahrzeugtypen
+    public Vector<Integer> VehTypeID;
+    public Vector<String> VehTypeCode;
+    public Vector<String> VehTypeName;
+    public Vector<Integer> VehTypeVehCharakteristic;
+    public Vector<String> VehTypeVehClass;
+    public Vector<Double> VehTypeCurbWeightKg;
+    public Vector<Double> VehTypeVehCost;
+    public Vector<Double> VehTypeKmCost;
+    public Vector<Double> VehTypeHourCost;
+    public Vector<Double> VehTypeCapacity;
+    public Vector<Double> VehTypeBatteryCapacity;
+    public Vector<Double> VehTypeConServiceKm;
+    public Vector<Double> VehTypeConDeadKm;
+    public Vector<Double> VehTypeRechargingCost;
+    public Vector<Double> VehTypeSlowRechargingTime;
+    public Vector<Double> VehTypeFastRechargingTime;
+    public Vector<Integer> VehTypeChargingSystem; // new Vector<, welches die Ladesysteme enthält, mit denen ein Fahrzeugtyp geladen werden kann
+
+    // 1.1.5 Fahrzeugtypgruppen
+    public Vector<Integer> VehTypeGroupID;
+    public Vector<String> VehTypeGroupCODE;
+    public Vector<String> VehTypeGroupNAME;
+
+    // 1.1.6 Fahrzeugtyp zu Fahrzeugtypgruppe
+    public Vector<Integer> VehTypToVehTypeGroup; // A(i) = Fahrzeugtypgruppe von Fahrzeugtyp i
+
+    // 1.1.7 Fahrzeugkapazität (für Laden) zu Haltestelle
+    public Vector<Integer> CapVehTypeID; // (i,j): Fahrzeugtyp i kann an Haltestelle j geladen werden
+    public Vector<Integer> CapStoppointID; // (i,j): Fahrzeugtyp i kann an Haltestelle j geladen werden
+    public Vector<Double> CapIDMin; // 0
+    public Vector<Double> CapIDMax; // 1000 (unbegrenzt)
+
 }
