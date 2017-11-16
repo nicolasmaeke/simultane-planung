@@ -36,7 +36,7 @@ public class Fahrzeugumlauf {
 	
 	public boolean isFeasible(){
 		boolean result = true;
-		if ((fahrten.get(0) instanceof Deadruntime) || (fahrten.get(fahrten.size()-1) instanceof Deadruntime)){
+		if (!(fahrten.get(0) instanceof Deadruntime) || !(fahrten.get(fahrten.size()-1) instanceof Deadruntime)){
 			result = false;
 		}
 		return result;
@@ -45,6 +45,10 @@ public class Fahrzeugumlauf {
 	public String toString(){
 		String result = "Fahrzeugumlauf " + id + " beinhaltet folgende Fahrten: " + getFahrten();
 		return result;
+	}
+	
+	public int size(){
+		return fahrten.size();
 	}
 
 }

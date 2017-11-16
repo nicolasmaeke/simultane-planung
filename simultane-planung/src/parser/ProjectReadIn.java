@@ -48,11 +48,11 @@ public class ProjectReadIn {
 
     
     // 1.1.3 Servicefahrten
-    public Vector<Servicejourney> servicejeourneys;
+    public Vector<Servicejourney> servicejourneys;
     
     
     // 1.1.4 Verbindungen (Deadruntime)
-    public Vector<Deadruntime> deadruntimes;
+    public HashMap<String, Deadruntime> deadruntimes;
     
     
     // Zeitformat
@@ -74,6 +74,9 @@ public class ProjectReadIn {
     public Table<Integer, Integer, Double> distance;
     public Table<Integer, Integer, Double> sfdistance;
     
+    // sind Verbindungen zwischen zwei Servicefahrten gültig
+    public HashMap<String, Integer> validEdges;
+    
     /**
      * Wenn die Methode aufgerufen wird, instanziiert sie zunaechst die Variablen
      * und ruft zum Schluss die Methode ProjectReadIn auf
@@ -92,6 +95,7 @@ public class ProjectReadIn {
 
         //this.ProjectReadIn(); // Datei auslesen
     }
+    
 
     /**
      * Methode liest die Daten-Datei zeilenweise aus 
@@ -165,19 +169,19 @@ public class ProjectReadIn {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    servicejeourneys = new Vector<Servicejourney>();
+                    servicejourneys = new Vector<Servicejourney>();
 
                     while (temp != null && !ersteszeichen.equals("*")) {
 
-                        int sfId= Integer.parseInt(temp.split(";")[0]); // ID
-                        int sfLineID = Integer.parseInt(temp.split(";")[1]); // LineID
-                        int sfFromStopID = Integer.parseInt(temp.split(";")[2]); // Starthaltestelle
-                        int sfToStopID = Integer.parseInt(temp.split(";")[3]); // Endhaltestelle
+                        String sfId= (temp.split(";")[0]); // ID
+                        //int sfLineID = Integer.parseInt(temp.split(";")[1]); // LineID
+                        String sfFromStopID = (temp.split(";")[2]); // Starthaltestelle
+                        String sfToStopID = (temp.split(";")[3]); // Endhaltestelle
                         String sfDepTime = temp.split(";")[4]; // Abfahrtszeit
                         String sfArrTime = temp.split(";")[5]; // Ankunftszeit
                         double sfDistance = Double.parseDouble(temp.split(";")[11]) / 1000; // Distanz wird in Kilometer umgerechnet
                         
-                        servicejeourneys.add(new Servicejourney(sfId, sfLineID, sfFromStopID, sfToStopID, sfDepTime, sfArrTime, sfDistance));
+                        servicejourneys.add(new Servicejourney(sfId, sfFromStopID, sfToStopID, sfDepTime, sfArrTime, sfDistance));
 
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -192,16 +196,17 @@ public class ProjectReadIn {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    deadruntimes = new Vector<Deadruntime>();
+                    deadruntimes = new HashMap<String, Deadruntime>();
 
                     while (temp != null && !ersteszeichen.equals("*")) {
 
-                        int fromStopID = Integer.parseInt(temp.split(";")[0]); // ID
-                        int toStopID = Integer.parseInt(temp.split(";")[1]); // ID
+                        String fromStopID = (temp.split(";")[0]); // ID
+                        String toStopID =(temp.split(";")[1]); // ID
                         double distance = Double.parseDouble(temp.split(";")[4]) / 1000;
                         int runtime = Integer.parseInt(temp.split(";")[5]) / 60;
 
-                        deadruntimes.add(new Deadruntime(fromStopID, toStopID, distance, runtime));
+                        Deadruntime neu = new Deadruntime(fromStopID, toStopID, distance, runtime);
+                        deadruntimes.put(neu.getId(), neu);
                         
                         temp = reader.readLine();
 
@@ -212,6 +217,34 @@ public class ProjectReadIn {
         } catch (IOException e) {
             System.out.println(e);
         }
+        
+        validEdges = new HashMap<String, Integer>();
+        for (int i = 0; i < servicejourneys.size(); i++) {
+			for (int j = 0; j < servicejourneys.size(); j++) {
+				if(i==j){
+					validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 0);
+				}
+				else{
+					if(zeitpuffer(servicejourneys.get(i), servicejourneys.get(j)) >= 0){
+						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 1);
+					}
+					else{
+						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 0);
+					}
+				}
+			}
+		}
 	}
+
+	
+	private long zeitpuffer(Servicejourney i, Servicejourney j){
+		long result = 0;
+		String deadrunId = ""+i.getSfToStopId()+j.getSfFromStopId();
+		//String deadrunId = "0889008880";
+		result = (j.getSfDepTime().getTime() - i.getSfArrTime().getTime()) - deadruntimes.get(deadrunId).getRuntime();
+		return result;
+	}
+
+	
 }
 

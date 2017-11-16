@@ -6,10 +6,9 @@ import java.util.Date;
 
 public class Servicejourney implements Journey {
 
-    int id;
-    int lineId;
-    int sfFromStopId;
-    int sfToStopId;
+    private String id;
+    private String sfFromStopId;
+    private String sfToStopId;
     Date sfDepTime;
     Date sfArrTime;
     double sfDistance; // in Kilometer
@@ -19,11 +18,10 @@ public class Servicejourney implements Journey {
     private String help;
 	private Date zeit;
     
-    public Servicejourney(int id, int lineId, int FromStopId, int ToStopId, String DepTime, String ArrTime, double Distance){
+    public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
     	this.id = id;
-    	this.lineId = lineId;
-    	this.sfFromStopId = FromStopId;
-    	this.sfToStopId = ToStopId;
+    	this.setSfFromStopId(FromStopId);
+    	this.setSfToStopId(ToStopId);
     	this.sfDistance = Distance;
     	
     	help = DepTime;
@@ -69,6 +67,78 @@ public class Servicejourney implements Journey {
 	public String toString(){
 		return "Servicejourney " + id + " hat eine Dauer von " + sfRuntime +
 				" Sekunden und verbraucht dabei " + sfVerbrauch + " kWh";
+	}
+
+	public String getSfFromStopId() {
+		return sfFromStopId;
+	}
+
+	public void setSfFromStopId(String sfFromStopId) {
+		this.sfFromStopId = sfFromStopId;
+	}
+
+	public String getSfToStopId() {
+		return sfToStopId;
+	}
+
+	public void setSfToStopId(String sfToStopId) {
+		this.sfToStopId = sfToStopId;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public Date getSfDepTime() {
+		return sfDepTime;
+	}
+
+	public void setSfDepTime(Date sfDepTime) {
+		this.sfDepTime = sfDepTime;
+	}
+
+	public Date getSfArrTime() {
+		return sfArrTime;
+	}
+
+	public void setSfArrTime(Date sfArrTime) {
+		this.sfArrTime = sfArrTime;
+	}
+
+	public double getSfDistance() {
+		return sfDistance;
+	}
+
+	public void setSfDistance(double sfDistance) {
+		this.sfDistance = sfDistance;
+	}
+
+	public DateFormat getZformat() {
+		return zformat;
+	}
+
+	public void setZformat(DateFormat zformat) {
+		this.zformat = zformat;
+	}
+
+	public String getHelp() {
+		return help;
+	}
+
+	public void setHelp(String help) {
+		this.help = help;
+	}
+
+	public Date getZeit() {
+		return zeit;
+	}
+
+	public void setZeit(Date zeit) {
+		this.zeit = zeit;
 	}
     
 }
