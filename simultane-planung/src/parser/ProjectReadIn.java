@@ -3,8 +3,8 @@ package parser;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import helper.feasibilityHelper;
 import model.Deadruntime;
-import model.Line;
 import model.Servicejourney;
 import model.Stoppoint;
 import output.Schedule;
@@ -22,7 +22,6 @@ import java.util.Vector;
 
 /**
  * 
- * @author nicolasmaeke
  * Parser Klassen, die nur die Instanzen der Daten einliest,
  * die fuer die Problemstellung unseres Projektes notwendig sind.
  *
@@ -43,17 +42,11 @@ public class ProjectReadIn {
     // 1.1.1 Stoppoints
     public Vector<Stoppoint> stoppoints;
     
-    // 1.1.2 Linien
-    public Vector<Line> lines;
-
-    
-    // 1.1.3 Servicefahrten
+    // 1.1.2 Servicefahrten
     public Vector<Servicejourney> servicejourneys;
     
-    
-    // 1.1.4 Verbindungen (Deadruntime)
+    // 1.1.3 Verbindungen (Deadruntime)
     public HashMap<String, Deadruntime> deadruntimes;
-    
     
     // Zeitformat
     public DateFormat zformat;
@@ -63,7 +56,6 @@ public class ProjectReadIn {
 
     // Lösung
     public Schedule s;
-    public int depotnummer;
     public double factor_oben;
     public double factor_unten;
     public Vector<Integer> Ladestation;
@@ -74,7 +66,7 @@ public class ProjectReadIn {
     public Table<Integer, Integer, Double> distance;
     public Table<Integer, Integer, Double> sfdistance;
     
-    // sind Verbindungen zwischen zwei Servicefahrten gültig
+    // sind Verbindungen zwischen zwei Servicefahrten moeglich
     public HashMap<String, Integer> validEdges;
     
     /**
@@ -92,13 +84,10 @@ public class ProjectReadIn {
 
         // Lösung
         s = new Schedule();
-
-        //this.ProjectReadIn(); // Datei auslesen
     }
-    
 
     /**
-     * Methode liest die Daten-Datei zeilenweise aus 
+     * Konstruktor: liest die Daten-Datei zeilenweise aus 
      * und speichert die Instanzen in den zuvor erstellten und instanziierten Variablen
      */
 	public ProjectReadIn(String path) {
@@ -144,26 +133,7 @@ public class ProjectReadIn {
                 } // end if
 
 
-                if (BlockBegin.equals("$LINE")) // 2. Relation: Lines
-                {
-                    temp = reader.readLine(); // nächste Zeile
-                    ersteszeichen = temp.substring(0, 1); // erstes Zeichen
-                    
-                    lines = new Vector<Line>();
-                    
-                    while (temp != null && !ersteszeichen.equals("*")) {
-                    	
-                    	lines.add(new Line(Integer.parseInt(temp.split(";")[0])));
-
-                        temp = reader.readLine(); // nächste Zeile
-                        ersteszeichen = temp.substring(0, 1); // erstes Zeichen
-
-                    } // end while
-                    continue;
-                } // end if
-
-
-                if (BlockBegin.equals("$SERVICEJOURNEY")) // 3. Relation: Servicefahrten
+                if (BlockBegin.equals("$SERVICEJOURNEY")) // 2. Relation: Servicefahrten
                 {
 
                     temp = reader.readLine(); // nächste Zeile
@@ -190,7 +160,7 @@ public class ProjectReadIn {
                     continue;
                 } // end if
 
-                if (BlockBegin.equals("$DEADRUNTIME")) // 4. Relation: Servicefahrten
+                if (BlockBegin.equals("$DEADRUNTIME")) // 3. Relation: Servicefahrten
                 {
 
                     temp = reader.readLine(); // nächste Zeile
@@ -218,6 +188,9 @@ public class ProjectReadIn {
             System.out.println(e);
         }
         
+        /**
+         * es wird eine Matrix mit moeglichen Verbindungen zwischen zwei Servicefahrten erstellt
+         */
         validEdges = new HashMap<String, Integer>();
         for (int i = 0; i < servicejourneys.size(); i++) {
 			for (int j = 0; j < servicejourneys.size(); j++) {
@@ -225,7 +198,7 @@ public class ProjectReadIn {
 					validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 0);
 				}
 				else{
-					if(zeitpuffer(servicejourneys.get(i), servicejourneys.get(j)) >= 0){
+					if(feasibilityHelper.zeitpuffer(servicejourneys.get(i), servicejourneys.get(j), deadruntimes) >= 0){
 						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 1);
 					}
 					else{
@@ -235,16 +208,6 @@ public class ProjectReadIn {
 			}
 		}
 	}
-
-	
-	private long zeitpuffer(Servicejourney i, Servicejourney j){
-		long result = 0;
-		String deadrunId = ""+i.getSfToStopId()+j.getSfFromStopId();
-		//String deadrunId = "0889008880";
-		result = (j.getSfDepTime().getTime() - i.getSfArrTime().getTime()) - deadruntimes.get(deadrunId).getRuntime();
-		return result;
-	}
-
 	
 }
 

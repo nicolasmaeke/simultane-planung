@@ -1,6 +1,10 @@
 package model;
 
-
+/**
+ * 
+ * Klasse repraesentiert die Leerfahrten
+ * 
+ */
 public class Deadruntime implements Journey {
 
 	private String id;
@@ -10,6 +14,14 @@ public class Deadruntime implements Journey {
     int runtime;
     private double verbrauch;
     
+    /**
+     * Konstruktor: initialisiert die Variablen, berechnet den Verbrauch
+     * und erstellt eine eindeutige ID aus Start- und Endhaltestelle
+     * @param fromStopId
+     * @param toStopId
+     * @param distance
+     * @param runtime
+     */
     public Deadruntime(String fromStopId, String toStopId, double distance, int runtime){
     	this.fromStopId = fromStopId;
     	this.toStopId = toStopId;
@@ -27,11 +39,6 @@ public class Deadruntime implements Journey {
 
 	public void setVerbrauch(double verbrauch) {
 		this.verbrauch = verbrauch;
-	}
-	
-	public String toString(){
-		return "Leerfahrt von Haltestelle " + fromStopId + " zu Haltestelle " + toStopId +
-				" hat einen Verbraucht von " + verbrauch + " kWh";
 	}
 
 	public String getFromStopId() {
@@ -72,5 +79,10 @@ public class Deadruntime implements Journey {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+	
+	public String toString(){
+		return "Leerfahrt von Haltestelle " + fromStopId + " zu Haltestelle " + toStopId +
+				" hat einen Verbraucht von " + verbrauch + " kWh";
 	}
 }

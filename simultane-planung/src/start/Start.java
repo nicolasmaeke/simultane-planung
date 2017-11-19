@@ -13,7 +13,7 @@ public class Start {
 	public static void main(String[] args) {
 
 		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/sample_toy_6_SF_9_stoppoints.txt");
-		test.Problem();
+		//test.Problem();
 		
 		/**
 		for (int i = 0; i < test.servicejeourneys.size(); i++) {

@@ -1,15 +1,24 @@
 package model;
 
+/**
+ * 
+ * Klasse repraesentiert die Haltestellen
+ *
+ */
 public class Stoppoint {
 
 	private int id;
 	private int code;
 	private String name;
 	
-	public Stoppoint(int i){
-		this.setId(i);
-		this.setCode(i);
-		this.setName("Haltestelle " + i);
+	/**
+	 * Konstruktor
+	 * @param id
+	 */
+	public Stoppoint(int id){
+		this.setId(id);
+		this.setCode(id);
+		this.setName("Haltestelle " + id);
 	}
 
 	public int getId() {

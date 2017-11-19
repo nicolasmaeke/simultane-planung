@@ -4,6 +4,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * 
+ * Klasse repraesentiert die Servicefahrten
+ *
+ */
 public class Servicejourney implements Journey {
 
     private String id;
@@ -14,10 +19,22 @@ public class Servicejourney implements Journey {
     double sfDistance; // in Kilometer
     private double sfRuntime; // in Milisekunden
     private double sfVerbrauch;
+    /**
+     * Hilfsvariablen zur Berechnung der Runtime
+     */
     public DateFormat zformat = new SimpleDateFormat("HH:mm:ss");
     private String help;
 	private Date zeit;
     
+	/**
+	 * Konstruktor: initialisiert Variablen und berechnet Runtime sowie Verbrauch der Servicefahrt
+	 * @param id
+	 * @param FromStopId
+	 * @param ToStopId
+	 * @param DepTime
+	 * @param ArrTime
+	 * @param Distance
+	 */
     public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
     	this.id = id;
     	this.setSfFromStopId(FromStopId);
@@ -62,11 +79,6 @@ public class Servicejourney implements Journey {
 
 	public void setSfRuntime(double sfRuntime) {
 		this.sfRuntime = sfRuntime;
-	}
-    
-	public String toString(){
-		return "Servicejourney " + id + " hat eine Dauer von " + sfRuntime +
-				" Sekunden und verbraucht dabei " + sfVerbrauch + " kWh";
 	}
 
 	public String getSfFromStopId() {
@@ -139,6 +151,11 @@ public class Servicejourney implements Journey {
 
 	public void setZeit(Date zeit) {
 		this.zeit = zeit;
+	}
+	
+	public String toString(){
+		return "Servicejourney " + id + " hat eine Dauer von " + sfRuntime +
+				" Sekunden und verbraucht dabei " + sfVerbrauch + " kWh";
 	}
     
 }
