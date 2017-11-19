@@ -11,7 +11,8 @@ import java.util.LinkedList;
 public class Fahrzeugumlauf {
 	
 	int id;
-	private LinkedList<Journey> fahrten;
+	// Typ der Liste ist Journey, damit sowohl Servicefahrten als auch Leerfahrten hinzugefuegt werden koennen
+	private LinkedList<Journey> fahrten; 
 	
 	/**
 	 * Konstruktor

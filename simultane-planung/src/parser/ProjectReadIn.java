@@ -70,8 +70,7 @@ public class ProjectReadIn {
     public HashMap<String, Integer> validEdges;
     
     /**
-     * Wenn die Methode aufgerufen wird, instanziiert sie zunaechst die Variablen
-     * und ruft zum Schluss die Methode ProjectReadIn auf
+     * 
      */
     public void Problem() {
 
@@ -144,7 +143,6 @@ public class ProjectReadIn {
                     while (temp != null && !ersteszeichen.equals("*")) {
 
                         String sfId= (temp.split(";")[0]); // ID
-                        //int sfLineID = Integer.parseInt(temp.split(";")[1]); // LineID
                         String sfFromStopID = (temp.split(";")[2]); // Starthaltestelle
                         String sfToStopID = (temp.split(";")[3]); // Endhaltestelle
                         String sfDepTime = temp.split(";")[4]; // Abfahrtszeit
@@ -172,8 +170,8 @@ public class ProjectReadIn {
 
                         String fromStopID = (temp.split(";")[0]); // ID
                         String toStopID =(temp.split(";")[1]); // ID
-                        double distance = Double.parseDouble(temp.split(";")[4]) / 1000;
-                        int runtime = Integer.parseInt(temp.split(";")[5]) / 60;
+                        double distance = Double.parseDouble(temp.split(";")[4]) / 1000; // Distanz wird in Kilometer umgerechnet
+                        int runtime = Integer.parseInt(temp.split(";")[5]) / 60; // Runtime wird in Minuten umgerechnet
 
                         Deadruntime neu = new Deadruntime(fromStopID, toStopID, distance, runtime);
                         deadruntimes.put(neu.getId(), neu);
