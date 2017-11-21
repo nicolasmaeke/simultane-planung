@@ -58,7 +58,7 @@ public class ProjectReadIn {
     public Schedule s;
     public double factor_oben;
     public double factor_unten;
-    public Vector<Integer> Ladestation;
+    
 
     // Ladestationen
     public double LSpro = 0.1;
@@ -67,7 +67,7 @@ public class ProjectReadIn {
     public Table<Integer, Integer, Double> sfdistance;
     
     // sind Verbindungen zwischen zwei Servicefahrten moeglich
-    public HashMap<String, Integer> validEdges;
+    public HashMap<String, Boolean> validEdges;
     
     /**
      * 
@@ -123,7 +123,7 @@ public class ProjectReadIn {
                     
                     while (temp != null && !ersteszeichen.equals("*")) {
                     
-                    	stoppoints.add(new Stoppoint(Integer.parseInt(temp.split(";")[0])));
+                    	stoppoints.add(new Stoppoint(temp.split(";")[0]));
                     
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -189,23 +189,22 @@ public class ProjectReadIn {
         /**
          * es wird eine Matrix mit moeglichen Verbindungen zwischen zwei Servicefahrten erstellt
          */
-        validEdges = new HashMap<String, Integer>();
+        validEdges = new HashMap<String, Boolean>();
         for (int i = 0; i < servicejourneys.size(); i++) {
 			for (int j = 0; j < servicejourneys.size(); j++) {
 				if(i==j){
-					validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 0);
+					validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), false);
 				}
 				else{
 					if(feasibilityHelper.zeitpuffer(servicejourneys.get(i), servicejourneys.get(j), deadruntimes) >= 0){
-						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 1);
+						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), true);
 					}
 					else{
-						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), 0);
+						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), false);
 					}
 				}
 			}
-		}
+		}   
 	}
-	
 }
 

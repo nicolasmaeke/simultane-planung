@@ -23,8 +23,7 @@ public class feasibilityHelper {
 	public static long zeitpuffer(Servicejourney i, Servicejourney j, HashMap<String, Deadruntime> deadruntimes){
 		long result = 0;
 		String deadrunId = ""+i.getSfToStopId()+j.getSfFromStopId();
-		//String deadrunId = "0889008880";
-		//result = (j.getSfDepTime().getTime() - i.getSfArrTime().getTime()) - deadruntimes.get(deadrunId).getRuntime();
+		result = (j.getSfDepTime().getTime() - i.getSfArrTime().getTime()) - deadruntimes.get(deadrunId).getRuntime();
 		return result;
 	}
 
