@@ -171,7 +171,7 @@ public class ProjectReadIn {
                     while (temp != null && !ersteszeichen.equals("*")) {
 
                         String fromStopID = (temp.split(";")[0]); // ID
-                        String toStopID =(temp.split(";")[1]); // ID
+                        String toStopID = (temp.split(";")[1]); // ID
                         double distance = Double.parseDouble(temp.split(";")[4]) / 1000; // Distanz wird in Kilometer umgerechnet
                         int runtime = Integer.parseInt(temp.split(";")[5]) / 60; // Runtime wird in Minuten umgerechnet
 
