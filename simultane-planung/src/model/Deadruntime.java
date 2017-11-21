@@ -57,7 +57,7 @@ public class Deadruntime implements Journey {
 		this.toStopId = toStopId;
 	}
 
-	public double getDistance() {
+	public Double getDistance() {
 		return distance;
 	}
 

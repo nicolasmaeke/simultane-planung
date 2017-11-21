@@ -10,7 +10,7 @@ import java.util.LinkedList;
  */
 public class Fahrzeugumlauf {
 	
-	int id;
+	private String id;
 	// Typ der Liste ist Journey, damit sowohl Servicefahrten als auch Leerfahrten hinzugefuegt werden koennen
 	private LinkedList<Journey> fahrten; 
 	
@@ -18,7 +18,7 @@ public class Fahrzeugumlauf {
 	 * Konstruktor
 	 * @param i
 	 */
-	public Fahrzeugumlauf(int i){
+	public Fahrzeugumlauf(String i){
 		this.setFahrten(new LinkedList<Journey>());
 		this.id = i;
 	}
@@ -38,6 +38,11 @@ public class Fahrzeugumlauf {
 	 */
 	public void addFahrtAfterFahrt(int index, Journey j){
 		fahrten.add(index, j);
+	}
+	
+	public Journey getAtIndex(int index){
+		Journey result = fahrten.get(index);
+		return result;
 	}
 	
 	public LinkedList<Journey> getFahrten() {
@@ -74,6 +79,14 @@ public class Fahrzeugumlauf {
 	public String toString(){
 		String result = "Fahrzeugumlauf " + id + " beinhaltet folgende Fahrten: " + getFahrten();
 		return result;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

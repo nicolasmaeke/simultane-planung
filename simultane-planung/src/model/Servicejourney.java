@@ -12,8 +12,8 @@ import java.util.Date;
 public class Servicejourney implements Journey {
 
     private String id;
-    private String sfFromStopId;
-    private String sfToStopId;
+    private String fromStopId;
+    private String toStopId;
     Date sfDepTime;
     Date sfArrTime;
     double sfDistance; // in Kilometer
@@ -37,8 +37,8 @@ public class Servicejourney implements Journey {
 	 */
     public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
     	this.id = id;
-    	this.setSfFromStopId(FromStopId);
-    	this.setSfToStopId(ToStopId);
+    	this.setFromStopId(FromStopId);
+    	this.setToStopId(ToStopId);
     	this.sfDistance = Distance;
     	
     	help = DepTime;
@@ -81,20 +81,20 @@ public class Servicejourney implements Journey {
 		this.sfRuntime = sfRuntime;
 	}
 
-	public String getSfFromStopId() {
-		return sfFromStopId;
+	public String getFromStopId() {
+		return fromStopId;
 	}
 
-	public void setSfFromStopId(String sfFromStopId) {
-		this.sfFromStopId = sfFromStopId;
+	public void setFromStopId(String FromStopId) {
+		this.fromStopId = FromStopId;
 	}
 
-	public String getSfToStopId() {
-		return sfToStopId;
+	public String getToStopId() {
+		return toStopId;
 	}
 
-	public void setSfToStopId(String sfToStopId) {
-		this.sfToStopId = sfToStopId;
+	public void setToStopId(String ToStopId) {
+		this.toStopId = ToStopId;
 	}
 
 	public String getId() {
@@ -156,6 +156,12 @@ public class Servicejourney implements Journey {
 	public String toString(){
 		return "Servicejourney " + id + " hat eine Dauer von " + sfRuntime +
 				" Sekunden und verbraucht dabei " + sfVerbrauch + " kWh";
+	}
+
+	@Override
+	public Double getDistance() {
+		// TODO Auto-generated method stub
+		return null;
 	}
     
 }

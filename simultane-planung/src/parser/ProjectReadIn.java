@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 /**
@@ -43,8 +44,8 @@ public class ProjectReadIn {
     public Vector<Stoppoint> stoppoints;
     
     // 1.1.2 Servicefahrten
-    public Vector<Servicejourney> servicejourneys;
-    
+    public HashMap<String, Servicejourney> servicejourneys;
+   
     // 1.1.3 Verbindungen (Deadruntime)
     public HashMap<String, Deadruntime> deadruntimes;
     
@@ -67,7 +68,7 @@ public class ProjectReadIn {
     public Table<Integer, Integer, Double> sfdistance;
     
     // sind Verbindungen zwischen zwei Servicefahrten moeglich
-    public HashMap<String, Boolean> validEdges;
+    public HashMap<String, Integer> validEdges;
     
     /**
      * 
@@ -138,7 +139,7 @@ public class ProjectReadIn {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    servicejourneys = new Vector<Servicejourney>();
+                    servicejourneys = new HashMap<String, Servicejourney>();
 
                     while (temp != null && !ersteszeichen.equals("*")) {
 
@@ -149,7 +150,8 @@ public class ProjectReadIn {
                         String sfArrTime = temp.split(";")[5]; // Ankunftszeit
                         double sfDistance = Double.parseDouble(temp.split(";")[11]) / 1000; // Distanz wird in Kilometer umgerechnet
                         
-                        servicejourneys.add(new Servicejourney(sfId, sfFromStopID, sfToStopID, sfDepTime, sfArrTime, sfDistance));
+                        Servicejourney neu = new Servicejourney(sfId, sfFromStopID, sfToStopID, sfDepTime, sfArrTime, sfDistance);
+                        servicejourneys.put(neu.getId(), neu);
 
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -189,18 +191,19 @@ public class ProjectReadIn {
         /**
          * es wird eine Matrix mit moeglichen Verbindungen zwischen zwei Servicefahrten erstellt
          */
-        validEdges = new HashMap<String, Boolean>();
-        for (int i = 0; i < servicejourneys.size(); i++) {
-			for (int j = 0; j < servicejourneys.size(); j++) {
+        validEdges = new HashMap<String, Integer>();
+        
+        for (Entry i: servicejourneys.entrySet()){
+			for (Entry j: servicejourneys.entrySet()) {
 				if(i==j){
-					validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), false);
+					validEdges.put(""+ i.getKey() + j.getKey(), 0);
 				}
 				else{
-					if(feasibilityHelper.zeitpuffer(servicejourneys.get(i), servicejourneys.get(j), deadruntimes) >= 0){
-						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), true);
+					if(feasibilityHelper.zeitpuffer(""+i.getKey(), ""+j.getKey(), deadruntimes, servicejourneys) >= 0){
+						validEdges.put(""+ i.getKey() + j.getKey(), 1);
 					}
 					else{
-						validEdges.put(servicejourneys.get(i).getId() + servicejourneys.get(j).getId(), false);
+						validEdges.put(""+ i.getKey() + j.getKey(), 0);
 					}
 				}
 			}
