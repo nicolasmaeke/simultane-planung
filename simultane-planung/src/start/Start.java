@@ -1,5 +1,6 @@
 package start;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
@@ -26,7 +27,8 @@ public class Start {
 		
 		Initialloesung p = new Initialloesung();
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes);
-		System.out.println(p.savings(test.validEdges, test.deadruntimes));
+		HashMap<String, Integer> savings = p.savings(test.validEdges, test.deadruntimes);
+		System.out.println(savings);
 		
 		/**
 		for (int i = 0; i < initialloesung.size(); i++) {

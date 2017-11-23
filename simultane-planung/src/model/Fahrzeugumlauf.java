@@ -45,6 +45,7 @@ public class Fahrzeugumlauf {
 		return result;
 	}
 	
+	
 	public LinkedList<Journey> getFahrten() {
 		return fahrten;
 	}

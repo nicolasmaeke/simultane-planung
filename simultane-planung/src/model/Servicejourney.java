@@ -16,7 +16,7 @@ public class Servicejourney implements Journey {
     private String toStopId;
     Date sfDepTime;
     Date sfArrTime;
-    double sfDistance; // in Kilometer
+    int Distance; 
     private double sfRuntime; // in Milisekunden
     private double sfVerbrauch;
     /**
@@ -35,11 +35,11 @@ public class Servicejourney implements Journey {
 	 * @param ArrTime
 	 * @param Distance
 	 */
-    public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
+    public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, int Distance){
     	this.id = id;
     	this.setFromStopId(FromStopId);
     	this.setToStopId(ToStopId);
-    	this.sfDistance = Distance;
+    	this.Distance = Distance;
     	
     	help = DepTime;
     	zeit = null;
@@ -61,8 +61,8 @@ public class Servicejourney implements Journey {
         }
         this.sfArrTime = zeit;
     	
-    	this.setSfRuntime((sfArrTime.getTime() - sfDepTime.getTime())/1000); // rechnet Runtime in Sekunden um
-    	this.setSfVerbrauch(sfDistance * 2.0);  // Annahme: 2kWh/km
+    	this.setSfRuntime((sfArrTime.getTime() - sfDepTime.getTime())); 
+    	this.setSfVerbrauch(Distance * 2.0);  // Annahme: 2kWh/m
     }
 
 	public double getSfVerbrauch() {
@@ -121,12 +121,12 @@ public class Servicejourney implements Journey {
 		this.sfArrTime = sfArrTime;
 	}
 
-	public double getSfDistance() {
-		return sfDistance;
+	public int getDistance() {
+		return Distance;
 	}
 
-	public void setSfDistance(double sfDistance) {
-		this.sfDistance = sfDistance;
+	public void setDistance(int Distance) {
+		this.Distance = Distance;
 	}
 
 	public DateFormat getZformat() {
@@ -159,9 +159,9 @@ public class Servicejourney implements Journey {
 	}
 
 	@Override
-	public Double getDistance() {
+	public double getVerbrauch() {
 		// TODO Auto-generated method stub
-		return null;
+		return sfVerbrauch;
 	}
-    
+
 }

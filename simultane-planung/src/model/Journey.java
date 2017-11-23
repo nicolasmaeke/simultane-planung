@@ -6,9 +6,11 @@ public interface Journey {
 
 	public void setId(String id);
 
-	public Double getDistance();
+	public int getDistance();
 	
 	public String getFromStopId();
 	
 	public String getToStopId();
+	
+	public double getVerbrauch();
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import model.Deadruntime;
 import model.Servicejourney;
+import model.Stoppoint;
 
 /**
  * 
@@ -20,13 +21,23 @@ public class feasibilityHelper {
 	 * @param deadruntimes
 	 * @return
 	 */
-	public static long zeitpuffer(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
+	public static long zeitpufferZwischenServicefahrten(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
 		long result = 0;
 		Servicejourney eins = servicejourneys.get(i);
 		Servicejourney zwei = servicejourneys.get(j);
 		String deadrunId = ""+eins.getToStopId()+zwei.getFromStopId();
 		result = (zwei.getSfDepTime().getTime() - eins.getSfArrTime().getTime()) - deadruntimes.get(deadrunId).getRuntime();
 		return result;
+	}
+	
+	public static boolean zeitpufferFuerLadezeit(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys, double restkapazitaet){
+		double result = 0;
+		double ladezeit = (80 - restkapazitaet) / ((7.5 / 60) / 1000);
+		Servicejourney eins = servicejourneys.get(i);
+		Servicejourney zwei = servicejourneys.get(j);
+		String deadrunId = ""+eins.getToStopId()+zwei.getFromStopId();
+		result = (zwei.getSfDepTime().getTime() - eins.getSfArrTime().getTime()) - deadruntimes.get(deadrunId).getRuntime() - ladezeit;
+		return result >= 0;
 	}
 
 }

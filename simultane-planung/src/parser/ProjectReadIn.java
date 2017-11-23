@@ -41,7 +41,7 @@ public class ProjectReadIn {
     // 1.1 Variablen fuer Streckennetz und Ladeinfrastruktur erstellen
     
     // 1.1.1 Stoppoints
-    public Vector<Stoppoint> stoppoints;
+    public HashMap<String, Stoppoint> stoppoints;
     
     // 1.1.2 Servicefahrten
     public HashMap<String, Servicejourney> servicejourneys;
@@ -120,11 +120,12 @@ public class ProjectReadIn {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    stoppoints = new Vector<Stoppoint>();
+                    stoppoints = new HashMap<String, Stoppoint>();
                     
                     while (temp != null && !ersteszeichen.equals("*")) {
                     
-                    	stoppoints.add(new Stoppoint(temp.split(";")[0]));
+                    	Stoppoint neu = new Stoppoint(temp.split(";")[0]);
+                    	stoppoints.put(neu.getId(), neu);
                     
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -148,7 +149,7 @@ public class ProjectReadIn {
                         String sfToStopID = (temp.split(";")[3]); // Endhaltestelle
                         String sfDepTime = temp.split(";")[4]; // Abfahrtszeit
                         String sfArrTime = temp.split(";")[5]; // Ankunftszeit
-                        double sfDistance = Double.parseDouble(temp.split(";")[11]) / 1000; // Distanz wird in Kilometer umgerechnet
+                        int sfDistance = Integer.parseInt(temp.split(";")[11]); 
                         
                         Servicejourney neu = new Servicejourney(sfId, sfFromStopID, sfToStopID, sfDepTime, sfArrTime, sfDistance);
                         servicejourneys.put(neu.getId(), neu);
@@ -172,8 +173,8 @@ public class ProjectReadIn {
 
                         String fromStopID = (temp.split(";")[0]); // ID
                         String toStopID = (temp.split(";")[1]); // ID
-                        double distance = Double.parseDouble(temp.split(";")[4]) / 1000; // Distanz wird in Kilometer umgerechnet
-                        int runtime = Integer.parseInt(temp.split(";")[5]) / 60; // Runtime wird in Minuten umgerechnet
+                        int distance = Integer.parseInt(temp.split(";")[4]); 
+                        int runtime = Integer.parseInt(temp.split(";")[5]); 
 
                         Deadruntime neu = new Deadruntime(fromStopID, toStopID, distance, runtime);
                         deadruntimes.put(neu.getId(), neu);
@@ -199,7 +200,7 @@ public class ProjectReadIn {
 					validEdges.put(""+ i.getKey() + j.getKey(), 0);
 				}
 				else{
-					if(feasibilityHelper.zeitpuffer(""+i.getKey(), ""+j.getKey(), deadruntimes, servicejourneys) >= 0){
+					if(feasibilityHelper.zeitpufferZwischenServicefahrten(""+i.getKey(), ""+j.getKey(), deadruntimes, servicejourneys) >= 0){
 						validEdges.put(""+ i.getKey() + j.getKey(), 1);
 					}
 					else{
