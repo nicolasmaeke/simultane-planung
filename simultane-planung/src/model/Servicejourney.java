@@ -16,7 +16,7 @@ public class Servicejourney implements Journey {
     private String toStopId;
     Date sfDepTime;
     Date sfArrTime;
-    int Distance; // in Meter
+    double Distance; // in Meter
     private double sfRuntime; // in Milisekunden
     private double sfVerbrauch;
     /**
@@ -35,7 +35,7 @@ public class Servicejourney implements Journey {
 	 * @param ArrTime
 	 * @param Distance
 	 */
-    public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, int Distance){
+    public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
     	this.id = id;
     	this.setFromStopId(FromStopId);
     	this.setToStopId(ToStopId);
@@ -121,11 +121,11 @@ public class Servicejourney implements Journey {
 		this.sfArrTime = sfArrTime;
 	}
 
-	public int getDistance() {
+	public double getDistance() {
 		return Distance;
 	}
 
-	public void setDistance(int Distance) {
+	public void setDistance(double Distance) {
 		this.Distance = Distance;
 	}
 
@@ -154,8 +154,7 @@ public class Servicejourney implements Journey {
 	}
 	
 	public String toString(){
-		return "Servicejourney " + id + " hat eine Dauer von " + sfRuntime +
-				" Sekunden und verbraucht dabei " + sfVerbrauch + " kWh";
+		return "SF: " + id + ", Verbrauch: " + sfVerbrauch + " kWh";
 	}
 
 	@Override

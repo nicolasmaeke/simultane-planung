@@ -69,11 +69,11 @@ public class Initialloesung {
 	 * @param deadruntimes
 	 * @return
 	 */
-	public HashMap<String, Integer> savings(HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes){
+	public HashMap<String, Double> savings(HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes){
 		
 		// Key: ID's der beiden Servicefahrten, die zusammengelegt werden sollen
 		// Value: Savings, falls die beiden Servicefahrten zuammengelegt werden
-		HashMap <String, Integer> savings = new HashMap<String, Integer>();  
+		HashMap <String, Double> savings = new HashMap<String, Double>();  
 		
 		Journey startknotenVonFu1 = null; // die erste Servicefahrt im Fahrzeugumlauf 1
 		String keySkFu1 = ""; // der Schlüssel der ersten Servicefahrt im Fahrzeugumlauf 1
@@ -135,17 +135,18 @@ public class Initialloesung {
 	 * @param deadrun
 	 * @return
 	 */
-	private int calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun) {
-		int saving = 0;
-		int d1 = j.getFahrten().getFirst().getDistance(); // Distanz zwischen Depot und Servicefahrt
-		int d2 = i.getFahrten().getLast().getDistance(); // Distanz zwischen Servicefahrt und Depot
+	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun) {
+		double saving = 0;
+		double d1 = j.getFahrten().getFirst().getDistance(); // Distanz zwischen Depot und Servicefahrt
+		double d2 = i.getFahrten().getLast().getDistance(); // Distanz zwischen Servicefahrt und Depot
 		saving = d1 + d2 - deadrun.getDistance() + 400000; // Distanz zwischen beiden Servicefahrten
 		return saving;
 	}
 	
-	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Integer> savings,  HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
+	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings,  HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
 		
 		String temp;
+		int n;
 		List<String> keys = new ArrayList<String>(); // Keys die schon dran waren
 		LinkedList<Journey> neu = null;
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewLoadingStations = null;
@@ -154,6 +155,7 @@ public class Initialloesung {
 		}
 		do {
 			temp = getHighestSaving(savings);
+			n = temp.length()/2;
 			if(savings.get(temp) <= 0){
 				return fahrzeugumlaeufe;
 			}
@@ -161,17 +163,17 @@ public class Initialloesung {
 				neu = umlaeufeZusammenlegen(temp, deadruntimes);
 				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys);
 				if (numberOfNewLoadingStations.get(temp) == null){
-					savings.put(temp, 0);
+					savings.put(temp, 0.0);
 				}else{
 					int kosten = numberOfNewLoadingStations.get(temp).size() * 250000;
-					int neueSavings = savings.get(temp) - kosten;
+					double neueSavings = savings.get(temp) - kosten;
 					savings.put(temp, neueSavings);
 				}
 			}
 			keys.add(temp);
 		} while (temp != getHighestSaving(savings));
 		//fahrzeugumlaeufe aktualisieren
-		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(temp.substring(0, 5), temp.substring(5, 10));
+		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(temp.substring(0, n), temp.substring(n, n*2));
 		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
 			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(0).getId()){
 				fahrzeugumlaeufe.get(i).setFahrten(neu);
@@ -214,8 +216,9 @@ public class Initialloesung {
 	private LinkedList<Journey> umlaeufeZusammenlegen(String keyOfHighestSavings, HashMap<String, Deadruntime> deadruntimes){
 
 		String key = keyOfHighestSavings;
-		String key1 = key.substring(0, 5);
-		String key2 = key.substring(5, 10);
+		int n = key.length()/2;
+		String key1 = key.substring(0, n);
+		String key2 = key.substring(n, n*2);
 		LinkedList<Journey> neu = null;
 		
 		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(key1, key2);
@@ -246,25 +249,40 @@ public class Initialloesung {
 					int x = 0;
 					while(neu.get(i-2-x) != neu.get(1) || ((i - 2 - x) <= letzteLadung)){
 						if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x).getId(), neu.get(i-x).getId(), deadruntimes, servicejourneys, kapazitaet)){
-							if (!stoppoints.get(neu.get(i-x).getId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
-								list.add(stoppoints.get(neu));
-								kapazitaet = 80;
-								i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
-								letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
-								break;
-							}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
-								kapazitaet = 80;
-								i = i - x;
-								letzteLadung = i - x;
-								break;
-							} 
+							if(x==0){
+								if (!stoppoints.get(neu.get(i-x).getFromStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
+									list.add(stoppoints.get(neu.get(i-x).getFromStopId()));
+									kapazitaet = 80;
+									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									break;
+								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
+									kapazitaet = 80;
+									i = i - x;
+									letzteLadung = i - x;
+									break;
+								} 
+							}else{
+								if (!stoppoints.get(neu.get(i-x).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
+									list.add(stoppoints.get(neu.get(i-x).getToStopId()));
+									kapazitaet = 80;
+									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									break;
+								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
+									kapazitaet = 80;
+									i = i - x;
+									letzteLadung = i - x;
+									break;
+								} 
+							}
 						}
 						x = x + 2;
 					}
 					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
 						if(letzteLadung != 1){ // schon einmal vor Servicefahrt 1 geladen?
-							if (!stoppoints.get(neu.get(1).getId()).isLadestation()){
-								list.add(stoppoints.get(neu));
+							if (!stoppoints.get(neu.get(1).getToStopId()).isLadestation()){
+								list.add(stoppoints.get(neu.get(i-x).getToStopId()));
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
@@ -283,27 +301,46 @@ public class Initialloesung {
 					int x = 0;
 					int y = 1;
 					while(neu.get(i-2-x-y) != neu.get(1) || ((i - 2 - x - y) <= letzteLadung)){
-						if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x-y).getId(), neu.get(i-x-y).getId(), deadruntimes, servicejourneys, kapazitaet)){
-							if (!stoppoints.get(neu.get(i-x-y).getId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
-								list.add(stoppoints.get(neu));
-								kapazitaet = 80;
-								i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
-								letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
-								break;
-							}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
-								kapazitaet = 80;
-								i = i - x;
-								letzteLadung = i - x;
-								break;
-							} 
+						if(x==0){
+							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x+y).getId(), neu.get(i-x+y).getId(), deadruntimes, servicejourneys, kapazitaet)){
+								if (!stoppoints.get(neu.get(i-x-y).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
+									list.add(stoppoints.get(neu.get(i-x-y).getToStopId()));
+									kapazitaet = 80;
+									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									break;
+								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
+									kapazitaet = 80;
+									i = i - x;
+									letzteLadung = i - x;
+									break;
+								} 
+							}
+							y = 0;
+							x = x + 2;
+						}else{
+							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x-y).getId(), neu.get(i-x-y).getId(), deadruntimes, servicejourneys, kapazitaet)){
+								if (!stoppoints.get(neu.get(i-x-y).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
+									list.add(stoppoints.get(neu.get(i-x-y).getToStopId()));
+									kapazitaet = 80;
+									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									break;
+								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
+									kapazitaet = 80;
+									i = i - x;
+									letzteLadung = i - x;
+									break;
+								} 
+							}
+							y = 0;
+							x = x + 2;
 						}
-						y = 0;
-						x = x + 2;
-					}
+					}	
 					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
 						if(letzteLadung != 1){ // schon einmal vor Servicefahrt 1 geladen?
-							if (!stoppoints.get(neu.get(1).getId()).isLadestation()){
-								list.add(stoppoints.get(neu));
+							if (!stoppoints.get(neu.get(1).getFromStopId()).isLadestation()){
+								list.add(stoppoints.get(neu.get(i-x-y).getFromStopId()));
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
@@ -315,21 +352,19 @@ public class Initialloesung {
 							numberOfNewStations.put(keyOfHighestValue, list);
 							return numberOfNewStations; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
 						}
-				}
-				
+					}
 				}	
-				kapazitaet = kapazitaet - neu.get(i).getVerbrauch();
-				
 			}
-		numberOfNewStations.put(keyOfHighestValue, list);
+			kapazitaet = kapazitaet - neu.get(i).getVerbrauch();
 		}
+		numberOfNewStations.put(keyOfHighestValue, list);
 		return numberOfNewStations;	
 	}
 	
-	private String getHighestSaving(HashMap<String, Integer> savings){
-		int temp = 0;
+	private String getHighestSaving(HashMap<String, Double> savings){
+		double temp = 0;
 		String key = "";
-		for (Entry<String, Integer> e: savings.entrySet()){
+		for (Entry<String, Double> e: savings.entrySet()){
 			if(e.getValue() > temp){
 				temp = e.getValue();
 				key = e.getKey();

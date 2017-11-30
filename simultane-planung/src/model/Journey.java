@@ -6,7 +6,7 @@ public interface Journey {
 
 	public void setId(String id);
 
-	public int getDistance();
+	public double getDistance();
 	
 	public String getFromStopId();
 	

@@ -140,7 +140,7 @@ public class ReadIn {
         zformat = new SimpleDateFormat("HH:mm:ss");
 
         // Lösung
-        s = new Schedule();
+        //s = new Schedule();
 
         this.ReadIn(); // Datei auslesen
     }

@@ -13,6 +13,8 @@ public class Fahrzeugumlauf {
 	private String id;
 	// Typ der Liste ist Journey, damit sowohl Servicefahrten als auch Leerfahrten hinzugefuegt werden koennen
 	private LinkedList<Journey> fahrten; 
+	private double laenge = 0;
+	private double energieVerbrauch = 0;
 	
 	/**
 	 * Konstruktor
@@ -21,6 +23,10 @@ public class Fahrzeugumlauf {
 	public Fahrzeugumlauf(String i){
 		this.setFahrten(new LinkedList<Journey>());
 		this.id = i;
+		for (int j = 0; j < fahrten.size(); j++) {
+			laenge = laenge + fahrten.get(j).getDistance();
+			energieVerbrauch = energieVerbrauch + fahrten.get(j).getVerbrauch();
+		}
 	}
 
 	/**

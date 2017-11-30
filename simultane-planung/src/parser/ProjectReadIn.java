@@ -52,39 +52,10 @@ public class ProjectReadIn {
     // Zeitformat
     public DateFormat zformat;
 
-    // Ladefunktion
-    public String funktionstyp;
-
-    // Lösung
-    public Schedule s;
-    public double factor_oben;
-    public double factor_unten;
-    
-
-    // Ladestationen
-    public double LSpro = 0.1;
-    public Map<Integer, Integer> nearestchargingstation;
-    public Table<Integer, Integer, Double> distance;
-    public Table<Integer, Integer, Double> sfdistance;
     
     // sind Verbindungen zwischen zwei Servicefahrten moeglich
     public HashMap<String, Integer> validEdges;
-    
-    /**
-     * 
-     */
-    public void Problem() {
-
-        nearestchargingstation = new HashMap<Integer, Integer>();
-        distance = HashBasedTable.create();
-        sfdistance = HashBasedTable.create();
-
-        // Zeitformat
-        zformat = new SimpleDateFormat("HH:mm:ss");
-
-        // Lösung
-        s = new Schedule();
-    }
+ 
 
     /**
      * Konstruktor: liest die Daten-Datei zeilenweise aus 

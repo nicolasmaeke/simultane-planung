@@ -10,7 +10,7 @@ public class Deadruntime implements Journey {
 	private String id;
 	private String fromStopId;
     private String toStopId;
-    int distance;
+    private double distance;
     int runtime;
     private double verbrauch;
     
@@ -22,13 +22,12 @@ public class Deadruntime implements Journey {
      * @param distance
      * @param runtime
      */
-    public Deadruntime(String fromStopId, String toStopId, int distance, int runtime){
+    public Deadruntime(String fromStopId, String toStopId, double distance, int runtime){
     	this.fromStopId = fromStopId;
     	this.toStopId = toStopId;
     	this.distance = distance; // in Meter
     	this.runtime = runtime * 1000; // von eingelesenen Sekunden in Milisekunde
-    	
-    	this.setVerbrauch(distance/1000 * 1.5); // Annahme: 1,5kWh/km
+    	this.setVerbrauch((distance/1000) * 1.5); // Annahme: 1,5kWh/km
     	this.setId(""+fromStopId+toStopId);
     	
     }
@@ -57,11 +56,11 @@ public class Deadruntime implements Journey {
 		this.toStopId = toStopId;
 	}
 
-	public int getDistance() {
+	public double getDistance() {
 		return distance;
 	}
 
-	public void setDistance(int distance) {
+	public void setDistance(double distance) {
 		this.distance = distance;
 	}
 
@@ -82,7 +81,7 @@ public class Deadruntime implements Journey {
 	}
 	
 	public String toString(){
-		return "Leerfahrt von Haltestelle " + fromStopId + " zu Haltestelle " + toStopId +
-				" hat einen Verbraucht von " + verbrauch + " kWh";
+		return "LF von " + fromStopId + " zu " + toStopId +
+				", Verbrauch: " + verbrauch + " kWh";
 	}
 }
