@@ -16,7 +16,7 @@ public class Servicejourney implements Journey {
     private String toStopId;
     Date sfDepTime;
     Date sfArrTime;
-    int Distance; 
+    int Distance; // in Meter
     private double sfRuntime; // in Milisekunden
     private double sfVerbrauch;
     /**
@@ -62,7 +62,7 @@ public class Servicejourney implements Journey {
         this.sfArrTime = zeit;
     	
     	this.setSfRuntime((sfArrTime.getTime() - sfDepTime.getTime())); 
-    	this.setSfVerbrauch(Distance * 2.0);  // Annahme: 2kWh/m
+    	this.setSfVerbrauch(Distance/1000 * 2.0);  // Annahme: 2kWh/km
     }
 
 	public double getSfVerbrauch() {

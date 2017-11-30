@@ -54,4 +54,12 @@ public class Stoppoint {
 	public void setLadestation(boolean ladestation) {
 		this.ladestation = ladestation;
 	}
+	
+	public String toString(){
+		if(isLadestation()){
+			return this.name + " hat eine Ladestation";
+		}else{
+			return this.name + " hat keine Ladestation";
+		}
+	}
 }
