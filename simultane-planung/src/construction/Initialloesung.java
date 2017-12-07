@@ -173,7 +173,7 @@ public class Initialloesung {
 			keys.add(temp);
 		} while (temp != getHighestSaving(savings));
 		//fahrzeugumlaeufe aktualisieren
-		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(temp.substring(0, n), temp.substring(n, n*2));
+		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(temp.substring(0, n), temp.substring(n, temp.length()));
 		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
 			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(0).getId()){
 				fahrzeugumlaeufe.get(i).setFahrten(neu);
@@ -218,7 +218,7 @@ public class Initialloesung {
 		String key = keyOfHighestSavings;
 		int n = key.length()/2;
 		String key1 = key.substring(0, n);
-		String key2 = key.substring(n, n*2);
+		String key2 = key.substring(n, key.length());
 		LinkedList<Journey> neu = null;
 		
 		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(key1, key2);
@@ -300,19 +300,25 @@ public class Initialloesung {
 				if(neu.get(i) instanceof Deadruntime){
 					int x = 0;
 					int y = 1;
-					while(neu.get(i-2-x-y) != neu.get(1) || ((i - 2 - x - y) <= letzteLadung)){
+					while(neu.get(i-2-x) != neu.get(1) || ((i - 2 - x + y) <= letzteLadung)){
+						if(i == neu.size()-1){
+							if (!stoppoints.get(neu.get(i-y).getToStopId()).isLadestation()){ // i ist die Starthaltestelle der Servicefahrt i
+								list.add(stoppoints.get(neu.get(i-y).getToStopId()));
+								kapazitaet = 80;
+								break;
+							}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i 
+								kapazitaet = 80;
+								break;
+							} 
+						}
 						if(x==0){
-							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x+y).getId(), neu.get(i-x+y).getId(), deadruntimes, servicejourneys, kapazitaet)){
-								if (!stoppoints.get(neu.get(i-x-y).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
-									list.add(stoppoints.get(neu.get(i-x-y).getToStopId()));
+							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2+y).getId(), neu.get(i+y).getId(), deadruntimes, servicejourneys, kapazitaet)){
+								if (!stoppoints.get(neu.get(i-y).getToStopId()).isLadestation()){ // i ist die Starthaltestelle der Servicefahrt i
+									list.add(stoppoints.get(neu.get(i-y).getToStopId()));
 									kapazitaet = 80;
-									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
-									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
 									break;
-								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
+								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i 
 									kapazitaet = 80;
-									i = i - x;
-									letzteLadung = i - x;
 									break;
 								} 
 							}
