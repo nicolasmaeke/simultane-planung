@@ -32,46 +32,49 @@ public class Initialloesung {
 	}
 
 	/**
-	 * Methode fuegt jedem Fahrzeugumlauf die beiden Leerfahrten vom- und zum Depot sowie eine Servicefahrt hinzu
+	 * (Pendeltouren für jede Servicefahrt erstellen)- Methode fuegt jedem Fahrzeugumlauf die beiden Leerfahrten vom- und zum Depot sowie eine Servicefahrt hinzu
+	 * 
 	 * @param servicejourneys
 	 * @param deadruntimes
-	 * @return
+	 * @return eine Liste von Fahrzeugumläufen
 	 */
 	public Vector<Fahrzeugumlauf> erstelleInitialloesung(HashMap<String, Servicejourney> servicejourneys, HashMap<String, Deadruntime> deadruntimes){
 		
-		for (Entry<String, Servicejourney> i: servicejourneys.entrySet()){
-			Fahrzeugumlauf j = new Fahrzeugumlauf(i.getKey());
-			String depot = "00001";
-			Servicejourney test = servicejourneys.get(i.getKey());
+		for (Entry<String, Servicejourney> i: servicejourneys.entrySet()){ //für jede Servicefahrt i
+			Fahrzeugumlauf j = new Fahrzeugumlauf(i.getKey()); //erstelle einen neuen Fahrzeugumlauf mit dieser Servicefahrt
+			String depot = "00001"; //Depot = 00001
+			Servicejourney test = servicejourneys.get(i.getKey()); 
 			
-			String key = depot + test.getFromStopId();  
+			String key = depot + test.getFromStopId(); // key ist 00001 + Starthaltestelle von Servicefarht i 
 			
-			j.addFahrtAfterFahrt(0, deadruntimes.get(key));
+			j.addFahrtAfterFahrt(0, deadruntimes.get(key)); // die erste Fahrt ist eine Leerfahrt
 			
-			j.addFahrtAfterFahrt(1,test); // jedem Fahrzeugumlauf wird genau eine Servicefahrt zugewiesen 
+			j.addFahrtAfterFahrt(1,test); // dann folgen Servicefahrt i
+			// jedem Fahrzeugumlauf wird genau eine Servicefahrt zugewiesen 
 			
-			key = test.getToStopId() + depot;
+			key = test.getToStopId() + depot; // key ist Endhaltestelle von Servicefahrt i + 00001
 
 			j.addFahrtAfterFahrt(j.size(), deadruntimes.get(key));
 			
-			fahrzeugumlaeufe.add(j);
+			fahrzeugumlaeufe.add(j); // füge den Fahrzeugumlauf j zu der Gesamtliste 
 		}
 		
-		return fahrzeugumlaeufe;
+		return fahrzeugumlaeufe; // Gesamtliste von Fahrzeugumläufen zurückgeben
 		
 	}
 	
+	
 	/**
-	 * Methode erstellt eine Savings-Matrix als HashMap. 
+	 * Methode erstellt eine Saving-Matrix als HashMap. 
 	 * Darin werden die Einsparpotenziale gespeichert, für den Fall, 
-	 * dass zwei Servicefahrten in einem Fahrzeugumlauf bedient werden.
+	 * dass zwei Servicefahrten in einem Fahrzeugumlauf bedient werden können.
 	 * @param validEdges
 	 * @param deadruntimes
-	 * @return
+	 * @return ein Hashmap mit key ist zwei IDs von SF, value ist der Saving
 	 */
 	public HashMap<String, Double> savings(HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes){
 		
-		// Key: ID's der beiden Servicefahrten, die zusammengelegt werden sollen
+		// Key: IDs der beiden Servicefahrten, die zusammengelegt werden sollen
 		// Value: Savings, falls die beiden Servicefahrten zuammengelegt werden
 		HashMap <String, Double> savings = new HashMap<String, Double>();  
 		
@@ -91,49 +94,49 @@ public class Initialloesung {
 		 * In der doppelten For-Schleife werden immer zwei Fahrzeugumlaeufe betrachtet.
 		 * Von den beiden Fahrzeugumlaeufen werden immer die erste und die letzte Servicefahrt betrachtet.
 		 */
-		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
+		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) { // für jeden Fahrzeugumlauf i
 			startknotenVonFu1 = fahrzeugumlaeufe.get(i).getAtIndex(1); // erste Servicefahrt im Fahrzeugumlauf i
-			keySkFu1 = startknotenVonFu1.getId();
+			keySkFu1 = startknotenVonFu1.getId(); // ID der ersten Servicefahrt von Fahrzeugumlauf i
 			endknotenVonFu1 = fahrzeugumlaeufe.get(i).getAtIndex(fahrzeugumlaeufe.get(i).getFahrten().size()-2); // letzte Servicefahrt im Fahrzeugumlauf i
-			keyEkFu1 = endknotenVonFu1.getId();
-			for (int j = 0; j < fahrzeugumlaeufe.size(); j++) {
-				if (i != j){
+			keyEkFu1 = endknotenVonFu1.getId(); // ID der letzten Servicefahrt von Fahrzeugumlauf i
+			for (int j = 0; j < fahrzeugumlaeufe.size(); j++) { // für jeden Fahrzeugumlauf j
+				if (i != j){ // falls i ungleich j
 					startknotenVonFu2 = fahrzeugumlaeufe.get(j).getAtIndex(1); // erste Servicefahrt im Fahrzeugumlauf j
-					keySkFu2 = startknotenVonFu2.getId();
+					keySkFu2 = startknotenVonFu2.getId(); // ID der ersten Servicefahrt von Fahrzeugumlauf j
 					endknotenVonFu2 = fahrzeugumlaeufe.get(j).getAtIndex(fahrzeugumlaeufe.get(j).getFahrten().size()-2); // letzte Servicefahrt im Fahrzeugumlauf j
-					keyEkFu2 = endknotenVonFu2.getId();
+					keyEkFu2 = endknotenVonFu2.getId(); // ID der letzten Servicefahrt von Fahrzeugumlauf j
 					
 					/**
 					 * Falls es eine zulässige Verbindung zwischen der letzten Servicefahrt von Fahrzeugumlauf i
 					 * mit der ersten Servicefahrt von Fahrzeugumlauf j gibt, werden die Savings berechnet.
 					 */
-					if(validEdges.get(""+keyEkFu1+keySkFu2) == 1){
-						neu = deadruntimes.get(""+endknotenVonFu1.getToStopId()+startknotenVonFu2.getFromStopId());
-						savings.put(""+keyEkFu1+keySkFu2, calculateSavings(fahrzeugumlaeufe.get(i),fahrzeugumlaeufe.get(j), neu));
+					if(validEdges.get(""+keyEkFu1+keySkFu2) == 1){ // falls Verbindung zwischen letzter SF von i und erster SF von j zulässig
+						neu = deadruntimes.get(""+endknotenVonFu1.getToStopId()+startknotenVonFu2.getFromStopId()); //neue Leerfahrt hinzufügen
+						savings.put(""+keyEkFu1+keySkFu2, calculateSavings(fahrzeugumlaeufe.get(i),fahrzeugumlaeufe.get(j), neu)); //berechne Saving
 					}
 					
 					/**
 					 * Falls es eine zulässige Verbindung zwischen der letzten Servicefahrt von Fahrzeugumlauf j
 					 * mit der ersten Servicefahrt von Fahrzeugumlauf i gibt, werden die Savings berechnet.
 					 */
-					if(validEdges.get(""+keyEkFu2+keySkFu1) == 1){
-						neu = deadruntimes.get(""+endknotenVonFu2.getToStopId()+startknotenVonFu1.getFromStopId());
-						savings.put(""+keyEkFu2+keySkFu1, calculateSavings(fahrzeugumlaeufe.get(j),fahrzeugumlaeufe.get(i), neu));
+					if(validEdges.get(""+keyEkFu2+keySkFu1) == 1){ // falls Verbindung zwischen letzter SF von j und erster SF von i zulässig
+						neu = deadruntimes.get(""+endknotenVonFu2.getToStopId()+startknotenVonFu1.getFromStopId()); //neue Leerfarht hinzufügen
+						savings.put(""+keyEkFu2+keySkFu1, calculateSavings(fahrzeugumlaeufe.get(j),fahrzeugumlaeufe.get(i), neu)); //berechne Saving
 					}
 				}	
 			}
 		}
-		return savings;
+		return savings; // Saving-Matrix zurückgeben
 	}
 	
 
 	/**
-	 * Methode zum berechnen der Savings, falls zwei Servicefahrten in einem Fahrzeugumlauf bedient werden.
+	 * Methode zum Berechnen der Savings, falls zwei Servicefahrten in einem Fahrzeugumlauf bedient werden.
 	 * 
 	 * @param i
 	 * @param j
 	 * @param deadrun
-	 * @return
+	 * @return Saving
 	 */
 	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun) {
 		double saving = 0;
@@ -143,45 +146,59 @@ public class Initialloesung {
 		return saving;
 	}
 	
-	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings,  HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
+	
+	/**
+	 * Methode zum Erstellen neuen Umlaufplan, solange ein positiver Saving vorhanden ist.
+	 * 
+	 * @param savings
+	 * @param deadruntimes
+	 * @param stoppoints
+	 * @param servicejourneys
+	 * @return eine Liste von Fahrzeugumläufen
+	 */
+	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
 		
 		String temp;
 		int n;
 		List<String> keys = new ArrayList<String>(); // Keys die schon dran waren
-		LinkedList<Journey> neu = null;
+		LinkedList<Journey> neu = null; // neu ist eine Liste von Fahrten, die zusammengelegt werden sollen
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewLoadingStations = null;
-		if(savings.isEmpty()){
-			return fahrzeugumlaeufe;
+		if(savings.isEmpty()){ 
+			return fahrzeugumlaeufe; // hört auf wenn größter Saving ≤ 0
 		}
 		do {
-			temp = getHighestSaving(savings);
-			n = temp.length()/2;
-			if(savings.get(temp) <= 0){
-				return fahrzeugumlaeufe;
+			temp = getHighestSaving(savings); // temp ist die ID vom zusammengelegten Umlauf mit größtem Saving
+			n = temp.length()/2; 
+			if(savings.get(temp) <= 0){ // falls der größte Saving ≤ 0
+				return fahrzeugumlaeufe; // hört auf & aktuelle Fahrzeugumlaeufe zurückgeben
 			}
-			if(!keys.contains(temp)){
-				neu = umlaeufeZusammenlegen(temp, deadruntimes);
-				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys);
-				if (numberOfNewLoadingStations.get(temp) == null){
-					savings.put(temp, 0.0);
-				}else{
-					int kosten = numberOfNewLoadingStations.get(temp).size() * 250000;
-					double neueSavings = savings.get(temp) - kosten;
-					savings.put(temp, neueSavings);
+			if(!keys.contains(temp)){ // falls temp noch nicht berücksichtigt wird
+				neu = umlaeufeZusammenlegen(temp, deadruntimes); // Fahrten von temp werden zusammengelegt und in neu eingepackt
+				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys); 
+				if (numberOfNewLoadingStations.get(temp) == null){ // falls keine Ladestation gebaut werden kann
+					savings.put(temp, 0.0); // Saving von temp ist 0
+				}else{ // falls Ladestation gebaut werden kann
+					int kosten = numberOfNewLoadingStations.get(temp).size() * 250000; // berechne Fixkosten von Ladestationen
+					double neueSavings = savings.get(temp) - kosten; // aktualisiere Saving von temp
+					savings.put(temp, neueSavings); // fügt den neuen Saving von temp hinzu
 				}
 			}
-			keys.add(temp);
-		} while (temp != getHighestSaving(savings));
-		//fahrzeugumlaeufe aktualisieren
+			keys.add(temp); // temp wird als berücksichtigt gespeichert 
+		} while (temp != getHighestSaving(savings)); //solange temp nicht der größte Saving ist
+		
+		
+		/**
+		fahrzeugumlaeufe aktualisieren
+		*/
 		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(temp.substring(0, n), temp.substring(n, temp.length()));
-		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
-			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(0).getId()){
-				fahrzeugumlaeufe.get(i).setFahrten(neu);
+		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) { // für jeden Fahrzeugumlauf i
+			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(0).getId()){ // falls ID von i gleich ID vom ersten der zusammengelegten Umläufen
+				fahrzeugumlaeufe.get(i).setFahrten(neu); //aktualisiere die Fahrten von Fahrzeugumlauf i
 			}
 		}
-		for(int i = 0; i < fahrzeugumlaeufe.size(); i++){
-			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(1).getId()){
-				fahrzeugumlaeufe.remove(i);
+		for(int i = 0; i < fahrzeugumlaeufe.size(); i++){ // für jeden Fahrzeugumlauf i
+			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(1).getId()){ // falls ID von i gleich ID vom zweiten der zusammengelegten Umläufen
+				fahrzeugumlaeufe.remove(i); // lösche i aus der Liste der Fahrzeugumläufe
 			}
 		}
 		ArrayList<Stoppoint> buildLoadingStations = numberOfNewLoadingStations.get(temp);
@@ -192,62 +209,89 @@ public class Initialloesung {
 		return fahrzeugumlaeufe;
 	}
 	
+	
+	/**
+	 * Methode zum Herausfinden, zu welchem Fahrzeugumlauf die zu zusammenlegenden Servicefahrten gehören
+	 * 
+	 * @param key1 (ID der ersten SF)
+	 * @param deadruntimes (ID der zweiten SF)
+	 * @return eine Liste von zwei Fahrzeugumläufen, welche jeweils die beiden SF beinhalten
+	 */
 	private ArrayList <Fahrzeugumlauf> umlaeufeFinden(String key1, String key2){
 		Fahrzeugumlauf eins = null;
 		Fahrzeugumlauf zwei = null;
 		
 		// while-Schleife drum machen: solange eins und zwei null sind
-		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) { // suche die beiden Fahrzeugumläufe die verbunden werden sollen
-			for (int j = 0; j < fahrzeugumlaeufe.get(i).getFahrten().size(); j++) {
-				if(fahrzeugumlaeufe.get(i).getFahrten().get(j).getId().equals(key1)){
-					eins = fahrzeugumlaeufe.get(i);
+		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) { // für jeden Fahrzeugumlauf i
+			for (int j = 0; j < fahrzeugumlaeufe.get(i).getFahrten().size(); j++) { // für jede Fahrt j im Fahrzeugumlauf i 
+				if(fahrzeugumlaeufe.get(i).getFahrten().get(j).getId().equals(key1)){  
+					eins = fahrzeugumlaeufe.get(i); // erster Umlauf beinhaltet key1
 				}
 				if(fahrzeugumlaeufe.get(i).getFahrten().get(j).getId().equals(key2)){
-					zwei = fahrzeugumlaeufe.get(i);
+					zwei = fahrzeugumlaeufe.get(i); // zweiter Umlauf beinhaltet key2
 				}
 			}
 		}
-		ArrayList umlaeufe = new ArrayList<Fahrzeugumlauf>();
+		ArrayList umlaeufe = new ArrayList<Fahrzeugumlauf>(); // eine ArrayList von Fahrzeugumläufen
 		umlaeufe.add(eins);
 		umlaeufe.add(zwei);
-		return umlaeufe;
+		return umlaeufe; // eine Liste von zwei Fahrzeugumläufen, welche jeweils key1 und key2 beinhalten 
 	}
 	
+	
+	/**
+	 * Methode zum Zusammenlegen von Fahrzeugumläufen
+	 * 
+	 * @param keyOfHighestSavings
+	 * @param deadruntimes
+	 * @return zusammengelegter Umlauf als Liste von Fahrten (Depot - SF1 - SF2 - Depot)
+	 */	
 	private LinkedList<Journey> umlaeufeZusammenlegen(String keyOfHighestSavings, HashMap<String, Deadruntime> deadruntimes){
 
-		String key = keyOfHighestSavings;
+		String key = keyOfHighestSavings; //Schlüssel vom größten Saving 
 		int n = key.length()/2;
-		String key1 = key.substring(0, n);
-		String key2 = key.substring(n, key.length());
+		String key1 = key.substring(0, n); //erster Umlauf von diesem Schlüssel
+		String key2 = key.substring(n, key.length()); //zweiter Umlauf von diesem Schlüssel
 		LinkedList<Journey> neu = null;
 		
-		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(key1, key2);
+		ArrayList<Fahrzeugumlauf> umlaeufe = umlaeufeFinden(key1, key2); // Liste von zwei Fahrzeugumläufen, welche jeweils key1 und key2 beinhalten
 	
-		LinkedList<Journey> eins = new LinkedList<Journey>();
-		LinkedList<Journey> zwei = new LinkedList<Journey>();
-		eins.addAll(umlaeufe.get(0).getFahrten());
-		zwei.addAll(umlaeufe.get(1).getFahrten());
-		eins.removeLast();
-		zwei.removeFirst();
+		LinkedList<Journey> eins = new LinkedList<Journey>(); // eins ist eine LinkedList von Fahrten
+		LinkedList<Journey> zwei = new LinkedList<Journey>(); // zwei ist eine LinkedList von Fahrten
+		eins.addAll(umlaeufe.get(0).getFahrten()); // alle Fahrten vom Umlauf, welcher key1 beinhaltet
+		zwei.addAll(umlaeufe.get(1).getFahrten()); // alle Fahrten vom Umlauf, welcher key2 beinhaltet
+		eins.removeLast(); // lösche letzte Fahrt von eins (ein Leerfahrt zum Depot)
+		zwei.removeFirst(); // lösche erste Fahrt von zwei (ein Leerfahrt aus Depot)
 		neu = eins;
-		neu.add(deadruntimes.get(eins.getLast().getToStopId()+zwei.getFirst().getFromStopId()));
+		neu.add(deadruntimes.get(eins.getLast().getToStopId()+zwei.getFirst().getFromStopId())); // neu entstehende Leerfarht zwsichen eins und zwei
 		neu.addAll(zwei);
 		
-		return neu;
+		return neu; // neu ist der zusammengelegte Umlauf (als LinkedList von Fahrten gespeichert): Depot - key1 - key2 - Depot 
 	}
 	
+	
+	/**
+	 * Methode zum ...
+	 * 
+	 * @param 
+	 * @param 
+	 * @return
+	 */	
 	private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Journey> neu, String keyOfHighestValue, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
 		
-		double kapazitaet = 80.0; //kWh
+		double kapazitaet = 80.0; // Batteriekapazität in kWh
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewStations = new HashMap<String, ArrayList<Stoppoint>>();
-		ArrayList<Stoppoint> list = new ArrayList<Stoppoint>();
+		ArrayList<Stoppoint> list = new ArrayList<Stoppoint>(); // eine Liste aller Haltestellen
 		
-		for (int i = 0; i < neu.size(); i++) { // zusammengesetzter Fahrzeugumlauf
-			int letzteLadung = 0;
-			if (kapazitaet - neu.get(i).getVerbrauch() < 0){
-				if(neu.get(i) instanceof Servicejourney){
+		for (int i = 0; i < neu.size(); i++) { // für jede Fahrt i im zusammengesetzten Fahrzeugumlauf
+			int letzteLadung = 0; // ID von Haltestelle, wo zuletzt geladen wird
+			if (kapazitaet - neu.get(i).getVerbrauch() < 0){ // falls Verbrauch von Fahrt i die Restkapazität nicht abdeckt
+				
+				if(neu.get(i) instanceof Servicejourney){ // falls Fahrt i eine Servicefahrt ist
 					int x = 0;
-					while(neu.get(i-2-x) != neu.get(1) || ((i - 2 - x) <= letzteLadung)){
+					
+					while(neu.get(i-2-x) != neu.get(1) || ((i - 2 - x) > letzteLadung)){
+						// solange wir nicht die erste SF oder die LetzteLadung erreichen
 						if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x).getId(), neu.get(i-x).getId(), deadruntimes, servicejourneys, kapazitaet)){
 							if(x==0){
 								if (!stoppoints.get(neu.get(i-x).getFromStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
@@ -297,10 +341,10 @@ public class Initialloesung {
 					}
 				}	
 
-				if(neu.get(i) instanceof Deadruntime){
+				if(neu.get(i) instanceof Deadruntime){ // falls Fahrt i eine Leerfahrt ist
 					int x = 0;
 					int y = 1;
-					while(neu.get(i-2-x) != neu.get(1) || ((i - 2 - x + y) <= letzteLadung)){
+					while(neu.get(i-2-x) != neu.get(1) || ((i - 2 - x + y) > letzteLadung)){
 						if(i == neu.size()-1){
 							if (!stoppoints.get(neu.get(i-y).getToStopId()).isLadestation()){ // i ist die Starthaltestelle der Servicefahrt i
 								list.add(stoppoints.get(neu.get(i-y).getToStopId()));
@@ -361,16 +405,23 @@ public class Initialloesung {
 					}
 				}	
 			}
-			kapazitaet = kapazitaet - neu.get(i).getVerbrauch();
+			kapazitaet = kapazitaet - neu.get(i).getVerbrauch(); // aktualisiere die Kapazität nach Fahrt i, falls Fahrt i noch gefahren werden kann
 		}
-		numberOfNewStations.put(keyOfHighestValue, list);
+		numberOfNewStations.put(keyOfHighestValue, list); 
 		return numberOfNewStations;	
 	}
 	
+	
+	/** 
+	 * Methode zum Finden der Schlüssel vom größten Saving
+	 * 
+	 * @param savings
+	 * @return Schlüssel vom größten Saving als String
+	 */
 	private String getHighestSaving(HashMap<String, Double> savings){
 		double temp = 0;
 		String key = "";
-		for (Entry<String, Double> e: savings.entrySet()){
+		for (Entry<String, Double> e: savings.entrySet()){ 
 			if(e.getValue() > temp){
 				temp = e.getValue();
 				key = e.getKey();
