@@ -1,8 +1,10 @@
 package helper;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 import model.Deadruntime;
+import model.Fahrzeugumlauf;
 import model.Servicejourney;
 import model.Stoppoint;
 
@@ -40,4 +42,15 @@ public class feasibilityHelper {
 		return result >= 0;
 	}
 
+	public static boolean isUmlaufFeasible(Fahrzeugumlauf fahrzeugumlauf, HashMap<String, Stoppoint> stoppoints){
+		boolean result = true;
+		double verbrauch = 0;
+		for (int i = 0; i < fahrzeugumlauf.getFahrten().size(); i++) {
+			verbrauch = verbrauch + fahrzeugumlauf.getFahrten().get(i).getVerbrauch();
+		}
+		if(verbrauch > 80){
+			result = false;
+		}
+		return result;
+	}
 }

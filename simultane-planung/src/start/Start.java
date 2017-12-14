@@ -15,13 +15,14 @@ public class Start {
 
 	public static void main(String[] args) {
 
-		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
 		
 		Initialloesung p = new Initialloesung();
-		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes);
+		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes, test.stoppoints);
 		HashMap<String, Double> savings;
 		int numberOfLoadingStations = 0;
 		int iteration = 0;
+		
 		
 		do {
 			/**
@@ -42,8 +43,8 @@ public class Start {
 					numberOfLoadingStations ++;
 				}
 			}
-			*/
 			
+			*/
 			//Schedule ergebnis = new Schedule(p.getInitialloesung(), test.stoppoints);
 			
 			//System.out.println("Kosten für den Umlaufplan: " + ergebnis.berechneKosten());
@@ -57,6 +58,10 @@ public class Start {
 			p.neuerUmlaufplan(savings, test.deadruntimes, test.stoppoints, test.servicejourneys);
 			
 			iteration ++;
+			
+			if(iteration == 225){
+				iteration = 225;
+			}
 			
 		}while(!savings.isEmpty());
 	
@@ -81,7 +86,5 @@ public class Start {
 		for (int j = 0; j < initialloesung.size(); j++) {
 			System.out.println(initialloesung.get(j).getFahrten().toString());
 		}
-		
 	}
-
 }
