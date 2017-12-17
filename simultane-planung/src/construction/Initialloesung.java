@@ -274,14 +274,14 @@ public class Initialloesung {
 		return neu; // neu ist der zusammengelegte Umlauf (als LinkedList von Fahrten gespeichert): Depot - key1 - key2 - Depot 
 	}
 	
-	
 	/**
-	 * Methode zum ...
+	 * 
 	 * 
 	 * @param 
 	 * @param 
 	 * @return
 	 */	
+
 	private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Journey> neu, String keyOfHighestValue, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
 		
 		double kapazitaet = 80.0; // Batteriekapazität in kWh
@@ -289,62 +289,65 @@ public class Initialloesung {
 		ArrayList<Stoppoint> list = new ArrayList<Stoppoint>(); // eine Liste aller Haltestellen
 		
 		for (int i = 0; i < neu.size(); i++) { // für jede Fahrt i im zusammengesetzten Fahrzeugumlauf
-			int letzteLadung = 0; // ID von Haltestelle, wo zuletzt geladen wird
+			int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
 			if (kapazitaet - neu.get(i).getVerbrauch() < 0){ // falls Verbrauch von Fahrt i die Restkapazität nicht abdeckt
 				
 				if(neu.get(i) instanceof Servicejourney){ // falls Fahrt i eine Servicefahrt ist
 					int x = 0;
-					
-					while(((i - 2 - x) > letzteLadung) && i-2-x > 0){
-						// solange wir nicht die erste SF oder die LetzteLadung erreichen
+					while((i-2-x) > letzteLadung){ //solange wir nicht die erste SF oder die LetzteLadung erreichen
 						if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2-x).getId(), neu.get(i-x).getId(), deadruntimes, servicejourneys, kapazitaet)){
-							if(x==0){
-								if (!stoppoints.get(neu.get(i-x).getFromStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
-									list.add(stoppoints.get(neu.get(i-x).getFromStopId()));
-									kapazitaet = 80;
-									letzteLadung = i; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
-									break;
+							//wenn genug Zeit zum Laden vorhanden ist
+							if(x==0){ //falls direkt bei der betroffenen SF geladen werden kann
+								if (!stoppoints.get(neu.get(i).getFromStopId()).isLadestation()){ //falls noch keine Ladestation an dieser Stelle vorhanden ist
+									list.add(stoppoints.get(neu.get(i).getFromStopId())); //füge die betroffene Haltestelle in die Liste hinzu
+									kapazitaet = 80; // Kapazität wieder voll geladen
+									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
+									stoppoints.get(neu.get(i).getFromStopId()).setLadestation(true); // setzt eine Ladestation an der Starthaltestelle von SF i
+									break; 
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
-									kapazitaet = 80;
-									letzteLadung = i; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									kapazitaet = 80; // Kapazität wieder voll geladen
+									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
 									break;
 								} 
-							}else{
-								if (!stoppoints.get(neu.get(i-x).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
+							}else{ // falls nicht direkt in i geladen werden kann und damit die vorherigen SF anschauen muss
+								if (!stoppoints.get(neu.get(i-x).getToStopId()).isLadestation()){ // 
 									list.add(stoppoints.get(neu.get(i-x).getToStopId()));
-									kapazitaet = 80;
-									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									kapazitaet = 80; // Kapazität wieder voll geladen
 									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									stoppoints.get(neu.get(i-x).getFromStopId()).setLadestation(true); //setzt eine Ladestation an der Starthaltestelle von SF i-x
+									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
-									kapazitaet = 80;
+									kapazitaet = 80; // Kapazität wieder voll geladen
+									letzteLadung = i - x; 
 									i = i - x;
-									letzteLadung = i - x;
 									break;
 								} 
 							}
 						}
 						x = x + 2;
-						System.out.println("x = " + x + "; i = " + i);
+						//System.out.println("x = " + x + "; i = " + i);
 					}
 					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
 						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
-							if (!stoppoints.get(neu.get(1).getFromStopId()).isLadestation()){
+							if (!stoppoints.get(neu.get(1).getFromStopId()).isLadestation()){ // falls vor SF1 noch keine Ladestation gebaut wird
 								list.add(stoppoints.get(neu.get(1).getFromStopId()));
 								kapazitaet = 80;
-								i = 1;
 								letzteLadung = 1;
-							}else{  // an der Haltestelle ist schon eine Ladestation: Laden
+								stoppoints.get(neu.get(1).getFromStopId()).setLadestation(true);
+								i = 1;
+								break;
+							}else{  // an der Haltestelle ist schon eine Ladestation -> Laden
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
 							}
 						}
-						else{
-							list.clear();
-							list.add(null);
+						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
+							list.clear(); 
+							list.add(null); // Liste der Haltestelle mit Ladestationen löschen und null zurückgeben
 							numberOfNewStations.put(keyOfHighestValue, list);
-							return numberOfNewStations; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
+							return numberOfNewStations;  
 						}
 					}
 				}	
@@ -352,27 +355,29 @@ public class Initialloesung {
 				if(neu.get(i) instanceof Deadruntime){ // falls Fahrt i eine Leerfahrt ist
 					int x = 0;
 					
-					while(((i - 2 - x + 1) > letzteLadung) && neu.get(i-2-x+1) != neu.get(1)){
-						if(i == neu.size()-1){
-							if (!stoppoints.get(neu.get(i-1).getToStopId()).isLadestation()){ // i ist die Starthaltestelle der Servicefahrt i
+					while(((i - x - 1) > letzteLadung)){ //solange die LetzteLadung nicht wieder erreicht wird
+						if(i == neu.size()-1){ //falls i die letzte Leerfahrt ist
+							if (!stoppoints.get(neu.get(i-1).getToStopId()).isLadestation()){ //falls keine Ladestation vorhanden an Endhaltestelle von SF (i-1)
 								list.add(stoppoints.get(neu.get(i-1).getToStopId()));
 								kapazitaet = 80;
-								i = i - x;
 								letzteLadung = i - 1;
+								stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true);
+								i = i - 1;
 								break;
-							}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i 
+							}else{ // es ist schon eine Ladestation vorhanden an Endhaltestelle von SF (i-1)
 								kapazitaet = 80;
-								i = i - x;
 								letzteLadung = i - 1;
+								i = i - 1;
 								break;
 							} 
 						}
-						if(x==0){
-							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-2+1).getId(), neu.get(i+1).getId(), deadruntimes, servicejourneys, kapazitaet)){
+						else if(x==0){
+							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-1).getId(), neu.get(i+1).getId(), deadruntimes, servicejourneys, kapazitaet)){					
 								if (!stoppoints.get(neu.get(i-1).getToStopId()).isLadestation()){ // i ist die Starthaltestelle der Servicefahrt i
 									list.add(stoppoints.get(neu.get(i-1).getToStopId()));
 									kapazitaet = 80;
 									letzteLadung = i-1;
+									stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true);
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i 
 									kapazitaet = 80;
@@ -386,19 +391,20 @@ public class Initialloesung {
 								if (!stoppoints.get(neu.get(i-x-1).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
 									list.add(stoppoints.get(neu.get(i-x-1).getToStopId()));
 									kapazitaet = 80;
-									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
 									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									stoppoints.get(neu.get(i-x-1).getToStopId()).setLadestation(true);
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
 									kapazitaet = 80;
-									i = i - x;
 									letzteLadung = i - x;
+									i = i - x;
 									break;
 								} 
 							}
 							x = x + 2;
 						}
-						System.out.println("x = " + x + "; i = " + i);
+						//System.out.println("x = " + x + "; i = " + i);
 					}	
 					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
 						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
@@ -407,6 +413,7 @@ public class Initialloesung {
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
+								stoppoints.get(neu.get(1).getFromStopId()).setLadestation(true);
 							}else{ // an der Haltestelle ist schon eine Ladestation: Laden
 								kapazitaet = 80;
 								i = 1;
@@ -428,7 +435,11 @@ public class Initialloesung {
 		return numberOfNewStations;	
 	}
 	
-	
+	private HashMap<String, Deadruntime> getId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/** 
 	 * Methode zum Finden der Schlüssel vom größten Saving
 	 * 
