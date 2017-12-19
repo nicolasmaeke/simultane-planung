@@ -161,10 +161,11 @@ public class Initialloesung {
 	 * @param servicejourneys
 	 * @return eine Liste von Fahrzeugumlaeufen
 	 */
-	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
+	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys, Integer iteration){
 		
 		String temp;
 		int n;
+		int test = 0;
 		List<String> keys = new ArrayList<String>(); // alle temp, die schon dran waren
 		LinkedList<Journey> neu = null; // neu ist eine Liste von Fahrten, die zusammengelegt werden sollen
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewLoadingStations = null;
@@ -187,13 +188,24 @@ public class Initialloesung {
 					double neueSavings = savings.get(temp) - kosten; // aktualisiere Saving von temp
 					savings.put(temp, neueSavings); // fuegt den neuen Saving von temp hinzu
 				}
-				keys.add(temp); // temp wird als beruecksichtigt gespeichert 	
+				keys.add(temp); // temp wird als beruecksichtigt gespeichert 
 			}
 			else {
 				neu = umlaeufeZusammenlegen(temp, deadruntimes);
 			}
 			//keys.add(temp); // temp wird als beruecksichtigt gespeichert 
+			
+			if (iteration == 261) {
+				System.out.println(test);
+				test ++;
+			}
+			
+			if (test == 4992) {
+				test = 4992;
+			}
+			
 		} while (temp != getHighestSaving(savings)); //solange temp nicht der groesste Saving ist
+		
 		
 		
 		/**
@@ -296,9 +308,10 @@ public class Initialloesung {
 		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewStations = new HashMap<String, ArrayList<Stoppoint>>();
 		ArrayList<Stoppoint> list = new ArrayList<Stoppoint>(); // Liste von Haltestellen
+		int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
 		
 		for (int i = 0; i < neu.size(); i++) { // fuer jede Fahrt i im zusammengesetzten Fahrzeugumlauf
-			int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
+			
 			if (kapazitaet - neu.get(i).getVerbrauch() < 0){ // falls Verbrauch von Fahrt i die Restkapazitaet nicht abdeckt
 				
 				if(neu.get(i) instanceof Servicejourney){ // falls Fahrt i eine Servicefahrt ist 
@@ -311,7 +324,7 @@ public class Initialloesung {
 									list.add(stoppoints.get(neu.get(i).getFromStopId())); //fuege die betroffene Haltestelle in die Liste hinzu
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
 									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
-									//stoppoints.get(neu.get(i).getFromStopId()).setLadestation(true); // setzt eine Ladestation an der Starthaltestelle von SF i
+									// stoppoints.get(neu.get(i).getFromStopId()).setLadestation(true); // setzt eine Ladestation an der Starthaltestelle von SF i
 									break; 
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x 
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
@@ -319,12 +332,12 @@ public class Initialloesung {
 									break;
 								} 
 							}else{ // falls nicht direkt in i geladen werden kann und damit die vorherigen SF anschauen muss
-								if (!stoppoints.get(neu.get(i-x).getToStopId()).isLadestation()){ // 
-									list.add(stoppoints.get(neu.get(i-x).getToStopId()));
+								if (!stoppoints.get(neu.get(i-2-x).getToStopId()).isLadestation()){ // 
+									list.add(stoppoints.get(neu.get(i-2-x).getToStopId()));
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
-									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
-									//stoppoints.get(neu.get(i-x).getFromStopId()).setLadestation(true); //setzt eine Ladestation an der Starthaltestelle von SF i-x
-									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									letzteLadung = i - 2 - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									// stoppoints.get(neu.get(i-x).getFromStopId()).setLadestation(true); //setzt eine Ladestation an der Starthaltestelle von SF i-x ### 1 mal drin
+									i = letzteLadung; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
@@ -343,7 +356,7 @@ public class Initialloesung {
 								list.add(stoppoints.get(neu.get(1).getFromStopId()));
 								kapazitaet = 80;
 								letzteLadung = 1;
-								//stoppoints.get(neu.get(1).getFromStopId()).setLadestation(true);
+								// stoppoints.get(neu.get(1).getFromStopId()).setLadestation(true);
 								i = 1;
 								break;
 							}else{  // an der Haltestelle ist schon eine Ladestation -> Laden
@@ -371,7 +384,7 @@ public class Initialloesung {
 								list.add(stoppoints.get(neu.get(i-1).getToStopId()));
 								kapazitaet = 80;
 								letzteLadung = i - 1;
-								//stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true);
+								// stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true); #### 7 Mal drin
 								i = i - 1;
 								break;
 							}else{ // es ist schon eine Ladestation vorhanden an Endhaltestelle von SF (i-1)
@@ -383,12 +396,12 @@ public class Initialloesung {
 						}
 						else if(x==0){
 							if(feasibilityHelper.zeitpufferFuerLadezeit(neu.get(i-1).getId(), neu.get(i+1).getId(), deadruntimes, servicejourneys, kapazitaet)){					
-								if (!stoppoints.get(neu.get(i-1).getToStopId()).isLadestation()){ // i ist die Starthaltestelle der Servicefahrt i
+								if (!stoppoints.get(neu.get(i-1).getToStopId()).isLadestation()){ 
 									list.add(stoppoints.get(neu.get(i-1).getToStopId()));
 									kapazitaet = 80;
 									letzteLadung = i-1;
 									i = i - 1;
-									//stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true);
+									// stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true);
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i 
 									kapazitaet = 80;
