@@ -3,6 +3,7 @@ package start;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import construction.Initialloesung;
 import model.Deadruntime;
@@ -15,16 +16,18 @@ public class Start {
 
 	public static void main(String[] args) {
 
-		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/Luna/git/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
 		
 		Initialloesung p = new Initialloesung();
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes, test.stoppoints);
 		HashMap<String, Double> savings;
 		int numberOfLoadingStations = 0;
 		int iteration = 0;
+		double valueSaving = 0.0;
 		
 		
 		do {
+			valueSaving = 0.0;
 			/**
 			for (int j = 0; j < initialloesung.size(); j++) {
 				System.out.println(initialloesung.get(j).getFahrten().toString());
@@ -55,15 +58,22 @@ public class Start {
 
 			System.out.println(iteration);
 			
-			p.neuerUmlaufplan(savings, test.deadruntimes, test.stoppoints, test.servicejourneys);
+			
+			p.neuerUmlaufplan(savings, test.deadruntimes, test.stoppoints, test.servicejourneys, iteration);
 			
 			iteration ++;
 			
 			if(iteration == 225){
 				iteration = 225;
+			}	
+			
+			for (Entry<String, Double> e: savings.entrySet()){ 
+				if(e.getValue() > valueSaving){
+					valueSaving = e.getValue();
+				}
 			}
 			
-		}while(!savings.isEmpty());
+		}while(!savings.isEmpty() && !(valueSaving <= 0)) ;
 	
 		
 		for (Map.Entry e: test.stoppoints.entrySet()){
@@ -87,4 +97,5 @@ public class Start {
 			System.out.println(initialloesung.get(j).getFahrten().toString());
 		}
 	}
+
 }

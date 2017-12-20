@@ -30,6 +30,9 @@ public class Initialloesung {
 	public Initialloesung(){
 		fahrzeugumlaeufe = new Vector<Fahrzeugumlauf>();
 	}
+	public Vector<Fahrzeugumlauf> getFahrzeugumlauf(){
+		return fahrzeugumlaeufe;	
+	}
 
 	/**
 	 * (Pendeltouren fuer jede Servicefahrt erstellen)- Methode fuegt jedem Fahrzeugumlauf die beiden Leerfahrten vom- und zum Depot sowie eine Servicefahrt hinzu
@@ -170,7 +173,7 @@ public class Initialloesung {
 		LinkedList<Journey> neu = null; // neu ist eine Liste von Fahrten, die zusammengelegt werden sollen
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewLoadingStations = null;
 		if(savings.isEmpty()){ 
-			return fahrzeugumlaeufe; // hoert auf wenn groesster Saving ≤ 0
+			return null; // hoert auf wenn groesster Saving ≤ 0
 		}
 		do {
 			temp = getHighestSaving(savings); // temp ist die ID vom zusammengelegten Umlauf mit groesstem Saving
@@ -182,30 +185,39 @@ public class Initialloesung {
 				neu = umlaeufeZusammenlegen(temp, deadruntimes); // Fahrten von temp werden zusammengelegt und in neu eingepackt
 				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys); 
 				if (numberOfNewLoadingStations.get(temp) == null){ // falls keine Ladestation gebaut werden kann
-					savings.put(temp, 0.0); // Saving von temp ist 0
+					savings.replace(temp, 0.0); // Saving von temp ist 0
 				}else{ // falls Ladestationen gebaut werden koennen
 					int kosten = numberOfNewLoadingStations.get(temp).size() * 250000; // berechne Fixkosten von Ladestationen
 					double neueSavings = savings.get(temp) - kosten; // aktualisiere Saving von temp
-					savings.put(temp, neueSavings); // fuegt den neuen Saving von temp hinzu
+					savings.replace(temp, neueSavings); // fuegt den neuen Saving von temp hinzu
 				}
 				keys.add(temp); // temp wird als beruecksichtigt gespeichert 
 			}
 			else {
 				neu = umlaeufeZusammenlegen(temp, deadruntimes);
+				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys);
 			}
 			//keys.add(temp); // temp wird als beruecksichtigt gespeichert 
 			
-			if (iteration == 261) {
+			if (iteration == 333) {
 				System.out.println(test);
 				test ++;
 			}
 			
-			if (test == 4992) {
-				test = 4992;
+			if (test == 9) {
+				test = 9;
 			}
 			
 		} while (temp != getHighestSaving(savings)); //solange temp nicht der groesste Saving ist
 		
+		ArrayList<Stoppoint> buildLoadingStations = numberOfNewLoadingStations.get(temp); //Liste der Haltestelle in temp, wo Ladestation gebaut werden muss
+		if (buildLoadingStations == null) {
+			return fahrzeugumlaeufe;
+		}else {
+			for (int i = 0; i < buildLoadingStations.size(); i++) {
+				buildLoadingStations.get(i).setLadestation(true); // Setzen der Ladestationen an den betroffenen Haltestellen
+			}
+		}
 		
 		
 		/**
@@ -229,10 +241,7 @@ public class Initialloesung {
 		Methode setzt Ladestationen an Haltestellen, wo geladen werden muss 
 		*/
 		
-		ArrayList<Stoppoint> buildLoadingStations = numberOfNewLoadingStations.get(temp); //Liste der Haltestelle in temp, wo Ladestation gebaut werden muss
-		for (int i = 0; i < buildLoadingStations.size(); i++) {
-			buildLoadingStations.get(i).setLadestation(true); // Setzen der Ladestationen an den betroffenen Haltestellen
-		}
+
 		return fahrzeugumlaeufe; 
 	}
 	
@@ -368,7 +377,7 @@ public class Initialloesung {
 						}
 						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
 							list.clear(); 
-							list.add(null); // Liste der Haltestelle mit Ladestationen loeschen und null zurueckgeben
+							list = null; // Liste der Haltestelle mit Ladestationen loeschen und null zurueckgeben
 							numberOfNewStations.put(keyOfHighestValue, list);
 							return numberOfNewStations;  
 						}
@@ -446,7 +455,7 @@ public class Initialloesung {
 						}
 						else{
 							list.clear();
-							list.add(null);
+							list = null;
 							numberOfNewStations.put(keyOfHighestValue, list);
 							return numberOfNewStations; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
 						}
@@ -471,11 +480,11 @@ public class Initialloesung {
 	 * @return Schluessel vom groessten Saving als String
 	 */
 	private String getHighestSaving(HashMap<String, Double> savings){
-		double temp = 0;
+		double temp2 = -1000000;
 		String key = "";
 		for (Entry<String, Double> e: savings.entrySet()){ 
-			if(e.getValue() > temp){
-				temp = e.getValue();
+			if(e.getValue() > temp2){
+				temp2 = e.getValue();
 				key = e.getKey();
 			}
 		}
