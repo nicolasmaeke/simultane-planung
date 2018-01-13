@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="simultane-planung/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/ReadAndWrite/ReadAndWrite/data/guava-21.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

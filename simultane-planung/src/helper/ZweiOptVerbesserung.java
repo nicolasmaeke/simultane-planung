@@ -10,6 +10,9 @@ public class ZweiOptVerbesserung {
 	int indexAltEins = 0;
 	int indexAltZwei = 0;
 	
+	/**
+	 * Konstruktor 
+	 */
 	public ZweiOptVerbesserung(double savings, Fahrzeugumlauf eins, Fahrzeugumlauf zwei, int indexAltEins, int indexAltZwei){
 		this.eins = eins;
 		this.zwei = zwei;

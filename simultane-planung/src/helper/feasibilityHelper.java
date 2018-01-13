@@ -21,6 +21,7 @@ public class feasibilityHelper {
 	 * @param i
 	 * @param j
 	 * @param deadruntimes
+	 * @param servicejourney
 	 * @return
 	 */
 	public static long zeitpufferZwischenServicefahrten(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
@@ -32,6 +33,12 @@ public class feasibilityHelper {
 		return result;
 	}
 	
+	
+	/**
+	 * Methode prueft, ob genug Zeit zum Laden zwischen zwei SF vorhanden ist, wenn eine Ladestation gebaut wird
+	 * 
+	 * @return
+	 */
 	public static boolean zeitpufferFuerLadezeit(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys, double restkapazitaet){
 		double result = 0;
 		double ladezeit = (80 - restkapazitaet) / ((7.5 / 60) / 1000);
@@ -42,6 +49,12 @@ public class feasibilityHelper {
 		return result >= 0;
 	}
 
+	/**
+	 * Methode prueft, ob ein Fahrzeugumlauf zulässig ist
+	 * @param fahrzeugumlauf
+	 * @param stoppoints
+	 * @return
+	 */
 	public static boolean isUmlaufFeasible(Fahrzeugumlauf fahrzeugumlauf, HashMap<String, Stoppoint> stoppoints){
 		boolean result = true;
 		double verbrauch = 0;

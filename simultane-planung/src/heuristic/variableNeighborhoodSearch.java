@@ -12,6 +12,8 @@ import model.Servicejourney;
 import model.Stoppoint;
 import output.Schedule;
 
+/** Klasse beinhaltet Methode für Variable Neighborhood Search
+ */
 public class variableNeighborhoodSearch {
 	
 	List<Schedule> solutions = new ArrayList<Schedule>(); // aktuelle Loseung, beste Loesung und neue Loesung speichern
@@ -30,10 +32,16 @@ public class variableNeighborhoodSearch {
 		this.servicejourneys = servicejourneys;
 	}
 	
-	public void shaking(){ // zufaellig die aktuelle Loesung manipulieren; kann auch schlechter werden
+	/** Methode -> zufaellig die aktuelle Loesung (den aktuellen Umlaufplan) manipulieren (Verschlechterung wird zugelassen)
+	 * 
+	 */
+	public void shaking(){ 
 		
 	}
 	
+	/** Methode zum Bestimmen der best moeglichen Verbesserung innerhalb einem Umlaufplan
+	 * 
+	 */
 	public void bestImprovement(){
 		// waehle zufaellig zwei Fahrzeugumlaeufe aus
 		int random1 = (int)(Math.random()*fahrzeugumlaeufe.size());
@@ -43,7 +51,7 @@ public class variableNeighborhoodSearch {
 		System.out.println(random1);
 		System.out.println(random2);
 		while(random1 == random2){
-			random2 = (int)(Math.random()*fahrzeugumlaeufe.size());
+			random2 = (int)(Math.random()*fahrzeugumlaeufe.size()); //random2 ungleich random1
 		}
 		ZweiOptVerbesserung verbesserung1 = zweiOpt(random1, random2);
 		if(verbesserung1 == null && fahrzeugumlaeufe.size() > 2){
@@ -179,23 +187,30 @@ public class variableNeighborhoodSearch {
 		
 	}
 
+	/** Methode gibt zurück, ob eine Verbesserung zwischen 2 unterschiedlichen Fahrzeugumläufen möglich ist (durch Kantentausch)
+	 * 
+	 * @param random1: ID des ersten Fahrzeugumlaufs 
+	 * @param random2: ID des zweiten Fahrzeugumlaufs 
+	 * @return
+	 */
 	
-	public ZweiOptVerbesserung zweiOpt(int random1, int random2){ // id der Fahrzeugumlaeufe aktuell noch String, wird zu Integer von 1...n geaendert
+	public ZweiOptVerbesserung zweiOpt(int random1, int random2){
 		
 		ZweiOptVerbesserung result = null;
 		
-		Fahrzeugumlauf eins = fahrzeugumlaeufe.get(random1);
+		Fahrzeugumlauf eins = fahrzeugumlaeufe.get(random1); 
 		Fahrzeugumlauf zwei = fahrzeugumlaeufe.get(random2);
 		
-		double currentCostValue = eins.getKosten() + zwei.getKosten();
+		double currentCostValue = eins.getKosten() + zwei.getKosten(); //aktuelle Gesamtkosten von Fahrzeugumlauf eins und zwei
 		
 		Fahrzeugumlauf betterEins = null;
 		Fahrzeugumlauf betterZwei = null;
 		
-		for (int i = -1; i < eins.size()-2; i = i + 2) { // i = 1, weil bei der zweiten Leerfahrt begonnen wird; es werden nur Servicefahrten betrachte, daher i+2
-			if(i == -1){
-				for (int j = 3; j < zwei.size(); j = j + 2) {
+		for (int i = -1; i < eins.size()-2; i = i + 2) { //es werden nur Servicefahrten betrachtet, daher i+2
+			if(i == -1){ //falls i = -1 (Depotknoten im ersten Umlauf)
+				for (int j = 3; j < zwei.size(); j = j + 2) { //die erste LF von j darf nicht geloescht werden
 					if(validEdges.get(zwei.getAtIndex(j-2).getId()+eins.getAtIndex(i+2).getId()) == 1){
+						//falls zeitlich von (j-2) zu (i+2) möglich ist -> verbinden
 						String deadruntimeId = zwei.getAtIndex(j-2).getToStopId() + eins.getAtIndex(i+2).getFromStopId(); 
 						Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(eins.getId());
 						einsNeu.addFahrten(zwei.getFahrtenVonBis(0, j-2));
@@ -210,9 +225,9 @@ public class variableNeighborhoodSearch {
 							//if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
 							if(true){
 								// neue Umlaeufe speichern, falls besser
-								double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten();
-								if(newCostValue <= currentCostValue){
-									currentCostValue = currentCostValue - newCostValue;
+								double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten(); //neue Kosten durch einsNeu und zweiNeu
+								if(newCostValue <= currentCostValue){ //wenn gespart wird
+									currentCostValue = currentCostValue - newCostValue; //
 									betterEins = einsNeu;
 									betterZwei = zweiNeu;
 								}
@@ -221,16 +236,16 @@ public class variableNeighborhoodSearch {
 					}
 				}
 			}
-			else{
-				String id = eins.getAtIndex(i).getId();
-			for (int j = 1; j < zwei.size(); j = j + 2) {
+			else{ // falls i ungleich -1, also SF vom ersten Umlauf
+				String id = eins.getAtIndex(i).getId(); 
+				for (int j = 1; j < zwei.size(); j = j + 2) { // alle SF vom zweiten Umlauf
 				id = eins.getAtIndex(i).getId();
-				if(j == zwei.size() && i > eins.size() - 4){
+				if(j == zwei.size() && i > eins.size() - 4){ // die letzten SF duerfen nicht miteinander verbunden werden
 					break;
 				}
 				id = id + zwei.getAtIndex(j).getId();
-				if (validEdges.get(id) == 1) {
-					if (j < 2) { // weil dann Depotkante geloescht wird
+				if (validEdges.get(id) == 1) { // falls zeitlich von i zu j möglich ist 
+					if (j < 2) { // die erste SF vom zweiten Umlauf, weil dann Depotkante geloescht wird
 						Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(eins.getId());
 						einsNeu.addFahrten(eins.getFahrtenVonBis(0, i));
 						String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
@@ -254,8 +269,8 @@ public class variableNeighborhoodSearch {
 						}	
 					}
 					}
-					else{
-						if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
+					else{ // ab dem zweiten SF vom zweiten Umlauf
+						//if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
 							Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(eins.getId());
 							einsNeu.addFahrten(eins.getFahrtenVonBis(0, i));
 							String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
@@ -277,7 +292,7 @@ public class variableNeighborhoodSearch {
 										betterEins = einsNeu;
 										betterZwei = zweiNeu;
 								}
-							}	
+								
 						}
 					}
 				}
@@ -286,7 +301,7 @@ public class variableNeighborhoodSearch {
 			}
 			}
 		}
-		if(!eins.equals(betterEins) && betterEins != null){
+		if(!eins.equals(betterEins) && betterEins != null){ // falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
 			result = new ZweiOptVerbesserung(currentCostValue, betterEins, betterZwei, random1, random2);
 		}
 		return result;
