@@ -206,7 +206,7 @@ public class Fahrzeugumlauf {
 
 	public List<Journey> getFahrtenVonBis(int i, int j) {
 		LinkedList<Journey> fahrten = new LinkedList<Journey>();
-		for (int k = i; k < j; k++) {
+		for (int k = i; k <= j; k++) {
 			fahrten.add(this.fahrten.get(k));
 		}
 		return fahrten;

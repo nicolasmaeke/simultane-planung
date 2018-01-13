@@ -25,14 +25,12 @@ public class Schedule {
 			}
 		}
 		for (int i = 0; i < umlaufplan.size(); i++) {
-			for (int j = 0; j < umlaufplan.get(i).getFahrten().size(); j = j + 2) { // es werden nur Leerfahrten beruecksichtigt
-				variableKosten = variableKosten + umlaufplan.get(i).getFahrten().get(j).getVerbrauch();
-			}
+				variableKosten = variableKosten + umlaufplan.get(i).getKosten();
 		}
 	}
 	
 	public double berechneKosten(){
-		kosten = anzahlBusse * 400000 + anzahlLadestationen * 250000 + variableKosten * 0.10;
+		kosten = anzahlBusse * 400000 + anzahlLadestationen * 250000 + variableKosten;
 		return kosten;
 	}
 
@@ -42,6 +40,38 @@ public class Schedule {
 
 	public void setKosten(double kosten) {
 		this.kosten = kosten;
+	}
+
+	public Vector<Fahrzeugumlauf> getUmlaufplan() {
+		return umlaufplan;
+	}
+
+	public void setUmlaufplan(Vector<Fahrzeugumlauf> umlaufplan) {
+		this.umlaufplan = umlaufplan;
+	}
+
+	public int getAnzahlLadestationen() {
+		return anzahlLadestationen;
+	}
+
+	public void setAnzahlLadestationen(int anzahlLadestationen) {
+		this.anzahlLadestationen = anzahlLadestationen;
+	}
+
+	public int getAnzahlBusse() {
+		return anzahlBusse;
+	}
+
+	public void setAnzahlBusse(int anzahlBusse) {
+		this.anzahlBusse = anzahlBusse;
+	}
+
+	public double getVariableKosten() {
+		return variableKosten;
+	}
+
+	public void setVariableKosten(double variableKosten) {
+		this.variableKosten = variableKosten;
 	}
 
 	

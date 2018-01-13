@@ -14,6 +14,8 @@ public class ZweiOptVerbesserung {
 		this.eins = eins;
 		this.zwei = zwei;
 		this.costs = savings;
+		this.indexAltEins = indexAltEins;
+		this.indexAltZwei = indexAltZwei;
 	}
 
 	public double getCosts() {

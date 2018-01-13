@@ -16,7 +16,7 @@ public class Start {
 
 	public static void main(String[] args) {
 
-		ProjectReadIn test = new ProjectReadIn("/Users/Luna/git/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_toy_6_9.txt");
 		
 		Initialloesung p = new Initialloesung();
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes, test.stoppoints);
@@ -94,6 +94,9 @@ public class Start {
 		numberOfLoadingStations = 0;
 		
 		for (int j = 0; j < initialloesung.size(); j++) {
+			for (int i = 0; i < initialloesung.get(j).size(); i++) {
+				System.out.println(initialloesung.get(j).getFahrten().get(i).getId());
+			}
 			System.out.println(initialloesung.get(j).getFahrten().toString());
 		}
 	}
