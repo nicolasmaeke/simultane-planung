@@ -8,7 +8,7 @@ public class StartAfterInitialSolution {
 
 	public static void main(String[] args) {
 		
-		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/XuanSon/Desktop/full_sample_real_433_SF_207_stoppoints_initialloesung.txt");
+		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
 		
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {

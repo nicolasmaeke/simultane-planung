@@ -143,29 +143,7 @@ public class variableNeighborhoodSearch {
 				fahrzeugumlaeufe.add(best.getZwei());
 			}
 				
-				/**
-				if(verbesserung1 == null){
-					// neuer Umlaufplan
-					fahrzeugumlaeufe.remove(random2);
-					fahrzeugumlaeufe.remove(random3);
-					fahrzeugumlaeufe.add(verbesserung2.getEins());
-					fahrzeugumlaeufe.add(verbesserung2.getZwei());
-				}
-				else if(verbesserung2 == null || verbesserung2.getCosts() > verbesserung1.getCosts()){
-					// neuer Umlaufplan
-					fahrzeugumlaeufe.remove(random1);
-					fahrzeugumlaeufe.remove(random3);
-					fahrzeugumlaeufe.add(verbesserung1.getEins());
-					fahrzeugumlaeufe.add(verbesserung1.getZwei());
-				}
-				else{
-					// neuer Umlaufplan
-					fahrzeugumlaeufe.remove(random2);
-					fahrzeugumlaeufe.remove(random3);
-					fahrzeugumlaeufe.add(verbesserung2.getEins());
-					fahrzeugumlaeufe.add(verbesserung2.getZwei());
-				}
-			}*/
+		
 		}
 		else if(verbesserung1 != null){ // Fall mit Nachbarschaftgroesse 2
 			// neuer Umlaufplan
@@ -202,6 +180,7 @@ public class variableNeighborhoodSearch {
 		Fahrzeugumlauf zwei = fahrzeugumlaeufe.get(random2);
 		
 		double currentCostValue = eins.getKosten() + zwei.getKosten(); //aktuelle Gesamtkosten von Fahrzeugumlauf eins und zwei
+		double initialCostValue = currentCostValue;
 		
 		Fahrzeugumlauf betterEins = null;
 		Fahrzeugumlauf betterZwei = null;
@@ -226,8 +205,8 @@ public class variableNeighborhoodSearch {
 							if(true){
 								// neue Umlaeufe speichern, falls besser
 								double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten(); //neue Kosten durch einsNeu und zweiNeu
-								if(newCostValue <= currentCostValue){ //wenn gespart wird
-									currentCostValue = currentCostValue - newCostValue; //
+								if(newCostValue < currentCostValue){ //wenn gespart wird
+									currentCostValue = newCostValue; //
 									betterEins = einsNeu;
 									betterZwei = zweiNeu;
 								}
@@ -261,8 +240,8 @@ public class variableNeighborhoodSearch {
 							if(true){
 								// neue Umlaeufe speichern, falls besser
 								double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten();
-								if(newCostValue <= currentCostValue){
-									currentCostValue = currentCostValue - newCostValue;
+								if(newCostValue < currentCostValue){
+									currentCostValue = newCostValue;
 									betterEins = einsNeu;
 									betterZwei = zweiNeu;
 							}
@@ -287,8 +266,8 @@ public class variableNeighborhoodSearch {
 								if(true){
 									// neue Umlaeufe speichern, falls besser
 									double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten();
-									if(newCostValue <= currentCostValue){
-										currentCostValue = currentCostValue - newCostValue;
+									if(newCostValue < currentCostValue){
+										currentCostValue = newCostValue;
 										betterEins = einsNeu;
 										betterZwei = zweiNeu;
 								}
@@ -301,8 +280,106 @@ public class variableNeighborhoodSearch {
 			}
 			}
 		}
+		// Kopie von oben; es werden eins und zwei vertauscht, um auch Rueckwaertskanten zu betrachten
+		for (int i = -1; i < zwei.size()-2; i = i + 2) { //es werden nur Servicefahrten betrachtet, daher i+2
+			if(i == -1){ //falls i = -1 (Depotknoten im ersten Umlauf)
+				for (int j = 3; j < eins.size(); j = j + 2) { //die erste LF von j darf nicht geloescht werden
+					if(validEdges.get(eins.getAtIndex(j-2).getId()+zwei.getAtIndex(i+2).getId()) == 1){
+						//falls zeitlich von (j-2) zu (i+2) möglich ist -> verbinden
+						String deadruntimeId = eins.getAtIndex(j-2).getToStopId() + zwei.getAtIndex(i+2).getFromStopId(); 
+						Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(zwei.getId());
+						einsNeu.addFahrten(eins.getFahrtenVonBis(0, j-2));
+						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
+						einsNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size() - 1));
+						//if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
+						if(true){
+							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
+							deadruntimeId = "00001" + eins.getAtIndex(j).getFromStopId();
+							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
+							zweiNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size() - 1));
+							//if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
+							if(true){
+								// neue Umlaeufe speichern, falls besser
+								double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten(); //neue Kosten durch einsNeu und zweiNeu
+								if(newCostValue < currentCostValue){ //wenn gespart wird
+									currentCostValue = newCostValue; //
+									betterEins = einsNeu;
+									betterZwei = zweiNeu;
+								}
+							}
+						}
+					}
+				}
+			}
+			else{ // falls i ungleich -1, also SF vom ersten Umlauf
+				String id = zwei.getAtIndex(i).getId(); 
+				for (int j = 1; j < eins.size(); j = j + 2) { // alle SF vom zweiten Umlauf
+				id = zwei.getAtIndex(i).getId();
+				if(j == eins.size() && i > zwei.size() - 4){ // die letzten SF duerfen nicht miteinander verbunden werden
+					break;
+				}
+				id = id + eins.getAtIndex(j).getId();
+				if (validEdges.get(id) == 1) { // falls zeitlich von i zu j möglich ist 
+					if (j < 2) { // die erste SF vom zweiten Umlauf, weil dann Depotkante geloescht wird
+						Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(zwei.getId());
+						einsNeu.addFahrten(zwei.getFahrtenVonBis(0, i));
+						String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
+						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
+						einsNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size()-1));
+						//if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
+						if(true){
+							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
+							deadruntimeId = "00001" + zwei.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
+							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
+							zweiNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size()-1));
+							//if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
+							if(true){
+								// neue Umlaeufe speichern, falls besser
+								double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten();
+								if(newCostValue < currentCostValue){
+									currentCostValue = newCostValue;
+									betterEins = einsNeu;
+									betterZwei = zweiNeu;
+							}
+						}	
+					}
+					}
+					else{ // ab dem zweiten SF vom zweiten Umlauf
+						//if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
+							Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(zwei.getId());
+							einsNeu.addFahrten(zwei.getFahrtenVonBis(0, i));
+							String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
+							einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
+							einsNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size()-1));
+							//if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
+							if(true){
+								Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
+								zweiNeu.addFahrten(eins.getFahrtenVonBis(0, j-2));
+								deadruntimeId = eins.getAtIndex(j-2).getToStopId() + zwei.getAtIndex(i+2).getFromStopId();
+								zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
+								zweiNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size()-1));
+								//if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes))
+								if(true){
+									// neue Umlaeufe speichern, falls besser
+									double newCostValue = einsNeu.getKosten() + zweiNeu.getKosten();
+									if(newCostValue < currentCostValue){
+										currentCostValue =  newCostValue;
+										betterEins = einsNeu;
+										betterZwei = zweiNeu;
+								}
+								
+						}
+					}
+				}
+			
+			}
+			}
+			}
+		}
+		double savings = 0;
 		if(!eins.equals(betterEins) && betterEins != null){ // falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
-			result = new ZweiOptVerbesserung(currentCostValue, betterEins, betterZwei, random1, random2);
+			savings = initialCostValue - currentCostValue;
+			result = new ZweiOptVerbesserung(savings, betterEins, betterZwei, random1, random2);
 		}
 		return result;
 	}
