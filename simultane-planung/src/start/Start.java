@@ -1,5 +1,9 @@
 package start;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -24,6 +28,20 @@ public class Start {
 		int numberOfLoadingStations = 0;
 		int iteration = 0;
 		double valueSaving = 0.0;
+		
+		//neu
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+		PrintWriter pw = null;
+		
+		//neu
+		try {
+			fw = new FileWriter("/Users/XuanSon/Desktop/full_sample_real_433_SF_207_stoppoints.txt", true);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} 
+		bw = new BufferedWriter(fw); 
+		pw = new PrintWriter(bw);
 		
 		
 		do {
@@ -93,11 +111,18 @@ public class Start {
 		
 		numberOfLoadingStations = 0;
 		
+		pw.println();
+		pw.println("*;;;;;;;;;;");
+		pw.println("* Initialloesung;;;;;;;;;;");
+		pw.println("*;;;;;;;;;;");
+		pw.println("$Umlauf:ID;Fahrten;;;;;;;;");
+		
+		//neu
 		for (int j = 0; j < initialloesung.size(); j++) {
-			for (int i = 0; i < initialloesung.get(j).size(); i++) {
-				System.out.println(initialloesung.get(j).getFahrten().get(i).getId());
-			}
-			System.out.println(initialloesung.get(j).getFahrten().toString());
+			String umlaufId = String.valueOf(j);
+			System.out.println(umlaufId + ";" + initialloesung.get(j).getFahrten().toString());
+			pw.println(umlaufId + ";" + initialloesung.get(j).getFahrten().toString());
+			pw.flush();
 		}
 	}
 
