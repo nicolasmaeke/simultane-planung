@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -95,13 +96,16 @@ public class ProjectReadInWithInitialSolution {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    stoppoints = new HashMap<String, Stoppoint>();
+                    //stoppoints = new HashMap<String, Stoppoint>();
                     
                     while (temp != null && !ersteszeichen.equals("*")) {
                     
+                    	/**
                     	Stoppoint neu = new Stoppoint(temp.split(";")[0]);
+                    	
                     	stoppoints.put(neu.getId(), neu);
-                    
+                    	*/
+                    	
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     } // end while
@@ -161,6 +165,35 @@ public class ProjectReadInWithInitialSolution {
                     continue;
                 } // end if
                 
+                if (BlockBegin.equals("$INITIALSTOPPOINT")) // 1. Relation: Stoppoint
+                {
+
+                    temp = reader.readLine(); // nächste Zeile
+                    ersteszeichen = temp.substring(0, 1); // erstes Zeichen
+                    
+                    stoppoints = new HashMap<String, Stoppoint>();
+                    
+                    while (temp != null && !ersteszeichen.equals("*")) {
+                    
+                    	String id = temp.split(";")[0];
+                    	String isLoadingstation = temp.split(";")[1];
+                    	boolean isLoadingstation1 = false;
+                    	if(isLoadingstation.equals("true")){
+                    		isLoadingstation1 = true;
+                    	}
+                    	int frequency = Integer.parseInt(temp.split(";")[2]);
+                    	
+                    	Stoppoint neu = new Stoppoint(id);
+                    	neu.setLadestation(isLoadingstation1);
+                    	neu.setFrequency(frequency);
+                    	stoppoints.put(neu.getId(), neu);
+                    
+                        temp = reader.readLine(); // nächste Zeile
+                        ersteszeichen = temp.substring(0, 1); // erstes Zeichen
+                        
+                    } // end while
+                    continue;
+                } // end if
      
                 if (BlockBegin.equals("$Umlauf")) // 4. Relation: Fahrzeugumlaeufe nach der Initialloesung
                 {
@@ -176,6 +209,9 @@ public class ProjectReadInWithInitialSolution {
                         String fahrten = (temp.split(";")[1]); // ID
                         fahrten = fahrten.substring(1, fahrten.length()-1);
                         String[] ids = fahrten.split(", ");
+                        String stopps = temp.split(";")[2];
+                        stopps = stopps.substring(1, stopps.length()-1);
+                        String[] idStoppoints = stopps.split(", ");
                         Fahrzeugumlauf neu = new Fahrzeugumlauf(id);
                         for (int i = 0; i < ids.length; i++) {
 							if(i % 2 == 0){
@@ -185,6 +221,12 @@ public class ProjectReadInWithInitialSolution {
 								neu.addFahrt(servicejourneys.get(ids[i]));
 							}		
 						}
+                        LinkedList<Stoppoint> laden = new LinkedList<Stoppoint>();
+                        for (int i = 0; i < idStoppoints.length; i++) {
+							laden.add((stoppoints.get(idStoppoints[i])));
+						}
+                        
+                        neu.setLaden(laden);
                         fahrzeugumlaeufe.add(neu);
                         temp = reader.readLine();
                         
@@ -192,6 +234,8 @@ public class ProjectReadInWithInitialSolution {
                     } // end while
                     continue;
                 } // end if
+                
+                
                 
             } // end outer while
         } catch (IOException e) {

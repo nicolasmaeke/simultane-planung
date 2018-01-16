@@ -21,6 +21,7 @@ public class Fahrzeugumlauf {
 	private double laenge = 0;
 	private double energieVerbrauch = 0;
 	private long kosten = 0;
+	private LinkedList<Stoppoint> laden;
 	
 	/**
 	 * Konstruktor
@@ -33,6 +34,7 @@ public class Fahrzeugumlauf {
 			laenge = laenge + fahrten.get(j).getDistance();
 			energieVerbrauch = energieVerbrauch + fahrten.get(j).getVerbrauch();
 		}
+		this.laden = new LinkedList<Stoppoint>();
 	}
 
 	/**
@@ -66,20 +68,6 @@ public class Fahrzeugumlauf {
 		this.fahrten = fahrten;
 	}
 	
-	/**
-	 * prueft, ob der Fahrzeugumlauf die Bedingung erfuellt, dass erste und letzte Fahrt Leerfahrten sind
-	 * hier noch ergaenzen: 
-	 * erste Fahrt vom Depot?
-	 * letzte Fahrt zum Depot?
-	 * @return
-	 */
-	public boolean isFeasible(){
-		boolean result = true;
-		if (!(fahrten.get(0) instanceof Deadruntime) || !(fahrten.get(fahrten.size()-1) instanceof Deadruntime)){
-			result = false;
-		}
-		return result;
-	}
 	
 	/**
 	 * gibt die Anzahl der Fahrten im Fahrzeugumlauf zurueck
@@ -91,6 +79,16 @@ public class Fahrzeugumlauf {
 	
 	public String toString(){
 		String result = "Fahrzeugumlauf " + id + " beinhaltet folgende Fahrten: " + getFahrten();
+		return result;
+	}
+	
+	public String toStringIds(){
+		String result = "[";
+		for (int i = 0; i < fahrten.size(); i++) {
+			result = result + fahrten.get(i).getId() + ", ";
+		}
+		result = result.substring(0, result.length()-2);
+		result = result + "]";
 		return result;
 	}
 
@@ -108,6 +106,7 @@ public class Fahrzeugumlauf {
 		if (!(fahrten.get(0) instanceof Deadruntime) || !(fahrten.get(fahrten.size()-1) instanceof Deadruntime)){
 			return false;
 		}
+		laden.clear();
 		
 		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
 		int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
@@ -125,13 +124,15 @@ public class Fahrzeugumlauf {
 								if (stoppoints.get(fahrten.get(i).getFromStopId()).isLadestation()){ //falls noch keine Ladestation an dieser Stelle vorhanden ist
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
 									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
+									laden.add(stoppoints.get(fahrten.get(i).getFromStopId()));
 									break;
 								} 
 							}else{ // falls nicht direkt in i geladen werden kann und damit die vorherigen SF anschauen muss
 								if (stoppoints.get(fahrten.get(i-2-x).getToStopId()).isLadestation()){ // 
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
+									laden.add(stoppoints.get(fahrten.get(i-2-x).getToStopId()));
 									letzteLadung = i - x; 
-									i = i - x;
+									i = i - x;	
 									break;
 								} 
 							}
@@ -142,6 +143,7 @@ public class Fahrzeugumlauf {
 						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
 							if (stoppoints.get(fahrten.get(1).getFromStopId()).isLadestation()){ // falls vor SF1 noch keine Ladestation gebaut wird
 								kapazitaet = 80;
+								laden.add(stoppoints.get(fahrten.get(1).getFromStopId()));
 								i = 1;
 								letzteLadung = 1;
 								break;
@@ -156,18 +158,23 @@ public class Fahrzeugumlauf {
 				if(fahrten.get(i) instanceof Deadruntime){ // falls Fahrt i eine Leerfahrt ist
 					int x = 0;
 					while(((i - x - 1) > letzteLadung)){ //solange die LetzteLadung nicht wieder erreicht wird
-						if(i == fahrten.size()-1){ //falls i die letzte Leerfahrt ist
+						if(i == fahrten.size()-1 && x == 0){ //falls i die letzte Leerfahrt ist
 							if (stoppoints.get(fahrten.get(i-1).getToStopId()).isLadestation()){ //falls keine Ladestation vorhanden an Endhaltestelle von SF (i-1)
 								kapazitaet = 80;
+								laden.add(stoppoints.get(fahrten.get(i-1).getToStopId()));
 								letzteLadung = i - 1;
 								i = i - 1;
 								break;
-							} 
+							}
+							else{
+								x = x + 2;
+							}
 						}
 						else if(x==0){
 							if(feasibilityHelper.zeitpufferFuerLadezeit(fahrten.get(i-1).getId(), fahrten.get(i+1).getId(), deadruntimes, servicejourneys, kapazitaet)){					
 								if (stoppoints.get(fahrten.get(i-1).getToStopId()).isLadestation()){
 									kapazitaet = 80;
+									laden.add(stoppoints.get(fahrten.get(i-1).getToStopId()));
 									letzteLadung = i-1;
 									break;
 								} 
@@ -177,6 +184,7 @@ public class Fahrzeugumlauf {
 							if(feasibilityHelper.zeitpufferFuerLadezeit(fahrten.get(i-2-x+1).getId(), fahrten.get(i-x+1).getId(), deadruntimes, servicejourneys, kapazitaet)){
 								if (stoppoints.get(fahrten.get(i-x-1).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
 									kapazitaet = 80;
+									laden.add(stoppoints.get(fahrten.get(i-x-1).getToStopId()));
 									letzteLadung = i - x;
 									i = i - x;
 									break;
@@ -188,6 +196,7 @@ public class Fahrzeugumlauf {
 					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
 						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
 							if (stoppoints.get(fahrten.get(1).getFromStopId()).isLadestation()){
+								laden.add(stoppoints.get(fahrten.get(1).getFromStopId()));
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
@@ -227,6 +236,46 @@ public class Fahrzeugumlauf {
 
 	public void addFahrten(List<Journey> list) {
 		fahrten.addAll(list);
+	}
+
+	public double getLaenge() {
+		return laenge;
+	}
+
+	public void setLaenge(double laenge) {
+		this.laenge = laenge;
+	}
+
+	public double getEnergieVerbrauch() {
+		return energieVerbrauch;
+	}
+
+	public void setEnergieVerbrauch(double energieVerbrauch) {
+		this.energieVerbrauch = energieVerbrauch;
+	}
+
+	public String getLadenString() {
+		String result = "[";
+		for (int i = 0; i < laden.size(); i++) {
+			result = result + laden.get(i).getId() + ", ";
+		}
+		if(result.length() > 1){
+			result = result.substring(0, result.length()-2);
+		}
+		result = result + "]";
+		return result;
+	}
+	
+	public LinkedList<Stoppoint> getLaden(){
+		return laden;
+	}
+
+	public void setLaden(LinkedList<Stoppoint> laden) {
+		this.laden = laden;
+	}
+
+	public void setKosten(long kosten) {
+		this.kosten = kosten;
 	}
 
 }

@@ -11,6 +11,7 @@ public class Stoppoint {
 	private String code;
 	private String name;
 	private boolean ladestation;
+	private int frequency;
 	
 	/**
 	 * Konstruktor
@@ -21,6 +22,7 @@ public class Stoppoint {
 		this.setCode(id);
 		this.setName("Haltestelle " + id);
 		setLadestation(false);
+		this.frequency = 0;
 	}
 
 	public String getId() {
@@ -61,5 +63,13 @@ public class Stoppoint {
 		}else{
 			return this.name + " hat keine Ladestation";
 		}
+	}
+
+	public int getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(int frequency) {
+		this.frequency = frequency;
 	}
 }

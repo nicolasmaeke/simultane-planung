@@ -1,6 +1,8 @@
 package start;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,7 +22,7 @@ public class Start {
 
 	public static void main(String[] args) {
 
-		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_toy_6_9.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
 		
 		Initialloesung p = new Initialloesung();
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes, test.stoppoints);
@@ -36,7 +38,7 @@ public class Start {
 		
 		//neu
 		try {
-			fw = new FileWriter("/Users/XuanSon/Desktop/full_sample_real_433_SF_207_stoppoints.txt", true);
+			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
@@ -111,6 +113,43 @@ public class Start {
 		
 		numberOfLoadingStations = 0;
 		
+		for (int i = 0; i < p.getInitialloesung().size(); i++) {
+			if(!p.getInitialloesung().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
+				System.err.println("Is not Feasible!");
+			}
+		}
+		
+		
+		
+		pw.println("*;;;;;;;;;;");
+		pw.println("* Initialloesung;;;;;;;;;;");
+		pw.println("*;;;;;;;;;;");
+		pw.println("$INITIALSTOPPOINT:ID;isLoadingstation;frequency");
+		
+		for (Map.Entry e: test.stoppoints.entrySet()){
+			Stoppoint i1 = test.stoppoints.get(e.getKey());
+			String stoppointId = i1.getId();
+			String isLoadingstation;
+			int counter = 0;
+			String frequency = "0";
+			if (i1.isLadestation()) {
+				isLoadingstation = "true";
+				for (int i = 0; i < p.getInitialloesung().size(); i++) {
+					for (int j = 0; j < p.getInitialloesung().get(i).getLaden().size(); j++) {
+						if(p.getInitialloesung().get(i).getLaden().get(j).getId().equals(i1.getId())){
+							counter ++;
+						}
+					}
+				}
+				frequency = "" + counter + "";
+			}
+			else{
+				isLoadingstation = "false";
+			}
+			pw.println(stoppointId + ";" + isLoadingstation + ";" + frequency);
+			pw.flush();
+		}
+		
 		pw.println();
 		pw.println("*;;;;;;;;;;");
 		pw.println("* Initialloesung;;;;;;;;;;");
@@ -120,8 +159,8 @@ public class Start {
 		//neu
 		for (int j = 0; j < initialloesung.size(); j++) {
 			String umlaufId = String.valueOf(j);
-			System.out.println(umlaufId + ";" + initialloesung.get(j).getFahrten().toString());
-			pw.println(umlaufId + ";" + initialloesung.get(j).getFahrten().toString());
+			System.out.println(umlaufId + ";" + initialloesung.get(j).toStringIds());
+			pw.println(umlaufId + ";" + initialloesung.get(j).toStringIds() + ";" + initialloesung.get(j).getLadenString());
 			pw.flush();
 		}
 	}

@@ -8,7 +8,7 @@ public class StartAfterInitialSolution {
 
 	public static void main(String[] args) {
 		
-		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
+		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt");
 		
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {
@@ -37,6 +37,9 @@ public class StartAfterInitialSolution {
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {
 			System.out.println(test.fahrzeugumlaeufe.get(i).toString());
+			if(!test.fahrzeugumlaeufe.get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
+				System.err.println("Is not Feasible!");
+			}
 		}
 		System.out.println(neueKosten);
 		System.out.println();
