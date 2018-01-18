@@ -104,95 +104,33 @@ public class variableNeighborhoodSearch {
 	/** Methode zum Bestimmen der best moeglichen Verbesserung innerhalb einem Umlaufplan
 	 * 
 	 */
-	public void bestImprovement(){
+	public void bestImprovement(int kMax){
 		// waehle zufaellig zwei Fahrzeugumlaeufe aus
 		int random1 = (int)(Math.random()*fahrzeugumlaeufe.size());
-		int random2 = (int)(Math.random()*fahrzeugumlaeufe.size());	
-		//int random1 = 69;
-		//int random2 = 50;
-		System.out.println(random1);
-		System.out.println(random2);
-		while(random1 == random2){
-			random2 = (int)(Math.random()*fahrzeugumlaeufe.size()); //random2 ungleich random1
-		}
-		ZweiOptVerbesserung verbesserung1 = zweiOpt(random1, random2);
-		if(verbesserung1 == null && fahrzeugumlaeufe.size() > 2){
-			int random3 = (int)(Math.random()*fahrzeugumlaeufe.size());
-			//int random3 = 18;
-			System.out.println(random3);
-			ZweiOptVerbesserung verbesserung2 = null;
-			while(random1 == random3 || random2 == random3){
-				random3 = (int)(Math.random()*fahrzeugumlaeufe.size());
+		
+		ArrayList<Integer> randoms = new ArrayList<Integer>();
+		randoms.add(random1);
+		ZweiOptVerbesserung best = new ZweiOptVerbesserung(0.0, null, null, 0, 0);
+		int nachbarschaft = 2;
+		while(nachbarschaft <= kMax){
+			int randomNeu = (int)(Math.random()*fahrzeugumlaeufe.size());	
+			while(randoms.contains(randomNeu)){
+				randomNeu = (int)(Math.random()*fahrzeugumlaeufe.size()); 
 			}
-			verbesserung1 = zweiOpt(random1, random3);
-			verbesserung2 = zweiOpt(random2, random3);
-			if(verbesserung1 == null && verbesserung2 == null && fahrzeugumlaeufe.size() > 3){
-				ZweiOptVerbesserung verbesserung3 = null;
-				int random4 = (int)(Math.random()*fahrzeugumlaeufe.size());
-				//int random4 = 75;
-				System.out.println(random4);
-				while(random1 == random4 || random2 == random4 || random3 == random4){
-					random4 = (int)(Math.random()*fahrzeugumlaeufe.size());
-				}
-				verbesserung1 = zweiOpt(random1, random4);
-				verbesserung2 = zweiOpt(random2, random4);
-				verbesserung3 = zweiOpt(random3, random4);
-				if(verbesserung1 == null && verbesserung2 == null && verbesserung3 == null){
-					return;
-				}
-				else{ // Fall mit Nachbargschaftsgroesse 4
-					ArrayList<ZweiOptVerbesserung> list = new ArrayList<>();
-					ZweiOptVerbesserung best = new ZweiOptVerbesserung(0.0, null, null, 0, 0);
-					if(verbesserung1 != null){
-						list.add(verbesserung1);
+			randoms.add(randomNeu);
+			
+			for (int i = 0; i < randoms.size()-1; i++) {
+				ZweiOptVerbesserung temp = zweiOpt(randoms.get(i), randoms.get(randoms.size()-1));
+				if(temp != null){
+					if(temp.getCosts() > best.getCosts()){
+						best = temp;
 					}
-					if(verbesserung2 != null){
-						list.add(verbesserung2);
-					}
-					if(verbesserung3 != null){
-						list.add(verbesserung3);
-					}
-					
-					if(list.isEmpty()){ // alle drei sind null
-						return;
-					}
-					
-					for (int i = 0; i < list.size(); i++) {
-						if(list.get(i).getCosts() >= best.getCosts()){
-							best = list.get(i);
-						}
-					}
-					String id2 = fahrzeugumlaeufe.get(best.getIndexAltZwei()).getId();
-					fahrzeugumlaeufe.remove(best.getIndexAltEins());
-					for (int i = 0; i <= best.getIndexAltZwei(); i++) {
-						if(fahrzeugumlaeufe.get(i).getId().equals(id2)){
-							fahrzeugumlaeufe.remove(i);
-							break;
-						}
-					}
-					fahrzeugumlaeufe.add(best.getEins());
-					fahrzeugumlaeufe.add(best.getZwei());
 				}
 			}
-			else{ // Fall mit Nachbarschaftgroesse 3
-				ArrayList<ZweiOptVerbesserung> list = new ArrayList<>();
-				ZweiOptVerbesserung best = new ZweiOptVerbesserung(0.0, null, null, 0, 0);
-				if(verbesserung1 != null){
-					list.add(verbesserung1);
-				}
-				if(verbesserung2 != null){
-					list.add(verbesserung2);
-				}
-				
-				if(list.isEmpty()){ // beide sind null
-					return;
-				}
-				
-				for (int i = 0; i < list.size(); i++) {
-					if(list.get(i).getCosts() >= best.getCosts()){
-						best = list.get(i);
-					}
-				}
+			if(best.getCosts() == 0){
+				nachbarschaft++;
+			}
+			else{
 				String id2 = fahrzeugumlaeufe.get(best.getIndexAltZwei()).getId();
 				fahrzeugumlaeufe.remove(best.getIndexAltEins());
 				for (int i = 0; i <= best.getIndexAltZwei(); i++) {
@@ -203,25 +141,12 @@ public class variableNeighborhoodSearch {
 				}
 				fahrzeugumlaeufe.add(best.getEins());
 				fahrzeugumlaeufe.add(best.getZwei());
+				System.out.println(nachbarschaft);
+				break;
 			}
-				
-		
 		}
-		else if(verbesserung1 != null){ // Fall mit Nachbarschaftgroesse 2
-			// neuer Umlaufplan
-			String id2 = fahrzeugumlaeufe.get(random2).getId();
-			fahrzeugumlaeufe.remove(random1);
-			for (int i = 0; i <= random2; i++) {
-				if(fahrzeugumlaeufe.get(i).getId().equals(id2)){
-					fahrzeugumlaeufe.remove(i);
-					break;
-				}
-			}
-			fahrzeugumlaeufe.add(verbesserung1.getEins());
-			fahrzeugumlaeufe.add(verbesserung1.getZwei());
-		}
-			
 	}
+		
 	
 	public void firstImprovement(){
 		

@@ -43848,7 +43848,8 @@ $DEADRUNTIME:FromStopID;ToStopID;FromTime;ToTime;Distance;RunTime;;;;;
 00001;09094;000:00:00:00;001:12:00:00;5909;617;;;;;
 00001;09096;000:00:00:00;001:12:00:00;5909;617;;;;;
 00001;00016;000:00:00:00;001:12:00:00;5909;617;;;;;
-00001;00001;000:00:00:00;001:12:00:00;0;0;;;;;*;;;;;;;;;;
+00001;00001;000:00:00:00;001:12:00:00;0;0;;;;;
+*;;;;;;;;;;
 * Initialloesung;;;;;;;;;;
 *;;;;;;;;;;
 $INITIALSTOPPOINT:ID;isLoadingstation;frequency
@@ -44059,7 +44060,6 @@ $INITIALSTOPPOINT:ID;isLoadingstation;frequency
 09223;false;0
 09222;false;0
 09220;false;0
-
 *;;;;;;;;;;
 * Initialloesung;;;;;;;;;;
 *;;;;;;;;;;

@@ -27,12 +27,12 @@ public class StartAfterInitialSolution {
 		double neueKosten = initialkosten;
 		do {
 			variableNeighborhoodSearch verbesserung = new variableNeighborhoodSearch(test.fahrzeugumlaeufe, test.validEdges, test.deadruntimes, test.servicejourneys, test.stoppoints);
-			verbesserung.bestImprovement();
+			verbesserung.bestImprovement(10);
 			solution2 = new Schedule(test.fahrzeugumlaeufe, test.stoppoints);
 			neueKosten = solution2.berechneKosten();
 			counter ++;
 			System.err.println(counter);
-		} while (counter < 100);
+		} while (counter < 1000);
 		
 		
 		
