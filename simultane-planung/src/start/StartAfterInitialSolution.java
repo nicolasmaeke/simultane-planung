@@ -10,6 +10,7 @@ public class StartAfterInitialSolution {
 		
 		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt");
 		
+		//System.out.println(test.validEdges);
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {
 			System.out.println(test.fahrzeugumlaeufe.get(i).toString());

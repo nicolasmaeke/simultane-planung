@@ -80,7 +80,7 @@ public class Initialloesung {
 	 * @param deadruntimes
 	 * @return ein Hashmap mit key ist zwei IDs von SF, value ist der Saving
 	 */
-	public HashMap<String, Double> savings(HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes){
+	public HashMap<String, Double> savings(HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
 		
 		// Key: IDs der beiden Servicefahrten, die zusammengelegt werden sollen
 		// Value: Savings, falls die beiden Servicefahrten zusammengelegt werden
@@ -120,7 +120,7 @@ public class Initialloesung {
 					 */
 					if(validEdges.get(""+keyEkFu1+keySkFu2) == 1){ // falls Verbindung zwischen letzter SF von i und erster SF von j zulaessig
 						neu = deadruntimes.get(""+endknotenVonFu1.getToStopId()+startknotenVonFu2.getFromStopId()); //neue Leerfahrt hinzufuegen
-						savings.put(""+keyEkFu1+keySkFu2, calculateSavings(fahrzeugumlaeufe.get(i),fahrzeugumlaeufe.get(j), neu)); //berechne Saving
+						savings.put(""+keyEkFu1+keySkFu2, calculateSavings(fahrzeugumlaeufe.get(i),fahrzeugumlaeufe.get(j), neu, deadruntimes, servicejourneys)); //berechne Saving
 					}
 					
 					/**
@@ -129,7 +129,7 @@ public class Initialloesung {
 					 */
 					if(validEdges.get(""+keyEkFu2+keySkFu1) == 1){ // falls Verbindung zwischen letzter SF von j und erster SF von i zulaessig
 						neu = deadruntimes.get(""+endknotenVonFu2.getToStopId()+startknotenVonFu1.getFromStopId()); //neue Leerfarht hinzufuegen
-						savings.put(""+keyEkFu2+keySkFu1, calculateSavings(fahrzeugumlaeufe.get(j),fahrzeugumlaeufe.get(i), neu)); //berechne Saving
+						savings.put(""+keyEkFu2+keySkFu1, calculateSavings(fahrzeugumlaeufe.get(j),fahrzeugumlaeufe.get(i), neu, deadruntimes, servicejourneys)); //berechne Saving
 					}
 				}	
 			}
@@ -146,11 +146,12 @@ public class Initialloesung {
 	 * @param deadrun
 	 * @return Saving
 	 */
-	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun) {
+	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys) {
 		double saving = 0;
+		long zeitpuffer = feasibilityHelper.zeitpufferZwischenServicefahrten(i.getFahrten().get(i.size()-2).getId(), j.getFahrten().get(1).getId(), deadruntimes, servicejourneys);
 		double d1 = j.getFahrten().getFirst().getDistance(); // Distanz zwischen Depot und Servicefahrt
 		double d2 = i.getFahrten().getLast().getDistance(); // Distanz zwischen Servicefahrt und Depot
-		saving = d1 + d2 - deadrun.getDistance() + 400000; // Distanz zwischen beiden Servicefahrten
+		saving = d1 + d2 - deadrun.getDistance() + 400000 - (zeitpuffer/1000); // Distanz zwischen beiden Servicefahrten
 		return saving;
 	}
 	
