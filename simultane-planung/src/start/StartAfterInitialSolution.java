@@ -29,14 +29,15 @@ public class StartAfterInitialSolution {
 		}
 		*/
 		
-		Schedule solution = new Schedule(test.fahrzeugumlaeufe, test.stoppoints);
-		numberOfLoadingStations = solution.getAnzahlLadestationen();
-		Double initialkosten = solution.berechneKosten();
-		System.out.println(initialkosten);
+		Schedule globalSolution = new Schedule(test.fahrzeugumlaeufe, test.stoppoints);
+		numberOfLoadingStations = globalSolution.getAnzahlLadestationen();
+		Double initialCost = globalSolution.berechneKosten();
+		System.out.println(initialCost);
 		System.out.println(numberOfLoadingStations);
 		System.out.println();
 		
-		Schedule solution2 = null;
+		Schedule shakingSolution = null;
+		Schedule localSolution = null;
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {
 			if(!test.fahrzeugumlaeufe.get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
@@ -45,27 +46,26 @@ public class StartAfterInitialSolution {
 		}
 		
 		int counter = 0;
-		double neueKosten = initialkosten;
+		double globalCost = initialCost;
 		do {
 			variableNeighborhoodSearch verbesserung = new variableNeighborhoodSearch(test.fahrzeugumlaeufe, test.validEdges, test.deadruntimes, test.servicejourneys, test.stoppoints);
-			verbesserung.shaking();
-			verbesserung.bestImprovement(4);
-			solution2 = new Schedule(test.fahrzeugumlaeufe, test.stoppoints);
-			neueKosten = solution2.berechneKosten();
+			shakingSolution = verbesserung.shaking();
+			localSolution = verbesserung.bestImprovement(4, shakingSolution);
+			double localCost = localSolution.berechneKosten();
+			if(localCost < globalCost){
+				globalCost = localCost;
+				globalSolution = localSolution;
+			}
 			counter ++;
 			System.err.println(counter);
 		} while (counter < 50);
 		
-		numberOfLoadingStations = solution2.getAnzahlLadestationen();
+		numberOfLoadingStations = localSolution.getAnzahlLadestationen();
 		
-		/**
 		for (Map.Entry e: test.stoppoints.entrySet()){
 			Stoppoint i1 = test.stoppoints.get(e.getKey());
-			//System.out.println(""+ i1.isLadestation() + i1.getFrequency());
-			if (i1.isLadestation()) {
-				numberOfLoadingStations ++;
-			}
-		*/
+			System.out.println(""+ i1.isLadestation() + i1.getFrequency());
+		}
 		
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {
@@ -80,9 +80,9 @@ public class StartAfterInitialSolution {
 			System.out.println(test.fahrzeugumlaeufe.get(i).getLadenString());
 		}
 		
-		System.out.println(neueKosten);
+		System.out.println(globalCost);
 		System.out.println();
-		System.out.println(initialkosten - neueKosten);
+		System.out.println(initialCost - globalCost);
 		System.out.println(numberOfLoadingStations);
 	}
 }
