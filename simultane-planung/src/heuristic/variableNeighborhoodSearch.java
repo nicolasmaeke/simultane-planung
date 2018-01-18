@@ -415,7 +415,6 @@ public class variableNeighborhoodSearch {
 										betterEins = einsNeu;
 										betterZwei = zweiNeu;
 								}
-								
 						}
 					}
 				}
