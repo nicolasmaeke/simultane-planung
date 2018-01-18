@@ -44013,7 +44013,7 @@ $INITIALSTOPPOINT:ID;isLoadingstation;frequency
 08970;false;0
 09025;false;0
 09267;false;0
-09024;true;0
+09024;false;0
 09144;false;0
 08296;false;0
 09021;false;0

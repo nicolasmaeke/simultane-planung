@@ -78,7 +78,7 @@ public class Fahrzeugumlauf {
 	}
 	
 	public String toString(){
-		String result = "Fahrzeugumlauf " + id + " beinhaltet folgende Fahrten: " + getFahrten();
+		String result = "Fahrzeugumlauf " + id + " : " + getFahrten();
 		return result;
 	}
 	
@@ -221,6 +221,7 @@ public class Fahrzeugumlauf {
 		return fahrten;
 	}
 
+
 	public double getKosten() {
 		double verbrauchsKosten = 0;
 		Servicejourney sEins = (Servicejourney) fahrten.get(1);
@@ -232,6 +233,32 @@ public class Fahrzeugumlauf {
 			verbrauchsKosten = verbrauchsKosten + fahrten.get(i).getVerbrauch();
 		}
 		return verbrauchsKosten * 0.1 + personalkosten * 20 / 60 / 1000 / 1000;
+	}
+	
+	public double getKostenMitLadestationen() {
+		double verbrauchsKosten = 0;
+		double ladestationsAnteil = 0;
+		
+		for (int i = 0; i < this.getLaden().size(); i++) {
+			
+			if(!this.getLaden().contains(null)){
+				int test = this.getLaden().get(i).getFrequency();
+				if(test == 0){
+					System.err.println();
+				}
+				ladestationsAnteil = ladestationsAnteil + 250000*(1/(this.getLaden().get(i).getFrequency()));// Kosten fuer Ladestationen werden anteilig auf die nutzenden Fahrzeugumlaeufe verteilt
+			}	 
+		}
+		Servicejourney sEins = (Servicejourney) fahrten.get(1);
+		Servicejourney sZwei = (Servicejourney) fahrten.get(fahrten.size()-2);
+		Deadruntime dEins = (Deadruntime) fahrten.get(0);
+		Deadruntime dZwei = (Deadruntime) fahrten.get(fahrten.size()-1);
+		double personalkosten = (sZwei.getSfArrTime().getTime() + dZwei.runtime) - (sEins.getSfDepTime().getTime() - dEins.runtime);
+		for (int i = 0; i < fahrten.size(); i++) {
+			verbrauchsKosten = verbrauchsKosten + fahrten.get(i).getVerbrauch();
+		}
+		
+		return verbrauchsKosten * 0.1 + (personalkosten * 20 / 60 / 1000 / 1000) + ladestationsAnteil;
 	}
 
 	public void addFahrten(List<Journey> list) {

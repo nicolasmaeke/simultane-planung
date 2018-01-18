@@ -109,10 +109,6 @@ public class Start {
 		
 		System.out.println("Kosten für den Umlaufplan: " + ergebnis.berechneKosten());
 		
-		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
-		
-		numberOfLoadingStations = 0;
-		
 		for (int i = 0; i < p.getInitialloesung().size(); i++) {
 			if(!p.getInitialloesung().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
 				System.err.println("Is not Feasible!");
@@ -146,9 +142,14 @@ public class Start {
 			else{
 				isLoadingstation = "false";
 			}
+			if(counter == 0){
+				isLoadingstation = "false";
+			}
 			pw.println(stoppointId + ";" + isLoadingstation + ";" + frequency);
 			pw.flush();
 		}
+		
+		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
 		
 		pw.println();
 		pw.println("*;;;;;;;;;;");

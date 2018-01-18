@@ -25,12 +25,12 @@ public class Schedule {
 			}
 		}
 		for (int i = 0; i < umlaufplan.size(); i++) {
-				variableKosten = variableKosten + umlaufplan.get(i).getKosten();
+				variableKosten = variableKosten + umlaufplan.get(i).getKostenMitLadestationen();
 		}
 	}
 	
 	public double berechneKosten(){
-		kosten = anzahlBusse * 400000 + anzahlLadestationen * 250000 + variableKosten;
+		kosten = anzahlBusse * 400000 + variableKosten;
 		return kosten;
 	}
 

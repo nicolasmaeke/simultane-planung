@@ -154,7 +154,7 @@ public class Servicejourney implements Journey {
 	}
 	
 	public String toString(){
-		return "SF: " + id + ", Verbrauch: " + sfVerbrauch + " kWh";
+		return "SF: " + id;
 	}
 
 	@Override
