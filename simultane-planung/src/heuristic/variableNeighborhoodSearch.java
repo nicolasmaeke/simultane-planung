@@ -144,16 +144,16 @@ public class variableNeighborhoodSearch {
 	 */
 	public Schedule bestImprovement(int kMax, Schedule shaking){
 		// waehle zufaellig zwei Fahrzeugumlaeufe aus
-		int random1 = (int)(Math.random()*globalBest.getUmlaufplan().size());
-		localBest = globalBest;
+		int random1 = (int)(Math.random()*shaking.getUmlaufplan().size());
+		localBest = shaking;
 		ArrayList<Integer> randoms = new ArrayList<Integer>();
 		randoms.add(random1);
 		ZweiOptVerbesserung best = new ZweiOptVerbesserung(0.0, null, null, 0, 0);
 		int nachbarschaft = 2;
 		while(nachbarschaft <= kMax){
-			int randomNeu = (int)(Math.random()*globalBest.getUmlaufplan().size());	
+			int randomNeu = (int)(Math.random()*shaking.getUmlaufplan().size());	
 			while(randoms.contains(randomNeu)){
-				randomNeu = (int)(Math.random()*globalBest.getUmlaufplan().size()); 
+				randomNeu = (int)(Math.random()*shaking.getUmlaufplan().size()); 
 			}
 			randoms.add(randomNeu);
 			for (int i = 0; i < randoms.size()-1; i++) {
@@ -169,7 +169,7 @@ public class variableNeighborhoodSearch {
 				nachbarschaft++;
 			}
 			else{
-				Fahrzeugumlauf altEins = globalBest.getUmlaufplan().get(best.getIndexAltEins());
+				Fahrzeugumlauf altEins = shaking.getUmlaufplan().get(best.getIndexAltEins());
 				for (int k = 0; k < altEins.getLaden().size(); k++) {
 					if(!altEins.getLaden().contains(null)){
 						int frequency = altEins.getLaden().get(k).getFrequency() - 1;
@@ -179,7 +179,7 @@ public class variableNeighborhoodSearch {
 						}
 					}
 				}
-				Fahrzeugumlauf altZwei = globalBest.getUmlaufplan().get(best.getIndexAltZwei());
+				Fahrzeugumlauf altZwei = shaking.getUmlaufplan().get(best.getIndexAltZwei());
 				for (int k = 0; k < altZwei.getLaden().size(); k++) {
 					if(!altZwei.getLaden().contains(null)){
 						int frequency = altZwei.getLaden().get(k).getFrequency() - 1;
@@ -227,7 +227,7 @@ public class variableNeighborhoodSearch {
 		}
 		int gross = random1;
 		while(localBest.getUmlaufplan().get(gross) == minimal){
-			gross = (int)(Math.random()*globalBest.getUmlaufplan().size());
+			gross = (int)(Math.random()*localBest.getUmlaufplan().size());
 		}
 		sfUmlegen(minimal, localBest.getUmlaufplan().get(gross));
 		return localBest;
