@@ -1,6 +1,7 @@
 package heuristic;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
@@ -144,7 +145,7 @@ public class variableNeighborhoodSearch {
 	public Schedule bestImprovement(int kMax, Schedule shaking){
 		// waehle zufaellig zwei Fahrzeugumlaeufe aus
 		int random1 = (int)(Math.random()*globalBest.getUmlaufplan().size());
-		
+		localBest = globalBest;
 		ArrayList<Integer> randoms = new ArrayList<Integer>();
 		randoms.add(random1);
 		ZweiOptVerbesserung best = new ZweiOptVerbesserung(0.0, null, null, 0, 0);
@@ -156,6 +157,7 @@ public class variableNeighborhoodSearch {
 			}
 			randoms.add(randomNeu);
 			for (int i = 0; i < randoms.size()-1; i++) {
+				
 				ZweiOptVerbesserung temp = zweiOpt(randoms.get(i), randoms.get(randoms.size()-1));
 				if(temp != null){
 					if(temp.getCosts() > best.getCosts()){
@@ -187,7 +189,7 @@ public class variableNeighborhoodSearch {
 						}
 					}
 				}
-				localBest = globalBest;
+				// localBest = globalBest;
 				String id2 = localBest.getUmlaufplan().get(best.getIndexAltZwei()).getId();
 				localBest.getUmlaufplan().remove(best.getIndexAltEins());
 				for (int i = 0; i <= best.getIndexAltZwei(); i++) {
@@ -217,12 +219,125 @@ public class variableNeighborhoodSearch {
 				break;
 			}
 		}
+		Fahrzeugumlauf minimal = localBest.getUmlaufplan().get(0);
+		for (int i = 1; i < localBest.getUmlaufplan().size(); i++) {
+			if(localBest.getUmlaufplan().get(i).size() < minimal.size()){
+				minimal = localBest.getUmlaufplan().get(i);
+			}
+		}
+		int gross = random1;
+		while(localBest.getUmlaufplan().get(gross) == minimal){
+			gross = (int)(Math.random()*globalBest.getUmlaufplan().size());
+		}
+		sfUmlegen(minimal, localBest.getUmlaufplan().get(gross));
 		return localBest;
 	}
 		
 	
-	public void firstImprovement(){
-		
+	public void sfUmlegen(Fahrzeugumlauf klein, Fahrzeugumlauf gross){
+		ArrayList<Servicejourney> sfVonKlein = new ArrayList<Servicejourney>();
+		for (int i = 1; i < klein.size()-1; i = i + 2) {
+			sfVonKlein.add((Servicejourney)klein.getAtIndex(i));
+		}
+		for (int k = 0; k < sfVonKlein.size(); k ++) { 
+			Servicejourney kleinSf = sfVonKlein.get(k);
+			Fahrzeugumlauf neuGross = new Fahrzeugumlauf(gross.getId());
+			Fahrzeugumlauf neuKlein = new Fahrzeugumlauf(klein.getId());
+			int index = k + k + 1; // (k+k+1) ist der Index im Fahrzeugumlauf
+			for (int i = 3; i < gross.size()-3; i = i + 2) {
+				if(gross.getAtIndex(i) instanceof Deadruntime){
+					System.out.println();
+				}
+				Servicejourney temp = (Servicejourney) gross.getAtIndex(i);
+				if(kleinSf.getSfArrTime().getTime() <= temp.getSfDepTime().getTime()){ // passt die Servicefahrt zeitlich
+					Deadruntime nachSf = deadruntimes.get(kleinSf.getToStopId() + temp.getFromStopId());
+					if (kleinSf.getSfArrTime().getTime()+nachSf.getRuntime() <= temp.getSfDepTime().getTime()) { // passt die Sf + die Leerfahrt danach zeitlich
+						temp = (Servicejourney) gross.getAtIndex(i-2);
+						Deadruntime vorSf = deadruntimes.get(temp.getToStopId() + kleinSf.getFromStopId());
+						if (temp.getSfArrTime().getTime() + vorSf.getRuntime() <= kleinSf.getSfDepTime().getTime()) { // passt die Leerfahrt davor + die Sf zeitlich
+							neuGross.addFahrten(gross.getFahrtenVonBis(0, i-2));
+							neuGross.addFahrt(vorSf);
+							neuGross.addFahrt(kleinSf);
+							neuGross.addFahrt(nachSf);
+							neuGross.addFahrten(gross.getFahrtenVonBis(i, gross.size()-1));
+							if(klein.size() > 3){ // neuKlein wird nur gebaut wenn klein mehr als eine SF hat
+								if(k >= 1 && index <= klein.size()-3){ // eine mittlere SF wird geloescht
+									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2));
+									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex((index)-2).getToStopId() + klein.getAtIndex((index)+2).getFromStopId()));
+									neuKlein.addFahrten(klein.getFahrtenVonBis((index)+2, klein.size()-1));
+								}
+								else if(k == 0){ // die erste SF wird geloescht
+									neuKlein.addFahrt(deadruntimes.get("00001" + klein.getAtIndex(3).getFromStopId()));
+									neuKlein.addFahrten(klein.getFahrtenVonBis((index)+2, klein.size()-1));
+								}
+								else if(k == sfVonKlein.size()-1){ // die letzte SF wird geloescht
+									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2));
+									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex(klein.size()-2).getToStopId() + "00001"));
+								}
+								if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+									neuKlein.getFahrten().clear();
+									neuGross.getFahrten().clear();
+									break;
+								}
+							}
+							if(neuGross.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+								for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
+									if(localBest.getUmlaufplan().get(j).getId().equals(gross.getId())){
+										localBest.getUmlaufplan().remove(j);
+										localBest.getUmlaufplan().add(neuGross);
+										for (int x = 0; x < gross.getLaden().size(); x++) {
+											if(!gross.getLaden().contains(null)){
+												int frequency = gross.getLaden().get(x).getFrequency() - 1;
+												gross.getLaden().get(x).setFrequency(frequency);
+												if(gross.getLaden().get(x).getFrequency() == 0){
+													gross.getLaden().get(x).setLadestation(false);
+												}
+											}
+										}
+										for (int x = 0; x < neuGross.getLaden().size(); x++) {
+											if(!neuGross.getLaden().contains(null)){
+												int frequency = neuGross.getLaden().get(x).getFrequency() + 1;
+												neuGross.getLaden().get(x).setFrequency(frequency);
+											}
+										}
+									}
+								}
+								gross = neuGross;
+								if(klein.size() > 3){
+									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
+										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){
+											localBest.getUmlaufplan().remove(j);
+											localBest.getUmlaufplan().add(neuKlein);
+											for (int x = 0; x < neuKlein.getLaden().size(); x++) {
+												if(!neuKlein.getLaden().contains(null)){
+													int frequency = neuKlein.getLaden().get(x).getFrequency() + 1;
+													neuKlein.getLaden().get(x).setFrequency(frequency);
+												}
+											}
+										}
+									}
+								}
+								for (int j = 0; j < klein.getLaden().size(); j++) {
+									if(!klein.getLaden().contains(null)){
+										int frequency = klein.getLaden().get(j).getFrequency() - 1;
+										klein.getLaden().get(j).setFrequency(frequency);
+										if(klein.getLaden().get(j).getFrequency() == 0){
+											klein.getLaden().get(j).setLadestation(false);
+										}
+									}
+								}
+								klein = neuKlein;
+							}
+							else{
+								neuKlein.getFahrten().clear();
+								neuGross.getFahrten().clear();
+								break;
+							}
+						}
+					}
+				}
+			}
+		}	
 	}
 
 	/** Methode gibt zurück, ob eine Verbesserung zwischen 2 unterschiedlichen Fahrzeugumläufen möglich ist (durch Kantentausch)
