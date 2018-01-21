@@ -239,15 +239,20 @@ public class variableNeighborhoodSearch {
 		for (int i = 1; i < klein.size()-1; i = i + 2) {
 			sfVonKlein.add((Servicejourney)klein.getAtIndex(i));
 		}
-		for (int k = 0; k < sfVonKlein.size(); k ++) { 
+
+		for (int k = 0; k < sfVonKlein.size(); k++) { 
 			Servicejourney kleinSf = sfVonKlein.get(k);
-			Fahrzeugumlauf neuGross = new Fahrzeugumlauf(gross.getId());
-			Fahrzeugumlauf neuKlein = new Fahrzeugumlauf(klein.getId());
-			int index = k + k + 1; // (k+k+1) ist der Index im Fahrzeugumlauf
+
 			for (int i = 3; i < gross.size()-3; i = i + 2) {
-				if(gross.getAtIndex(i) instanceof Deadruntime){
-					System.out.println();
+				int index = 0; // ist der Index im Fahrzeugumlauf
+				for (int j = 0; j < klein.size(); j++) {
+					if(kleinSf.equals(klein.getFahrten().get(j))){
+						break;
+					}
+					index ++;
 				}
+				Fahrzeugumlauf neuGross = new Fahrzeugumlauf(gross.getId());
+				Fahrzeugumlauf neuKlein = new Fahrzeugumlauf(klein.getId());
 				Servicejourney temp = (Servicejourney) gross.getAtIndex(i);
 				if(kleinSf.getSfArrTime().getTime() <= temp.getSfDepTime().getTime()){ // passt die Servicefahrt zeitlich
 					Deadruntime nachSf = deadruntimes.get(kleinSf.getToStopId() + temp.getFromStopId());
@@ -261,24 +266,33 @@ public class variableNeighborhoodSearch {
 							neuGross.addFahrt(nachSf);
 							neuGross.addFahrten(gross.getFahrtenVonBis(i, gross.size()-1));
 							if(klein.size() > 3){ // neuKlein wird nur gebaut wenn klein mehr als eine SF hat
-								if(k >= 1 && index <= klein.size()-3){ // eine mittlere SF wird geloescht
+								if(index >= 3 && index <= klein.size()-3){ // eine mittlere SF wird geloescht
 									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2));
 									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex((index)-2).getToStopId() + klein.getAtIndex((index)+2).getFromStopId()));
 									neuKlein.addFahrten(klein.getFahrtenVonBis((index)+2, klein.size()-1));
+									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+										break;
+									}
 								}
-								else if(k == 0){ // die erste SF wird geloescht
+								else if(index == 1){ // die erste SF wird geloescht
 									neuKlein.addFahrt(deadruntimes.get("00001" + klein.getAtIndex(3).getFromStopId()));
-									neuKlein.addFahrten(klein.getFahrtenVonBis((index)+2, klein.size()-1));
+									neuKlein.addFahrten(klein.getFahrtenVonBis(3, klein.size()-1));
+									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+										break;
+									}
 								}
-								else if(k == sfVonKlein.size()-1){ // die letzte SF wird geloescht
+								else if(index == klein.size()-2){ // die letzte SF wird geloescht
 									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2));
-									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex(klein.size()-2).getToStopId() + "00001"));
+									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex(klein.size()-4).getToStopId() + "00001"));
+									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+										break;
+									}
 								}
-								if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
-									neuKlein.getFahrten().clear();
-									neuGross.getFahrten().clear();
+								else{
+									System.out.println();
 									break;
-								}
+								} 
+									
 							}
 							if(neuGross.isFeasible(stoppoints, servicejourneys, deadruntimes)){
 								for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
@@ -298,11 +312,15 @@ public class variableNeighborhoodSearch {
 											if(!neuGross.getLaden().contains(null)){
 												int frequency = neuGross.getLaden().get(x).getFrequency() + 1;
 												neuGross.getLaden().get(x).setFrequency(frequency);
+												neuGross.getLaden().get(x).setLadestation(true);
 											}
 										}
 									}
 								}
-								gross = neuGross;
+								gross.getFahrten().clear();
+								gross.addFahrten(neuGross.getFahrten());
+								gross.setLaden(neuGross.getLaden());
+
 								if(klein.size() > 3){
 									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
 										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){
@@ -312,8 +330,16 @@ public class variableNeighborhoodSearch {
 												if(!neuKlein.getLaden().contains(null)){
 													int frequency = neuKlein.getLaden().get(x).getFrequency() + 1;
 													neuKlein.getLaden().get(x).setFrequency(frequency);
+													neuKlein.getLaden().get(x).setLadestation(true);
 												}
 											}
+										}
+									}
+								}
+								else{
+									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
+										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){
+											localBest.getUmlaufplan().remove(j);
 										}
 									}
 								}
@@ -326,11 +352,13 @@ public class variableNeighborhoodSearch {
 										}
 									}
 								}
-								klein = neuKlein;
+								if (klein.size() > 3) {
+									klein.getFahrten().clear();
+									klein.addFahrten(neuKlein.getFahrten());
+									klein.setLaden(neuKlein.getLaden());
+								}
 							}
 							else{
-								neuKlein.getFahrten().clear();
-								neuGross.getFahrten().clear();
 								break;
 							}
 						}

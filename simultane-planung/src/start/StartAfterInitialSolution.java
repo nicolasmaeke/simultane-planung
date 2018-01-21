@@ -75,14 +75,16 @@ public class StartAfterInitialSolution {
 			}
 		}
 	
+		int anzahlUmlaeufe = 0;
 		
 		for (int i = 0; i < test.fahrzeugumlaeufe.size(); i++) {
 			System.out.println(test.fahrzeugumlaeufe.get(i).toString());
 			System.out.println(test.fahrzeugumlaeufe.get(i).getLadenString());
+			anzahlUmlaeufe ++;
 		}
 		
 		System.out.println(globalCost);
-		System.out.println();
+		System.out.println(anzahlUmlaeufe);
 		System.out.println(initialCost - globalCost);
 		System.out.println(numberOfLoadingStations);
 	}
