@@ -347,12 +347,12 @@ public class Initialloesung {
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
 									letzteLadung = i - 2 - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
 									// stoppoints.get(neu.get(i-x).getFromStopId()).setLadestation(true); //setzt eine Ladestation an der Starthaltestelle von SF i-x ### 1 mal drin
-									i = letzteLadung; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
+									i = letzteLadung + 1; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
-									letzteLadung = i - x; 
-									i = i - x;
+									letzteLadung = i - 2 - x; 
+									i = letzteLadung + 1; // Verbrauch ab Leerfahrt nach SF i
 									break;
 								} 
 							}
@@ -368,12 +368,12 @@ public class Initialloesung {
 								letzteLadung = 1;
 								// stoppoints.get(neu.get(1).getFromStopId()).setLadestation(true);
 								i = 1;
-								break;
+
 							}else{  // an der Haltestelle ist schon eine Ladestation -> Laden
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
-								break;
+
 							}
 						}
 						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
@@ -395,12 +395,12 @@ public class Initialloesung {
 								kapazitaet = 80;
 								letzteLadung = i - 1;
 								// stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true); #### 7 Mal drin
-								i = i - 1;
+								//i = i - 1;
 								break;
 							}else{ // es ist schon eine Ladestation vorhanden an Endhaltestelle von SF (i-1)
 								kapazitaet = 80;
 								letzteLadung = i - 1;
-								i = i - 1;
+								//i = i - 1;
 								break;
 							} 
 						}
@@ -409,13 +409,13 @@ public class Initialloesung {
 								if (!stoppoints.get(neu.get(i-1).getToStopId()).isLadestation()){ 
 									list.add(stoppoints.get(neu.get(i-1).getToStopId()));
 									kapazitaet = 80;
-									letzteLadung = i-1;
-									i = i - 1;
+									letzteLadung = i - 1;
+									//i = i - 1;
 									// stoppoints.get(neu.get(i-1).getToStopId()).setLadestation(true);
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i 
 									kapazitaet = 80;
-									letzteLadung = i-1;
+									letzteLadung = i - 1;
 									break;
 								} 
 							}
@@ -425,13 +425,13 @@ public class Initialloesung {
 								if (!stoppoints.get(neu.get(i-x-1).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
 									list.add(stoppoints.get(neu.get(i-x-1).getToStopId()));
 									kapazitaet = 80;
-									letzteLadung = i - x; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
+									letzteLadung = i - x - 1; // merkt sich, an welcher Stelle die letzte Ladung erfolgt ist
 									i = i - x; // i muss zurueckgesetzt werden, um dort zu starten, wo die Kapazitaet wieder bei 80 ist
 									//stoppoints.get(neu.get(i-x-1).getToStopId()).setLadestation(true);
 									break;
 								}else{ // es ist schon eine Ladestation vorhanden an Haltestelle i - x
 									kapazitaet = 80;
-									letzteLadung = i - x;
+									letzteLadung = i - x - 1;
 									i = i - x;
 									break;
 								} 
