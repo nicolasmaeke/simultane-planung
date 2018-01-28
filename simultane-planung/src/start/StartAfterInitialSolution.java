@@ -69,7 +69,7 @@ public class StartAfterInitialSolution {
 			}
 			counter ++;
 			System.err.println(counter);
-		} while (counter < 150);
+		} while (counter < 500);
 		
 		numberOfLoadingStations = localSolution.getAnzahlLadestationen();
 		
@@ -81,7 +81,7 @@ public class StartAfterInitialSolution {
 		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			if(!globalSolution.getUmlaufplan().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
-				System.err.println(i + " Is not Feasible!");
+				System.err.println(globalSolution.getUmlaufplan().get(i).getId() + " Is not Feasible!");
 			}
 		}
 	

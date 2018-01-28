@@ -3,6 +3,7 @@ package heuristic;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -151,6 +152,9 @@ public class variableNeighborhoodSearch {
 									break;
 								}
 							}
+							if(((eins.size()+zwei.size())) - (einsNeu.size()+zweiNeu.size()) != 0){
+								System.out.println();
+							}
 							shaking.getUmlaufplan().add(einsNeu); // fuege einsNeu in Shaking hinzu
 							shaking.getUmlaufplan().add(zweiNeu); // fuege zweiNeu in Shaking hinzu
 						}
@@ -166,7 +170,9 @@ public class variableNeighborhoodSearch {
 			if(!localBest.getUmlaufplan().equals(shaking.getUmlaufplan())){ // wenn nicht Feasible, dann noch einmal Shaking
 				condition = false;
 			}
+			
 		}
+		
 		return shaking;  // den Umlaufplan nach dem Shaking zurueckgeben
 	}
 	
@@ -262,17 +268,47 @@ public class variableNeighborhoodSearch {
 			}
 		}
 		
-		Fahrzeugumlauf minimal = localBest.getUmlaufplan().get(0); // initialisiere den minimalen Umlauf in Lokalbest
-		for (int i = 1; i < localBest.getUmlaufplan().size(); i++) {
-			if(localBest.getUmlaufplan().get(i).size() < minimal.size()){
-				minimal = localBest.getUmlaufplan().get(i); // minimal ist der kleinste Umlauf in Lokalbest
+		List<Fahrzeugumlauf> minimal = new ArrayList<Fahrzeugumlauf>();
+		minimal.add(localBest.getUmlaufplan().get(0)); // initialisiere den minimalen Umlauf in Lokalbest
+		minimal.add(localBest.getUmlaufplan().get(1));
+		minimal.add(localBest.getUmlaufplan().get(2));
+		minimal.add(localBest.getUmlaufplan().get(3));
+		minimal.add(localBest.getUmlaufplan().get(4));
+		for (int i = 5; i < localBest.getUmlaufplan().size(); i++) {
+			for (int j = 0; j < minimal.size(); j++) {
+				if(localBest.getUmlaufplan().get(i).size() < minimal.get(j).size()){
+					if(!minimal.contains(localBest.getUmlaufplan().get(i))){
+						minimal.remove(j);
+						minimal.add(localBest.getUmlaufplan().get(i));	
+					}			
+				}
 			}
 		}
+		int randomMinimal = (int)(Math.random()*minimal.size());
 		int gross = random1;
 		while(localBest.getUmlaufplan().get(gross).equals(minimal)){
 			gross = (int)(Math.random()*localBest.getUmlaufplan().size()); // index eines beliebigen Umlaufs in Lokalbest
 		}
-		sfUmlegen(minimal, localBest.getUmlaufplan().get(gross)); // Umlegen minimal und gross
+		int anzahlSF = 0;
+		for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
+			for (int j = 0; j < localBest.getUmlaufplan().get(i).size(); j++) {
+				if(localBest.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
+					anzahlSF++;
+				}
+			}
+		}
+		sfUmlegen(minimal.get(randomMinimal), localBest.getUmlaufplan().get(gross)); // Umlegen minimal und gross
+		int anzahlSFNach = 0;
+		for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
+			for (int j = 0; j < localBest.getUmlaufplan().get(i).size(); j++) {
+				if(localBest.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
+					anzahlSFNach++;
+				}
+			}
+		}
+		if(anzahlSF - anzahlSFNach != 0){
+			System.out.println();
+		}
 		return localBest; // lokal beste Loesung zurueckgeben
 	}
 		
@@ -282,6 +318,8 @@ public class variableNeighborhoodSearch {
 	 * @param gross - groeßerer Umlauf
 	 */
 	public void sfUmlegen(Fahrzeugumlauf klein, Fahrzeugumlauf gross){
+		int kleinSize = klein.size();
+		int grossSize = gross.size();
 		ArrayList<Servicejourney> sfVonKlein = new ArrayList<Servicejourney>(); // Liste aller SF vom kleineren Umlauf
 		for (int i = 1; i < klein.size()-1; i = i + 2) {
 			sfVonKlein.add((Servicejourney)klein.getAtIndex(i)); 
@@ -315,6 +353,9 @@ public class variableNeighborhoodSearch {
 							neuGross.addFahrt(kleinSf); // SF aus klein
 							neuGross.addFahrt(nachSf); // Nach-Leerfahrt
 							neuGross.addFahrten(gross.getFahrtenVonBis(i, gross.size()-1)); // i bis Ende von gross
+							if(gross.size() - neuGross.size() != -2){
+								System.out.println();
+							}
 							if(klein.size() > 3){ // neuKlein wird nur gebaut wenn klein mehr als eine SF hat
 								if(index >= 3 && index <= klein.size()-3){ // falls eine mittlere SF geloescht wird
 									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2)); // Anfang bis einschließlich index - 2 aus klein
@@ -323,12 +364,18 @@ public class variableNeighborhoodSearch {
 									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){ 
 										break; // break wenn neuKlein nicht feasible
 									}
+									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 0){
+										System.out.println();
+									}
 								}
 								else if(index == 1){ // falls die erste SF geloescht wird
 									neuKlein.addFahrt(deadruntimes.get("00001" + klein.getAtIndex(3).getFromStopId())); // erste Leerfahrt von Depot zum naechsten SF
 									neuKlein.addFahrten(klein.getFahrtenVonBis(3, klein.size()-1)); // bis Ende klein
 									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
 										break; // break wenn neuKlein nicht feasible
+									}
+									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 0){
+										System.out.println();
 									}
 								}
 								else if(index == klein.size()-2){ // falls die letzte SF geloescht wird
@@ -337,9 +384,14 @@ public class variableNeighborhoodSearch {
 									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
 										break; // break wenn neuKlein nicht feasible
 									}
+									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 0){
+										System.out.println();
+									}
 								}
 								else{
-									System.out.println();
+									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 1){
+										System.out.println();
+									}
 									break;
 								} 
 									
@@ -358,6 +410,7 @@ public class variableNeighborhoodSearch {
 												}
 											}
 										}
+
 										for (int x = 0; x < neuGross.getLaden().size(); x++) { // aktualisiere Frequency von Ladestationen in neuGross
 											if(!neuGross.getLaden().contains(null)){
 												int frequency = neuGross.getLaden().get(x).getFrequency() + 1;
@@ -367,10 +420,11 @@ public class variableNeighborhoodSearch {
 										}
 									}
 								}
+
 								gross.getFahrten().clear(); 
 								gross.addFahrten(neuGross.getFahrten()); // aktualisiere gross durch neuGross
 								gross.setLaden(neuGross.getLaden()); // aktualisiere Ladenliste von gross durch Ladenliste von neuGross
-
+								
 								if(klein.size() > 3){ // wenn neuGross feasible ist und klein mehr als eine SF hat
 									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
 										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){ //suche nach klein in Lokalbest
@@ -385,6 +439,7 @@ public class variableNeighborhoodSearch {
 											}
 										}
 									}
+
 								}
 								else{ // wenn neuGross feasible ist und klein nur eine SF hat
 									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
@@ -392,7 +447,9 @@ public class variableNeighborhoodSearch {
 											localBest.getUmlaufplan().remove(j); // entferne klein aus Lokalbest
 										}
 									}
+
 								}
+
 								for (int j = 0; j < klein.getLaden().size(); j++) { // aktualisiere Frequency der Ladestationen von klein
 									if(!klein.getLaden().contains(null)){
 										int frequency = klein.getLaden().get(j).getFrequency() - 1;
@@ -403,11 +460,14 @@ public class variableNeighborhoodSearch {
 										}
 									}
 								}
+
+								
 								if (klein.size() > 3) {
 									klein.getFahrten().clear();
 									klein.addFahrten(neuKlein.getFahrten());
 									klein.setLaden(neuKlein.getLaden());
 								}
+								
 								break;
 							}
 							else{
@@ -417,7 +477,8 @@ public class variableNeighborhoodSearch {
 					}
 				}
 			}
-		}	
+		}
+
 	}
 
 	/** ZweiOpt: Methode gibt zurück, ob eine Verbesserung zwischen 2 unterschiedlichen Fahrzeugumläufen möglich ist (durch Kantentausch)
@@ -618,9 +679,13 @@ public class variableNeighborhoodSearch {
 		}
 		double savings = 0;
 		if(!eins.equals(betterEins) && betterEins != null){ // falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
+			if((eins.size()+zwei.size()) - (betterEins.size()+betterZwei.size()) != 0){
+				System.out.println();
+			}
 			savings = initialCostValue - currentCostValue;
 			result = new ZweiOptVerbesserung(savings, betterEins, betterZwei, random1, random2);
 		}
+		
 		return result;
 	}
 }
