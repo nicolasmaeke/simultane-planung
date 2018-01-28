@@ -30,7 +30,13 @@ public class variableNeighborhoodSearch {
 		this.deadruntimes = deadruntimes;
 		this.stoppoints = stoppoints;
 		this.servicejourneys = servicejourneys;
-		this.globalBest =  new Schedule(fahrzeugumlaeufe, stoppoints);
+		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
+			if(!fahrzeugumlaeufe.get(i).isFeasible(stoppoints, servicejourneys, deadruntimes)){
+				System.out.println();
+			}
+		}
+		this.globalBest =  new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
+		this.localBest = new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
 	}
 	
 	/** Shaking: Methode -> zufaellig die aktuelle Loesung (den aktuellen Umlaufplan) manipulieren (Verschlechterung wird zugelassen)
@@ -42,32 +48,42 @@ public class variableNeighborhoodSearch {
 		boolean condition = true;
 		while(condition) {
 			// Zwei beliebige unterschiedliche Umlaeufe aus Globalbest auswaehlen
-			int random1 = (int)(Math.random()*globalBest.getUmlaufplan().size()); // Index eines beliebigen Umlaufs aus Globalbest
-			int random2 = (int)(Math.random()*globalBest.getUmlaufplan().size()); // Index des zweiten beliebigen Umlaufs aus Globalbest
-			while(random1 == random2){
-				random2 = (int)(Math.random()*globalBest.getUmlaufplan().size()); // nicht den gleichen Umlauf nehmen
+			int random1 = (int)(Math.random()*localBest.getUmlaufplan().size()); // Index eines beliebigen Umlaufs aus Globalbest
+			while(localBest.getUmlaufplan().get(random1).size() <= 3){
+				random1 = (int)(Math.random()*localBest.getUmlaufplan().size());
+			}
+			int random2 = (int)(Math.random()*localBest.getUmlaufplan().size()); // Index des zweiten beliebigen Umlaufs aus Globalbest
+			while(random1 == random2 || localBest.getUmlaufplan().get(random2).size() <= 3){
+				random2 = (int)(Math.random()*localBest.getUmlaufplan().size()); // nicht den gleichen Umlauf nehmen
 			}
 			
 			// Zwei beliebige Servicefahrten aus den zwei gewaehlten Umlaefen 
-			int randomI = (int)(Math.random()*globalBest.getUmlaufplan().get(random1).size()); // Index einer beliebigen SF aus Umlauf mit der ID ramdom1
+			int randomI = (int)((Math.random()*localBest.getUmlaufplan().get(random1).size())); // Index einer beliebigen SF aus Umlauf mit der ID ramdom1
 			while(randomI % 2 == 0){ 
-				randomI = (int)(Math.random()*globalBest.getUmlaufplan().get(random1).size());
+				randomI = (int)(Math.random()*localBest.getUmlaufplan().get(random1).size());
+			}
+			if(randomI == 1){
+				randomI = 3;
 			}
 			
-			int randomJ = (int)(Math.random()*(globalBest.getUmlaufplan().get(random2).size()-2)); // Index einer beliebigen SF aus Umlauf mit der ID random2
-			if(globalBest.getUmlaufplan().get(random2).size() <= 3){ // falls der Umlauf nur noch eine Servicefahrt beinhaltet
+			int randomJ = (int)(Math.random()*(localBest.getUmlaufplan().get(random2).size()-2)); // Index einer beliebigen SF aus Umlauf mit der ID random2
+			if(localBest.getUmlaufplan().get(random2).size() <= 3){ // falls der Umlauf nur noch eine Servicefahrt beinhaltet
 				randomJ = 1; // ID = 1
 			}
 			else{
 				while(randomJ % 2 == 0){
-					randomJ = (int)(Math.random()*(globalBest.getUmlaufplan().get(random2).size()-2));
+					randomJ = (int)(Math.random()*(localBest.getUmlaufplan().get(random2).size()-2));
 				}
 			}
 			
-			Fahrzeugumlauf eins = globalBest.getUmlaufplan().get(random1); // eins ist der erste gewaehlte Umlauf
-			Fahrzeugumlauf zwei = globalBest.getUmlaufplan().get(random2); // zwei ist der zweite gewaehlte Umlauf
-			
-			shaking = new Schedule(globalBest.getUmlaufplan(), stoppoints); // neuer Fahrzeugumlauf für Shaking 
+			Fahrzeugumlauf eins = localBest.getUmlaufplan().get(random1); // eins ist der erste gewaehlte Umlauf
+			Fahrzeugumlauf zwei = localBest.getUmlaufplan().get(random2); // zwei ist der zweite gewaehlte Umlauf
+			for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
+				if(!localBest.getUmlaufplan().get(i).isFeasible(stoppoints, servicejourneys, deadruntimes)){
+					System.out.println();
+				}
+			}
+			shaking = new Schedule(new Vector<Fahrzeugumlauf>(localBest.getUmlaufplan()), stoppoints); // neuer Fahrzeugumlauf für Shaking 
 			
 			if(validEdges.get(zwei.getAtIndex(randomJ).getId() + eins.getAtIndex(randomI).getId()) == 1){ // j mit i verbinden
 				// falls zwischen zwei gewaehlten SFs eine Verbindung zeitlich moeglich ist
@@ -78,13 +94,12 @@ public class variableNeighborhoodSearch {
 				einsNeu.addFahrten(eins.getFahrtenVonBis(randomI, eins.size() - 1)); // Aus eins: randomI bis Ende
 				if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // falls einsNeu feasible ist
 					Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId()); // Neuer Umlauf mit der ID von zwei
-#randomI - 2 ?		zweiNeu.addFahrten(eins.getFahrtenVonBis(0, randomI)); // Aus eins: Anfang bis .... 
+					zweiNeu.addFahrten(eins.getFahrtenVonBis(0, randomI-2)); // Aus eins: Anfang bis .... 
 					deadruntimeId = eins.getAtIndex(randomI).getToStopId() + zwei.getAtIndex(randomJ).getFromStopId();
 					zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));  
-					zweiNeu.addFahrten(zwei.getFahrtenVonBis(randomJ, zwei.size() - 1)); 
+					zweiNeu.addFahrten(zwei.getFahrtenVonBis(randomJ+2, zwei.size() - 1)); 
 					if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // falls zweiNeu feasible ist
-						if(!eins.equals(einsNeu) && einsNeu != null){ // falls einsNeu ungleich eins und einsNeu nicht leer ist
-???							// falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
+						if(!eins.equals(einsNeu) && einsNeu != null){ // falls einsNeu ungleich eins und einsNeu nicht leer ist						// falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
 							// Frequenzen der Ladungen an den Haltestellen aktualisieren
 		
 							// Frequency aller Ladestationen von eins um 1 abziehen
@@ -105,6 +120,7 @@ public class variableNeighborhoodSearch {
 									zwei.getLaden().get(k).setFrequency(frequency);
 									if(zwei.getLaden().get(k).getFrequency() == 0){
 										zwei.getLaden().get(k).setLadestation(false);
+										
 									}
 								}
 							}
@@ -147,7 +163,7 @@ public class variableNeighborhoodSearch {
 			if(counter >= 100){
 				condition = false;
 			}
-			if(!globalBest.getUmlaufplan().equals(shaking.getUmlaufplan())){ // wenn nicht Feasible, dann noch einmal Shaking
+			if(!localBest.getUmlaufplan().equals(shaking.getUmlaufplan())){ // wenn nicht Feasible, dann noch einmal Shaking
 				condition = false;
 			}
 		}
@@ -253,7 +269,7 @@ public class variableNeighborhoodSearch {
 			}
 		}
 		int gross = random1;
-		while(localBest.getUmlaufplan().get(gross) == minimal){
+		while(localBest.getUmlaufplan().get(gross).equals(minimal)){
 			gross = (int)(Math.random()*localBest.getUmlaufplan().size()); // index eines beliebigen Umlaufs in Lokalbest
 		}
 		sfUmlegen(minimal, localBest.getUmlaufplan().get(gross)); // Umlegen minimal und gross
@@ -270,9 +286,12 @@ public class variableNeighborhoodSearch {
 		for (int i = 1; i < klein.size()-1; i = i + 2) {
 			sfVonKlein.add((Servicejourney)klein.getAtIndex(i)); 
 		}
-
+		if(sfVonKlein.size() == 1){
+			System.out.println();
+		}
 		for (int k = 0; k < sfVonKlein.size(); k++) { // fuer jede SF aus dem kleineren Umlauf
 			Servicejourney kleinSf = sfVonKlein.get(k);
+			
 			for (int i = 3; i < gross.size()-3; i = i + 2) { // fuer jede SF aus dem groeßeren Umlauf
 				int index = 0; 
 				for (int j = 0; j < klein.size(); j++) {
@@ -380,6 +399,7 @@ public class variableNeighborhoodSearch {
 										klein.getLaden().get(j).setFrequency(frequency);
 										if(klein.getLaden().get(j).getFrequency() == 0){
 											klein.getLaden().get(j).setLadestation(false);
+																						
 										}
 									}
 								}
@@ -388,6 +408,7 @@ public class variableNeighborhoodSearch {
 									klein.addFahrten(neuKlein.getFahrten());
 									klein.setLaden(neuKlein.getLaden());
 								}
+								break;
 							}
 							else{
 								break;
@@ -409,8 +430,8 @@ public class variableNeighborhoodSearch {
 		
 		ZweiOptVerbesserung result = null;
 		
-		Fahrzeugumlauf eins = globalBest.getUmlaufplan().get(random1); // 
-		Fahrzeugumlauf zwei = globalBest.getUmlaufplan().get(random2); // 
+		Fahrzeugumlauf eins = localBest.getUmlaufplan().get(random1); // 
+		Fahrzeugumlauf zwei = localBest.getUmlaufplan().get(random2); // 
 		
 		double currentCostValue = eins.getKostenMitLadestationen() + zwei.getKostenMitLadestationen(); //aktuelle Gesamtkosten von Fahrzeugumlauf eins und zwei
 		double initialCostValue = currentCostValue;

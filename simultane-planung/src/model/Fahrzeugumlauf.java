@@ -131,8 +131,8 @@ public class Fahrzeugumlauf {
 								if (stoppoints.get(fahrten.get(i-2-x).getToStopId()).isLadestation()){ // 
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
 									laden.add(stoppoints.get(fahrten.get(i-2-x).getToStopId()));
-									letzteLadung = i - x; 
-									i = i - x;	
+									letzteLadung = i - 2 - x; 
+									i = letzteLadung + 1;	
 									break;
 								} 
 							}
@@ -146,7 +146,7 @@ public class Fahrzeugumlauf {
 								laden.add(stoppoints.get(fahrten.get(1).getFromStopId()));
 								i = 1;
 								letzteLadung = 1;
-								break;
+							
 							}
 						}
 						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
@@ -185,7 +185,7 @@ public class Fahrzeugumlauf {
 								if (stoppoints.get(fahrten.get(i-x-1).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
 									kapazitaet = 80;
 									laden.add(stoppoints.get(fahrten.get(i-x-1).getToStopId()));
-									letzteLadung = i - x;
+									letzteLadung = i - x - 1;
 									i = i - x;
 									break;
 								} 
@@ -203,6 +203,7 @@ public class Fahrzeugumlauf {
 							}
 						}
 						else{
+							laden.clear();
 							return false; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
 						}
 					}
