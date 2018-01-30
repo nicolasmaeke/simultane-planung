@@ -198,7 +198,29 @@ public class variableNeighborhoodSearch {
 			randoms.add(randomNeu); // fuege randomNeu in die Liste randoms hinzu
 			
 			for (int i = 0; i < randoms.size()-1; i++) { // fuer jede random Wert bis zu dem letzten
+				int anzahlSF = 0;
+				for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
+					for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
+						if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+							anzahlSF++;
+						}
+					}
+				}				
 				ZweiOptVerbesserung temp = zweiOpt(randoms.get(i), randoms.get(randoms.size()-1)); // setze Methode Zweioptverbesserung ein
+				int anzahlSFNach = 0;
+				for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
+					for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
+						if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+							anzahlSFNach++;
+						}
+					}
+				}
+				if(anzahlSF - anzahlSFNach != 0){
+					System.out.println();
+				}
+				
+				
+				
 				if(temp != null){ // falls eine Verbesserung vorhanden ist
 					if(temp.getCosts() > best.getCosts()){ // falls durch temp mehr gespart wird als durch best
 						best = temp; // ersetzte best durch temp
@@ -246,6 +268,21 @@ public class variableNeighborhoodSearch {
 				localBest.getUmlaufplan().add(best.getEins()); // fuege Eins in Lokalbest hinzu
 				localBest.getUmlaufplan().add(best.getZwei()); // fuege Zwei in Lokalbest hinzu
 				
+				int anzahlSFNach = 0;
+				for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
+					for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
+						if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+							anzahlSFNach++;
+						}
+					}
+				}
+				if(anzahlSFNach != 433){
+					System.out.println();
+				}
+				
+				
+				
+				
 				// Frequency aller Ladestationen von Eins (neuer Umlauf) um 1 erhoehen
 				for (int k = 0; k < best.getEins().getLaden().size(); k++) {
 					if(!best.getEins().getLaden().contains(null)){
@@ -286,7 +323,7 @@ public class variableNeighborhoodSearch {
 		}
 		int randomMinimal = (int)(Math.random()*minimal.size());
 		int gross = random1;
-		while(localBest.getUmlaufplan().get(gross).equals(minimal)){
+		while(localBest.getUmlaufplan().get(gross).equals(minimal.get(randomMinimal))){
 			gross = (int)(Math.random()*localBest.getUmlaufplan().size()); // index eines beliebigen Umlaufs in Lokalbest
 		}
 		int anzahlSF = 0;
@@ -320,6 +357,19 @@ public class variableNeighborhoodSearch {
 	public void sfUmlegen(Fahrzeugumlauf klein, Fahrzeugumlauf gross){
 		int kleinSize = klein.size();
 		int grossSize = gross.size();
+
+		Fahrzeugumlauf anfangGross = new Fahrzeugumlauf(gross.getId());
+		anfangGross.addFahrten(gross.getFahrten());
+		Fahrzeugumlauf anfangKlein = new Fahrzeugumlauf(klein.getId());
+		anfangKlein.addFahrten(klein.getFahrten());
+		int anzahlSF = 0;
+		for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
+			for (int j = 0; j < localBest.getUmlaufplan().get(i).size(); j++) {
+				if(localBest.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
+					anzahlSF++;
+				}
+			}
+		}
 		ArrayList<Servicejourney> sfVonKlein = new ArrayList<Servicejourney>(); // Liste aller SF vom kleineren Umlauf
 		for (int i = 1; i < klein.size()-1; i = i + 2) {
 			sfVonKlein.add((Servicejourney)klein.getAtIndex(i)); 
@@ -476,6 +526,20 @@ public class variableNeighborhoodSearch {
 						}
 					}
 				}
+					
+			
+			
+			}
+			int anzahlSFNach = 0;
+			for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
+				for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
+					if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+						anzahlSFNach++;
+					}
+				}
+			}
+			if(anzahlSFNach != 433){
+				System.out.println();
 			}
 		}
 
