@@ -1,9 +1,7 @@
 package heuristic;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -11,14 +9,12 @@ import helper.ZweiOptVerbesserung;
 import model.Deadruntime;
 import model.Fahrzeugumlauf;
 import model.Servicejourney;
-import model.Stoppoint;
 import output.Schedule;
 
 /** Klasse beinhaltet Methode für Variable Neighborhood Search
  */
 public class variableNeighborhoodSearch {
 	
-	Schedule globalBest; // global best Loesung
 	Schedule localBest; // lokal beste Löoesung
 	Schedule shaking; // Loesung nach dem Shaking
 	HashMap<String, Integer> validEdges;
@@ -28,14 +24,12 @@ public class variableNeighborhoodSearch {
 	public variableNeighborhoodSearch(Schedule globalCopy, HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
 		this.validEdges = validEdges;
 		this.deadruntimes = deadruntimes;
-
 		this.servicejourneys = servicejourneys;
 		for (int i = 0; i < globalCopy.getUmlaufplan().size(); i++) {
 			if(!globalCopy.isFeasible(globalCopy.getUmlaufplan().get(i))){
 				System.out.println();
 			}
 		}
-		//this.globalBest =  new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
 		this.localBest = new Schedule(globalCopy.getUmlaufplan(), servicejourneys, deadruntimes, globalCopy.getStoppoints());
 	}
 	
@@ -101,49 +95,7 @@ public class variableNeighborhoodSearch {
 					zweiNeu.addFahrten(zwei.getFahrtenVonBis(randomJ+2, zwei.size() - 1)); 
 					if(localBest.isFeasible(zweiNeu)){ // falls zweiNeu feasible ist
 						if(!eins.equals(einsNeu) && einsNeu != null){ // falls einsNeu ungleich eins und einsNeu nicht leer ist						// falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
-							// Frequenzen der Ladungen an den Haltestellen aktualisieren
-							/**
-							// Frequency aller Ladestationen von eins um 1 abziehen
-							for (int k = 0; k < eins.getLaden().size(); k++) { // jede Ladestationen von eins
-								if(!eins.getLaden().contains(null)){ // falls die Ladenliste nicht leer ist
-									int frequency = eins.getLaden().get(k).getFrequency() - 1; // Frequency um 1 abziehen
-									eins.getLaden().get(k).setFrequency(frequency); // Frequency aktualisieren
-									if(eins.getLaden().get(k).getFrequency() == 0){ // falls Frequency = 0 
-										eins.getLaden().get(k).setLadestation(false); // ladestation = false!
-									}
-								}
-							}
-								
-							//Frequency aller Ladestationen von zwei um 1 abziehen
-							for (int k = 0; k < zwei.getLaden().size(); k++) { // jede Ladestation von zwei
-								if(!zwei.getLaden().contains(null)){ 
-									int frequency = zwei.getLaden().get(k).getFrequency() - 1;
-									zwei.getLaden().get(k).setFrequency(frequency);
-									if(zwei.getLaden().get(k).getFrequency() == 0){
-										zwei.getLaden().get(k).setLadestation(false);
-										
-									}
-								}
-							}
 							
-							//Frequency aller Ladestationen von einsNeu um 1 erhoehen
-							for (int k = 0; k < einsNeu.getLaden().size(); k++) {
-								if(!einsNeu.getLaden().contains(null)){
-									int frequency = einsNeu.getLaden().get(k).getFrequency() + 1;
-									einsNeu.getLaden().get(k).setFrequency(frequency);
-									einsNeu.getLaden().get(k).setLadestation(true);
-								}
-							}
-							
-							//Frequency aller Ladestationen von zweiNeu um 1 erhoehen
-							for (int k = 0; k < zweiNeu.getLaden().size(); k++) {
-								if(!zweiNeu.getLaden().contains(null)){
-									int frequency = zweiNeu.getLaden().get(k).getFrequency() + 1;
-									zweiNeu.getLaden().get(k).setFrequency(frequency);
-									zweiNeu.getLaden().get(k).setLadestation(true);
-								}
-							}
-							*/
 							String id2 = shaking.getUmlaufplan().get(random2).getId(); // ID des Umlaufs zwei
 							shaking.getUmlaufplan().remove(random1); // entferne Umlauf eins aus shaking
 							for (int i = 0; i <= random2; i++) { 
@@ -233,31 +185,7 @@ public class variableNeighborhoodSearch {
 				nachbarschaft++; // erhoehe die Nachbarschaft um 1
 			}
 			else{ // wenn durch die aktuelle Nachbarschaft gespart wird
-				/**
-				// Frequency aller Ladestationen von altEins um 1 abziehen
-				Fahrzeugumlauf altEins = shaking.getUmlaufplan().get(best.getIndexAltEins());
-				for (int k = 0; k < altEins.getLaden().size(); k++) { // fuer jede Ladestation von altEins
-					if(!altEins.getLaden().contains(null)){
-						int frequency = altEins.getLaden().get(k).getFrequency() - 1; // Frequency um 1 abziehen
-						altEins.getLaden().get(k).setFrequency(frequency);
-						if(altEins.getLaden().get(k).getFrequency() == 0){
-							altEins.getLaden().get(k).setLadestation(false);
-						}
-					}
-				}
 				
-				// Frequency aller Ladestationen von altZwei um 1 abziehen
-				Fahrzeugumlauf altZwei = shaking.getUmlaufplan().get(best.getIndexAltZwei());
-				for (int k = 0; k < altZwei.getLaden().size(); k++) { // fuer jede Ladestation von altZwei
-					if(!altZwei.getLaden().contains(null)){
-						int frequency = altZwei.getLaden().get(k).getFrequency() - 1; // Frequency um 1 abziehen
-						altZwei.getLaden().get(k).setFrequency(frequency);
-						if(altZwei.getLaden().get(k).getFrequency() == 0){
-							altZwei.getLaden().get(k).setLadestation(false);
-						}
-					}
-				}
-				*/
 				// localBest = globalBest;
 				String id2 = localBest.getUmlaufplan().get(best.getIndexAltZwei()).getId();
 				localBest.getUmlaufplan().remove(best.getIndexAltEins()); // entferne altEins aus der lokal besten Loesung

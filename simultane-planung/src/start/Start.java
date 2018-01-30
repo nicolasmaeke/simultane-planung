@@ -105,7 +105,7 @@ public class Start {
 		}
 		
 		
-		Schedule ergebnis = new Schedule(p.getInitialloesung());
+		Schedule ergebnis = new Schedule(p.getInitialloesung(), test.servicejourneys, test.deadruntimes, test.stoppoints);
 		
 		System.out.println("Kosten für den Umlaufplan: " + ergebnis.berechneKosten());
 		
