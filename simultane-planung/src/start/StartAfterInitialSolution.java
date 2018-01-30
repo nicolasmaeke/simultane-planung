@@ -79,11 +79,13 @@ public class StartAfterInitialSolution {
 				Schedule globalCopy = new Schedule(copy, test.servicejourneys, test.deadruntimes, stoppoints);
 				
 				globalCopy.berechneFrequenzen();
+				/**
 				for (int i = 0; i < globalCopy.getUmlaufplan().size(); i++) {
 					if(!globalCopy.isFeasible(globalCopy.getUmlaufplan().get(i))){
 						System.err.println("Is not Feasible!");
 					}
 				}
+				*/
 				globalSolution = globalCopy;
 				System.out.println("global aktualisiert!");
 			}
@@ -102,12 +104,7 @@ public class StartAfterInitialSolution {
 			System.out.println(""+ i1.isLadestation() + i1.getFrequency());
 		}
 		
-		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
-			if(!globalSolution.isFeasible(globalSolution.getUmlaufplan().get(i))){
-				System.err.println("Is not Feasible!");
-			}
-		}
-	
+		
 		int anzahlUmlaeufe = 0;
 		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
@@ -117,10 +114,17 @@ public class StartAfterInitialSolution {
 			anzahlUmlaeufe ++;
 		}
 		
-		System.out.println(globalCost);
-		System.out.println(anzahlUmlaeufe);
-		System.out.println(initialCost - globalCost);
-		System.out.println(numberOfLoadingStations);
+		System.out.println("Kosten nach Verbesserung: " + globalCost);
+		System.out.println("Anzahl Umlaeufe: " + anzahlUmlaeufe);
+		System.out.println("Ersparnis: " + (initialCost - globalCost));
+		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
+		
+		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+			if(!globalSolution.isFeasible(globalSolution.getUmlaufplan().get(i))){
+				System.err.println(globalSolution.getUmlaufplan().get(i).getId() + " Is not Feasible!");
+			}
+		}
+	
 		
 		// teste, ob die Anzahl der SF noch korrekt ist und ob keine SF doppelt vorkommt
 		int anzahlSF = 0;
@@ -138,7 +142,7 @@ public class StartAfterInitialSolution {
 				}
 			}	
 		}
-		System.out.println(anzahlSF);
+		System.out.println("Anzahl Servicefahrten: " + anzahlSF);
 		
 	}
 	
