@@ -24,22 +24,19 @@ public class variableNeighborhoodSearch {
 	HashMap<String, Integer> validEdges;
 	public HashMap<String, Deadruntime> deadruntimes;
 	public HashMap<String, Servicejourney> servicejourneys;
-	public HashMap<String, Stoppoint> stoppoints;
-	Vector<Fahrzeugumlauf> fahrzeugumlaeufe;
 
-	public variableNeighborhoodSearch(Vector<Fahrzeugumlauf> fahrzeugumlaeufe, HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys, HashMap<String, Stoppoint> stoppoints){
+	public variableNeighborhoodSearch(Schedule globalCopy, HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
 		this.validEdges = validEdges;
 		this.deadruntimes = deadruntimes;
-		this.stoppoints = stoppoints;
+
 		this.servicejourneys = servicejourneys;
-		this.fahrzeugumlaeufe = fahrzeugumlaeufe;
-		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
-			if(!fahrzeugumlaeufe.get(i).isFeasible(stoppoints, servicejourneys, deadruntimes)){
+		for (int i = 0; i < globalCopy.getUmlaufplan().size(); i++) {
+			if(!globalCopy.isFeasible(globalCopy.getUmlaufplan().get(i))){
 				System.out.println();
 			}
 		}
 		//this.globalBest =  new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
-		this.localBest = new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
+		this.localBest = new Schedule(globalCopy.getUmlaufplan(), servicejourneys, deadruntimes, globalCopy.getStoppoints());
 	}
 	
 	/** Shaking: Methode -> zufaellig die aktuelle Loesung (den aktuellen Umlaufplan) manipulieren (Verschlechterung wird zugelassen)
@@ -81,12 +78,13 @@ public class variableNeighborhoodSearch {
 			
 			Fahrzeugumlauf eins = localBest.getUmlaufplan().get(random1); // eins ist der erste gewaehlte Umlauf
 			Fahrzeugumlauf zwei = localBest.getUmlaufplan().get(random2); // zwei ist der zweite gewaehlte Umlauf
+			
 			for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
-				if(!localBest.getUmlaufplan().get(i).isFeasible(stoppoints, servicejourneys, deadruntimes)){
+				if(!localBest.isFeasible(localBest.getUmlaufplan().get(i))){
 					System.out.println();
 				}
 			}
-			shaking = new Schedule(new Vector<Fahrzeugumlauf>(localBest.getUmlaufplan()), stoppoints); // neuer Fahrzeugumlauf für Shaking 
+			shaking = new Schedule(new Vector<Fahrzeugumlauf>(localBest.getUmlaufplan()), servicejourneys, deadruntimes, localBest.getStoppoints()); // neuer Fahrzeugumlauf für Shaking 
 			
 			if(validEdges.get(zwei.getAtIndex(randomJ).getId() + eins.getAtIndex(randomI).getId()) == 1){ // j mit i verbinden
 				// falls zwischen zwei gewaehlten SFs eine Verbindung zeitlich moeglich ist
@@ -95,13 +93,13 @@ public class variableNeighborhoodSearch {
 				einsNeu.addFahrten(zwei.getFahrtenVonBis(0, randomJ)); // Aus zwei: Anfang bis einschließlich SF randomJ
 				einsNeu.addFahrt(deadruntimes.get(deadruntimeId)); // Leerfahrt von randomJ bis randomI
 				einsNeu.addFahrten(eins.getFahrtenVonBis(randomI, eins.size() - 1)); // Aus eins: randomI bis Ende
-				if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // falls einsNeu feasible ist
+				if(localBest.isFeasible(einsNeu)){ // falls einsNeu feasible ist
 					Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId()); // Neuer Umlauf mit der ID von zwei
 					zweiNeu.addFahrten(eins.getFahrtenVonBis(0, randomI-2)); // Aus eins: Anfang bis .... 
 					deadruntimeId = eins.getAtIndex(randomI).getToStopId() + zwei.getAtIndex(randomJ).getFromStopId();
 					zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));  
 					zweiNeu.addFahrten(zwei.getFahrtenVonBis(randomJ+2, zwei.size() - 1)); 
-					if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // falls zweiNeu feasible ist
+					if(localBest.isFeasible(zweiNeu)){ // falls zweiNeu feasible ist
 						if(!eins.equals(einsNeu) && einsNeu != null){ // falls einsNeu ungleich eins und einsNeu nicht leer ist						// falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
 							// Frequenzen der Ladungen an den Haltestellen aktualisieren
 							/**
@@ -273,41 +271,8 @@ public class variableNeighborhoodSearch {
 				localBest.getUmlaufplan().add(best.getZwei()); // fuege Zwei in Lokalbest hinzu
 				
 				localBest.berechneFrequenzen();
+
 				
-				int anzahlSFNach = 0;
-				for (int i1 = 0; i1 < fahrzeugumlaeufe.size(); i1++) {
-					for (int j = 0; j < fahrzeugumlaeufe.get(i1).size(); j++) {
-						if(fahrzeugumlaeufe.get(i1).getFahrten().get(j) instanceof Servicejourney){
-							anzahlSFNach++;
-						}
-					}
-				}
-				if(anzahlSFNach != 433){
-					System.out.println();
-				}
-				
-				
-				
-				/**
-				// Frequency aller Ladestationen von Eins (neuer Umlauf) um 1 erhoehen
-				for (int k = 0; k < best.getEins().getLaden().size(); k++) {
-					if(!best.getEins().getLaden().contains(null)){
-						int frequency = best.getEins().getLaden().get(k).getFrequency() + 1;
-						best.getEins().getLaden().get(k).setFrequency(frequency);
-						best.getEins().getLaden().get(k).setLadestation(true);
-					}
-				}
-				
-				// Frequency aller Ladestationen von Zwei (neuer Umlauf) um 1 erhoehen
-				for (int k = 0; k < best.getZwei().getLaden().size(); k++) {
-					if(!best.getZwei().getLaden().contains(null)){
-						int frequency = best.getZwei().getLaden().get(k).getFrequency() + 1;
-						best.getZwei().getLaden().get(k).setFrequency(frequency);
-						best.getZwei().getLaden().get(k).setLadestation(true);
-					}
-				}
-				*/
-				//System.out.println(nachbarschaft);
 				break;
 			}
 		}
@@ -335,17 +300,7 @@ public class variableNeighborhoodSearch {
 		}
 
 		sfUmlegen(minimal.get(randomMinimal), localBest.getUmlaufplan().get(gross)); // Umlegen minimal und gross
-		int anzahlSFNach = 0;
-		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
-			for (int j = 0; j < fahrzeugumlaeufe.get(i).size(); j++) {
-				if(fahrzeugumlaeufe.get(i).getFahrten().get(j) instanceof Servicejourney){
-					anzahlSFNach++;
-				}
-			}
-		}
-		if(anzahlSFNach != 433){
-			System.out.println();
-		}
+		
 		return localBest; // lokal beste Loesung zurueckgeben
 	}
 		
@@ -411,7 +366,7 @@ public class variableNeighborhoodSearch {
 									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2)); // Anfang bis einschließlich index - 2 aus klein
 									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex((index)-2).getToStopId() + klein.getAtIndex((index)+2).getFromStopId())); // Leerfahrt
 									neuKlein.addFahrten(klein.getFahrtenVonBis((index)+2, klein.size()-1)); // index + 2 bis Ende klein
-									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){ 
+									if(!localBest.isFeasible(neuKlein)){ 
 										break; // break wenn neuKlein nicht feasible
 									}
 									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 0){
@@ -421,7 +376,7 @@ public class variableNeighborhoodSearch {
 								else if(index == 1){ // falls die erste SF geloescht wird
 									neuKlein.addFahrt(deadruntimes.get("00001" + klein.getAtIndex(3).getFromStopId())); // erste Leerfahrt von Depot zum naechsten SF
 									neuKlein.addFahrten(klein.getFahrtenVonBis(3, klein.size()-1)); // bis Ende klein
-									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+									if(!localBest.isFeasible(neuKlein)){
 										break; // break wenn neuKlein nicht feasible
 									}
 									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 0){
@@ -431,7 +386,7 @@ public class variableNeighborhoodSearch {
 								else if(index == klein.size()-2){ // falls die letzte SF geloescht wird
 									neuKlein.addFahrten(klein.getFahrtenVonBis(0, (index)-2)); // Anfang klein bis index - 2
 									neuKlein.addFahrt(deadruntimes.get(klein.getAtIndex(klein.size()-4).getToStopId() + "00001")); // Leerfahrt
-									if(!neuKlein.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+									if(!localBest.isFeasible(neuKlein)){
 										break; // break wenn neuKlein nicht feasible
 									}
 									if(((kleinSize+grossSize)) - (neuKlein.size()+neuGross.size()) != 0){
@@ -446,42 +401,14 @@ public class variableNeighborhoodSearch {
 								} 
 									
 							}
-							if(neuGross.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // wenn neuGross feasible ist
+							if(!localBest.isFeasible(neuGross)){ // wenn neuGross feasible ist
 								for (int j = 0; j < localBest.getUmlaufplan().size(); j++) { // suche gross in Lokalbest
 									if(localBest.getUmlaufplan().get(j).getId().equals(gross.getId())){
 										localBest.getUmlaufplan().remove(j); // entferne gross aus Lokalbest
 										localBest.getUmlaufplan().add(neuGross); // fuege neuGross in Lokalbest hinzu
-										/**
-										for (int x = 0; x < gross.getLaden().size(); x++) { // aktualisiere Frequency von Ladestationen in gross
-											if(!gross.getLaden().contains(null)){
-												int frequency = gross.getLaden().get(x).getFrequency() - 1;
-												gross.getLaden().get(x).setFrequency(frequency);
-												if(gross.getLaden().get(x).getFrequency() == 0){
-													gross.getLaden().get(x).setLadestation(false);
-												}
-											}
-										}
-
-										for (int x = 0; x < neuGross.getLaden().size(); x++) { // aktualisiere Frequency von Ladestationen in neuGross
-											if(!neuGross.getLaden().contains(null)){
-												int frequency = neuGross.getLaden().get(x).getFrequency() + 1;
-												neuGross.getLaden().get(x).setFrequency(frequency);
-												neuGross.getLaden().get(x).setLadestation(true);
-											}
-										}
-										*/
+										
 									}
-									int anzahlSFNach = 0;
-									for (int x = 0; x < fahrzeugumlaeufe.size(); x++) {
-										for (int j1 = 0; j1 < fahrzeugumlaeufe.get(x).size(); j1++) {
-											if(fahrzeugumlaeufe.get(x).getFahrten().get(j1) instanceof Servicejourney){
-												anzahlSFNach++;
-											}
-										}
-									}
-									if(anzahlSFNach != 433){
-										System.out.println();
-									}
+									
 								}
 								
 
@@ -494,43 +421,10 @@ public class variableNeighborhoodSearch {
 										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){ //suche nach klein in Lokalbest
 											localBest.getUmlaufplan().remove(j); // entferne klein
 											localBest.getUmlaufplan().add(neuKlein); // fuege neuKlein hinzu
-											/**
-											for (int x = 0; x < neuKlein.getLaden().size(); x++) { // aktualisiere Frequency der Ladestationen in neuKlein
-												if(!neuKlein.getLaden().contains(null)){
-													int frequency = neuKlein.getLaden().get(x).getFrequency() + 1;
-													neuKlein.getLaden().get(x).setFrequency(frequency);
-													neuKlein.getLaden().get(x).setLadestation(true);
-												}
-											}
-											*/
+											
 										}
 									}
-									int anzahlSFNach = 0;
-									for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
-										for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
-											if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
-												anzahlSFNach++;
-											}
-										}
-									}
-									if(anzahlSFNach != 433){
-
-										List<String> sf = new LinkedList<String>();
-										for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
-											for (int j = 0; j < localBest.getUmlaufplan().get(i1).getFahrten().size(); j++) {
-												if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
-													anzahlSF++;
-													if(sf.contains(localBest.getUmlaufplan().get(i1).getFahrten().get(j).getId())){
-														System.out.println("Fehler"+ localBest.getUmlaufplan().get(i1).getFahrten().get(j).getId());
-													}
-													else{
-														sf.add(localBest.getUmlaufplan().get(i1).getFahrten().get(j).getId());
-													}
-												}
-											}	
-										}
-										System.out.println();
-									}
+									
 
 								}
 								else{ // wenn neuGross feasible ist und klein nur eine SF hat
@@ -539,31 +433,10 @@ public class variableNeighborhoodSearch {
 											localBest.getUmlaufplan().remove(j); // entferne klein aus Lokalbest
 										}
 									}
-									int anzahlSFNach = 0;
-									for (int x = 0; x < localBest.getUmlaufplan().size(); x++) {
-										for (int j = 0; j < localBest.getUmlaufplan().get(x).size(); j++) {
-											if(localBest.getUmlaufplan().get(x).getFahrten().get(j) instanceof Servicejourney){
-												anzahlSFNach++;
-											}
-										}
-									}
-									if(anzahlSFNach != 433){
-										System.out.println();
-									}
+									
 
 								}
-								/**
-								for (int j = 0; j < klein.getLaden().size(); j++) { // aktualisiere Frequency der Ladestationen von klein
-									if(!klein.getLaden().contains(null)){
-										int frequency = klein.getLaden().get(j).getFrequency() - 1;
-										klein.getLaden().get(j).setFrequency(frequency);
-										if(klein.getLaden().get(j).getFrequency() == 0){
-											klein.getLaden().get(j).setLadestation(false);
-																						
-										}
-									}
-								}
-								*/
+								
 								
 								if (klein.size() > 3) {
 									klein.getFahrten().clear();
@@ -630,12 +503,12 @@ public class variableNeighborhoodSearch {
 						einsNeu.addFahrten(zwei.getFahrtenVonBis(0, j-2)); // Anfang Zwei bis einschließlich SF j-2
 						einsNeu.addFahrt(deadruntimes.get(deadruntimeId)); // Leerfahrt j-2 bis i+2
 						einsNeu.addFahrten(eins.getFahrtenVonBis(i+2, eins.size() - 1)); // SF i+2 bis Ende Eins
-						if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // falls einsNeu feasible ist
+						if(localBest.isFeasible(einsNeu)){ // falls einsNeu feasible ist
 							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId()); // initialisere zweiNeu
 							deadruntimeId = "00001" + zwei.getAtIndex(j).getFromStopId();
 							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId)); // LF von Depot nach SF j
 							zweiNeu.addFahrten(zwei.getFahrtenVonBis(j, zwei.size() - 1)); // bis Ende zwei
-							if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // wenn zweiNeu feasible ist
+							if(localBest.isFeasible(zweiNeu)){ // wenn zweiNeu feasible ist
 								// neue Umlaeufe speichern, falls besser
 								double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen(); //neue Kosten durch einsNeu und zweiNeu
 								if(newCostValue < currentCostValue){ // wenn gespart wird
@@ -663,12 +536,12 @@ public class variableNeighborhoodSearch {
 						String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
 						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
 						einsNeu.addFahrten(zwei.getFahrtenVonBis(j, zwei.size()-1));
-						if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+						if(localBest.isFeasible(einsNeu)){
 							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId());
 							deadruntimeId = "00001" + eins.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
 							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
 							zweiNeu.addFahrten(eins.getFahrtenVonBis(i+2, eins.size()-1));
-							if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+							if(localBest.isFeasible(zweiNeu)){
 								// neue Umlaeufe speichern, falls besser
 								double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
 								if(newCostValue < currentCostValue){
@@ -686,13 +559,13 @@ public class variableNeighborhoodSearch {
 							String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
 							einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
 							einsNeu.addFahrten(zwei.getFahrtenVonBis(j, zwei.size()-1));
-							if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+							if(localBest.isFeasible(einsNeu)){
 								Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId());
 								zweiNeu.addFahrten(zwei.getFahrtenVonBis(0, j-2));
 								deadruntimeId = zwei.getAtIndex(j-2).getToStopId() + eins.getAtIndex(i+2).getFromStopId();
 								zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
 								zweiNeu.addFahrten(eins.getFahrtenVonBis(i+2, eins.size()-1));
-								if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+								if(localBest.isFeasible(zweiNeu)){
 									// neue Umlaeufe speichern, falls besser
 									double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
 									if(newCostValue < currentCostValue){
@@ -720,12 +593,12 @@ public class variableNeighborhoodSearch {
 						einsNeu.addFahrten(eins.getFahrtenVonBis(0, j-2));
 						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
 						einsNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size() - 1));
-						if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+						if(localBest.isFeasible(einsNeu)){
 							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
 							deadruntimeId = "00001" + eins.getAtIndex(j).getFromStopId();
 							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
 							zweiNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size() - 1));
-							if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+							if(localBest.isFeasible(zweiNeu)){
 								// neue Umlaeufe speichern, falls besser
 								double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen(); //neue Kosten durch einsNeu und zweiNeu
 								if(newCostValue < currentCostValue){ //wenn gespart wird
@@ -753,12 +626,12 @@ public class variableNeighborhoodSearch {
 						String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
 						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
 						einsNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size()-1));
-						if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+						if(localBest.isFeasible(einsNeu)){
 							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
 							deadruntimeId = "00001" + zwei.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
 							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
 							zweiNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size()-1));
-							if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+							if(localBest.isFeasible(zweiNeu)){
 								// neue Umlaeufe speichern, falls besser
 								double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
 								if(newCostValue < currentCostValue){
@@ -776,13 +649,13 @@ public class variableNeighborhoodSearch {
 							String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
 							einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
 							einsNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size()-1));
-							if(einsNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+							if(localBest.isFeasible(einsNeu)){
 								Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
 								zweiNeu.addFahrten(eins.getFahrtenVonBis(0, j-2));
 								deadruntimeId = eins.getAtIndex(j-2).getToStopId() + zwei.getAtIndex(i+2).getFromStopId();
 								zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
 								zweiNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size()-1));
-								if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){
+								if(localBest.isFeasible(zweiNeu)){
 									// neue Umlaeufe speichern, falls besser
 									double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
 									if(newCostValue < currentCostValue){

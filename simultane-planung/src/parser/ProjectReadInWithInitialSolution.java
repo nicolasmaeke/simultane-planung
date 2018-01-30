@@ -42,9 +42,7 @@ public class ProjectReadInWithInitialSolution {
 
     // 1.1 Variablen fuer Streckennetz und Ladeinfrastruktur erstellen
     
-    // 1.1.1 Stoppoints
-    public HashMap<String, Stoppoint> stoppoints;
-    
+   
     // 1.1.2 Servicefahrten
     public HashMap<String, Servicejourney> servicejourneys;
    
@@ -54,12 +52,17 @@ public class ProjectReadInWithInitialSolution {
     // Zeitformat
     public DateFormat zformat;
 
+    // 1.1.1 Stoppoints
+    public Schedule global = new Schedule(new Vector<Fahrzeugumlauf>(), servicejourneys, deadruntimes, new HashMap<String, Stoppoint>());
+    public Schedule local = new Schedule(new Vector<Fahrzeugumlauf>(), servicejourneys, deadruntimes, new HashMap<String, Stoppoint>());
+
     
     // sind Verbindungen zwischen zwei Servicefahrten moeglich
     public HashMap<String, Integer> validEdges;
     
     // Menge der Fahrzeugumlaeufe aus der Initialloesung
-    public Vector<Fahrzeugumlauf> fahrzeugumlaeufe;
+    public Vector<Fahrzeugumlauf> fahrzeugumlaeufe1;
+    public Vector<Fahrzeugumlauf> fahrzeugumlaeufe2;
  
 
     /**
@@ -137,6 +140,9 @@ public class ProjectReadInWithInitialSolution {
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
 
                     } // end while
+
+                    global.setServicejourneys(servicejourneys);
+                    local.setServicejourneys(servicejourneys);
                     continue;
                 } // end if
 
@@ -162,16 +168,20 @@ public class ProjectReadInWithInitialSolution {
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
 
                     } // end while
+                    global.setDeadruntimes(deadruntimes);
+                    local.setDeadruntimes(deadruntimes);
+                    
                     continue;
                 } // end if
                 
+               
                 if (BlockBegin.equals("$INITIALSTOPPOINT")) // 1. Relation: Stoppoint
                 {
 
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    stoppoints = new HashMap<String, Stoppoint>();
+                 
                     
                     while (temp != null && !ersteszeichen.equals("*")) {
                     
@@ -183,10 +193,14 @@ public class ProjectReadInWithInitialSolution {
                     	}
                     	int frequency = Integer.parseInt(temp.split(";")[2]);
                     	
-                    	Stoppoint neu = new Stoppoint(id);
-                    	neu.setLadestation(isLoadingstation1);
-                    	neu.setFrequency(frequency);
-                    	stoppoints.put(neu.getId(), neu);
+                    	Stoppoint neu1 = new Stoppoint(id);
+                    	Stoppoint neu2 = new Stoppoint(id);
+                    	neu1.setLadestation(isLoadingstation1);
+                    	neu1.setFrequency(frequency);
+                    	neu2.setLadestation(isLoadingstation1);
+                    	neu2.setFrequency(frequency);
+                    	global.getStoppoints().put(neu1.getId(), neu1);
+                    	local.getStoppoints().put(neu2.getId(), neu2);
                     
                         temp = reader.readLine(); // nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen
@@ -201,8 +215,8 @@ public class ProjectReadInWithInitialSolution {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
                     
-                    fahrzeugumlaeufe = new Vector<Fahrzeugumlauf>();
-
+                    fahrzeugumlaeufe1 = new Vector<Fahrzeugumlauf>();
+                    fahrzeugumlaeufe2 = new Vector<Fahrzeugumlauf>();
                     while (temp != null && !ersteszeichen.equals("*")) {
 
                         String id = (temp.split(";")[0]); // ID
@@ -212,35 +226,58 @@ public class ProjectReadInWithInitialSolution {
                         String stopps = temp.split(";")[2];
                         stopps = stopps.substring(1, stopps.length()-1);
                         String[] idStoppoints = stopps.split(", ");
-                        Fahrzeugumlauf neu = new Fahrzeugumlauf(id);
+                        Fahrzeugumlauf neu1 = new Fahrzeugumlauf(id);
                         for (int i = 0; i < ids.length; i++) {
 							if(i % 2 == 0){
-								neu.addFahrt(deadruntimes.get(ids[i]));
+								neu1.addFahrt(deadruntimes.get(ids[i]));
 							}
 							else{
-								neu.addFahrt(servicejourneys.get(ids[i]));
+								neu1.addFahrt(servicejourneys.get(ids[i]));
+							}		
+						}
+                        Fahrzeugumlauf neu2 = new Fahrzeugumlauf(id);
+                        for (int i = 0; i < ids.length; i++) {
+							if(i % 2 == 0){
+								neu2.addFahrt(deadruntimes.get(ids[i]));
+							}
+							else{
+								neu2.addFahrt(servicejourneys.get(ids[i]));
 							}		
 						}
                         LinkedList<Stoppoint> laden = new LinkedList<Stoppoint>();
                         for (int i = 0; i < idStoppoints.length; i++) {
-							laden.add((stoppoints.get(idStoppoints[i])));
+							laden.add((global.getStoppoints().get(idStoppoints[i])));
+							laden.add((local.getStoppoints().get(idStoppoints[i])));
 						}
                         
-                        neu.setLaden(laden);
-                        fahrzeugumlaeufe.add(neu);
+                        neu1.setLaden(laden);
+                        neu2.setLaden(laden);
+                        fahrzeugumlaeufe1.add(neu1);
+                        fahrzeugumlaeufe2.add(neu2);
                         temp = reader.readLine();
                         
-
+                        
                     } // end while
+
+                    global.setUmlaufplan(fahrzeugumlaeufe1);
+                    local.setUmlaufplan(fahrzeugumlaeufe2);
                     continue;
                 } // end if
                 
-                
-                
+
+               
             } // end outer while
         } catch (IOException e) {
             System.out.println(e);
         }
+        
+        local.setAnzahlBusse(local.getUmlaufplan().size());
+        local.setAnzahlLadestationen();
+        local.setVariableKosten();
+       
+        global.setAnzahlBusse(global.getUmlaufplan().size());
+        global.setAnzahlLadestationen();
+        global.setVariableKosten();
         
         /**
          * es wird eine Matrix mit moeglichen Verbindungen zwischen zwei Servicefahrten erstellt

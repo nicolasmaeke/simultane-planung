@@ -105,12 +105,12 @@ public class Start {
 		}
 		
 		
-		Schedule ergebnis = new Schedule(p.getInitialloesung(), test.stoppoints);
+		Schedule ergebnis = new Schedule(p.getInitialloesung());
 		
 		System.out.println("Kosten für den Umlaufplan: " + ergebnis.berechneKosten());
 		
 		for (int i = 0; i < p.getInitialloesung().size(); i++) {
-			if(!p.getInitialloesung().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
+			if(!ergebnis.isFeasible(p.getInitialloesung().get(i))){
 				System.err.println("Is not Feasible!");
 			}
 		}

@@ -103,7 +103,8 @@ public class Fahrzeugumlauf {
 		this.id = id;
 	}
 
-	public boolean isFeasible(HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys,
+	/**
+	public boolean isFeasible(HashMap<String, Servicejourney> servicejourneys,
 			HashMap<String, Deadruntime> deadruntimes) {
 		
 		if (!(fahrten.get(0) instanceof Deadruntime) || !(fahrten.get(fahrten.size()-1) instanceof Deadruntime)){
@@ -225,7 +226,7 @@ public class Fahrzeugumlauf {
 		}
 		return true;
 	}
-
+	*/
 	public List<Journey> getFahrtenVonBis(int i, int j) {
 		LinkedList<Journey> fahrten = new LinkedList<Journey>();
 		for (int k = i; k <= j; k++) {
