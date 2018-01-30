@@ -16,7 +16,7 @@ public class StartAfterInitialSolution {
 
 	public static void main(String[] args) {
 		
-		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/Luna/git/simultane-planung//simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt");
+		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt");
 		
 		//System.out.println(test.validEdges);
 		
@@ -59,28 +59,34 @@ public class StartAfterInitialSolution {
 		int counter = 0;
 		double globalCost = initialCost;
 		do {
-			variableNeighborhoodSearch verbesserung = new variableNeighborhoodSearch(localSolution.getUmlaufplan(), test.validEdges, test.deadruntimes, test.servicejourneys, test.stoppoints);
-			
-			
-			
-			int anzahlSF = 0;
-			for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
-				for (int j = 0; j < localSolution.getUmlaufplan().get(i).size(); j++) {
-					if(localSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
-						anzahlSF++;
-					}
+			Vector<Fahrzeugumlauf> copy = new Vector<Fahrzeugumlauf>();
+			for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+				Fahrzeugumlauf neu = new Fahrzeugumlauf(globalSolution.getUmlaufplan().get(i).getId());
+				neu.addFahrten(globalSolution.getUmlaufplan().get(i).getFahrten());
+				copy.add(neu);
+			}
+			Schedule globalCopy = new Schedule(copy, test.stoppoints);
+			for (int i = 0; i < globalCopy.getUmlaufplan().size(); i++) {
+				if(!globalCopy.getUmlaufplan().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
+					System.err.println("Is not Feasible!");
 				}
 			}
+			globalCopy.berechneFrequenzen();
+
+			variableNeighborhoodSearch verbesserung = new variableNeighborhoodSearch(globalCopy.getUmlaufplan(), test.validEdges, test.deadruntimes, test.servicejourneys, test.stoppoints);
+			
+			
 			shakingSolution = verbesserung.shaking();
+			
 			int anzahlSFNach = 0;
-			for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
-				for (int j = 0; j < localSolution.getUmlaufplan().get(i).size(); j++) {
-					if(localSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
+			for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+				for (int j = 0; j < globalSolution.getUmlaufplan().get(i).size(); j++) {
+					if(globalSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
 						anzahlSFNach++;
 					}
 				}
 			}
-			if(anzahlSF - anzahlSFNach != 0){
+			if(anzahlSFNach != 433){
 				System.out.println(anzahlSFNach);
 			}
 			//System.out.println(anzahlSFNach);
@@ -88,9 +94,9 @@ public class StartAfterInitialSolution {
 			
 			localSolution = verbesserung.bestImprovement(14, shakingSolution);
 			int anzahlSFNach1 = 0;
-			for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
-				for (int j = 0; j < localSolution.getUmlaufplan().get(i).size(); j++) {
-					if(localSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
+			for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+				for (int j = 0; j < globalSolution.getUmlaufplan().get(i).size(); j++) {
+					if(globalSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
 						anzahlSFNach1++;
 					}
 				}
@@ -99,12 +105,12 @@ public class StartAfterInitialSolution {
 				System.out.println(anzahlSFNach);
 			}
 			double localCost = localSolution.berechneKosten();
-			if(localCost < globalCost){
+			//if(localCost < globalCost){
 				globalCost = localCost;
 				System.out.println("global aktualisiert!");
 				globalSolution = new Schedule(new Vector<Fahrzeugumlauf>(localSolution.getUmlaufplan()), test.stoppoints);
-				
-			}
+				globalSolution.berechneFrequenzen();
+			//}
 			int anzahlSFNach2 = 0;
 			for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 				for (int j = 0; j < globalSolution.getUmlaufplan().get(i).size(); j++) {
@@ -131,7 +137,19 @@ public class StartAfterInitialSolution {
 			System.out.println("local:" + anzahlSFNach3);
 			counter ++;
 			System.err.println(counter);
+			for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
+				if(!localSolution.getUmlaufplan().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
+					System.err.println(localSolution.getUmlaufplan().get(i).getId() + "Local Is not Feasible!");
+				}
+			}
+			for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+				if(!globalSolution.getUmlaufplan().get(i).isFeasible(test.stoppoints, test.servicejourneys, test.deadruntimes)){
+					System.err.println(globalSolution.getUmlaufplan().get(i).getId() + "GLobal Is not Feasible!");
+				}
+			}
 		} while (counter < 500);
+		
+		globalSolution.berechneFrequenzen();
 		
 		numberOfLoadingStations = localSolution.getAnzahlLadestationen();
 		
@@ -153,6 +171,7 @@ public class StartAfterInitialSolution {
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			System.out.println(globalSolution.getUmlaufplan().get(i).toString());
 			System.out.println(globalSolution.getUmlaufplan().get(i).getLadenString());
+			System.out.println(globalSolution.getUmlaufplan().get(i).getStellen());
 			anzahlUmlaeufe ++;
 		}
 		

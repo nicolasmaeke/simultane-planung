@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import helper.feasibilityHelper;
 
@@ -22,6 +23,7 @@ public class Fahrzeugumlauf {
 	private double energieVerbrauch = 0;
 	private long kosten = 0;
 	private LinkedList<Stoppoint> laden;
+	private LinkedList<Integer> stellen;
 	
 	/**
 	 * Konstruktor
@@ -35,6 +37,7 @@ public class Fahrzeugumlauf {
 			energieVerbrauch = energieVerbrauch + fahrten.get(j).getVerbrauch();
 		}
 		this.laden = new LinkedList<Stoppoint>();
+		this.stellen = new LinkedList<Integer>();
 	}
 
 	/**
@@ -107,7 +110,7 @@ public class Fahrzeugumlauf {
 			return false;
 		}
 		laden.clear();
-		
+		stellen.clear();
 		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
 		int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
 		
@@ -125,6 +128,7 @@ public class Fahrzeugumlauf {
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
 									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
 									laden.add(stoppoints.get(fahrten.get(i).getFromStopId()));
+									stellen.add(letzteLadung);									
 									break;
 								} 
 							}else{ // falls nicht direkt in i geladen werden kann und damit die vorherigen SF anschauen muss
@@ -132,6 +136,7 @@ public class Fahrzeugumlauf {
 									kapazitaet = 80; // Kapazitaet wieder voll geladen
 									laden.add(stoppoints.get(fahrten.get(i-2-x).getToStopId()));
 									letzteLadung = i - 2 - x; 
+									stellen.add(letzteLadung);
 									i = letzteLadung + 1;	
 									break;
 								} 
@@ -146,10 +151,12 @@ public class Fahrzeugumlauf {
 								laden.add(stoppoints.get(fahrten.get(1).getFromStopId()));
 								i = 1;
 								letzteLadung = 1;
-							
+								stellen.add(letzteLadung);
 							}
 						}
 						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
+							laden.clear();
+							stellen.clear();
 							return false;
 						}
 					}
@@ -163,6 +170,7 @@ public class Fahrzeugumlauf {
 								kapazitaet = 80;
 								laden.add(stoppoints.get(fahrten.get(i-1).getToStopId()));
 								letzteLadung = i - 1;
+								stellen.add(letzteLadung);
 								i = i - 1;
 								break;
 							}
@@ -176,6 +184,7 @@ public class Fahrzeugumlauf {
 									kapazitaet = 80;
 									laden.add(stoppoints.get(fahrten.get(i-1).getToStopId()));
 									letzteLadung = i-1;
+									stellen.add(letzteLadung);
 									break;
 								} 
 							}
@@ -186,6 +195,7 @@ public class Fahrzeugumlauf {
 									kapazitaet = 80;
 									laden.add(stoppoints.get(fahrten.get(i-x-1).getToStopId()));
 									letzteLadung = i - x - 1;
+									stellen.add(letzteLadung);
 									i = i - x;
 									break;
 								} 
@@ -200,10 +210,12 @@ public class Fahrzeugumlauf {
 								kapazitaet = 80;
 								i = 1;
 								letzteLadung = 1;
+								stellen.add(letzteLadung);
 							}
 						}
 						else{
 							laden.clear();
+							stellen.clear();
 							return false; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
 						}
 					}
@@ -304,6 +316,14 @@ public class Fahrzeugumlauf {
 
 	public void setKosten(long kosten) {
 		this.kosten = kosten;
+	}
+
+	public LinkedList<Integer> getStellen() {
+		return stellen;
+	}
+
+	public void setStellen(LinkedList<Integer> stellen) {
+		this.stellen = stellen;
 	}
 
 }

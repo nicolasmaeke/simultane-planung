@@ -25,18 +25,20 @@ public class variableNeighborhoodSearch {
 	public HashMap<String, Deadruntime> deadruntimes;
 	public HashMap<String, Servicejourney> servicejourneys;
 	public HashMap<String, Stoppoint> stoppoints;
+	Vector<Fahrzeugumlauf> fahrzeugumlaeufe;
 
 	public variableNeighborhoodSearch(Vector<Fahrzeugumlauf> fahrzeugumlaeufe, HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys, HashMap<String, Stoppoint> stoppoints){
 		this.validEdges = validEdges;
 		this.deadruntimes = deadruntimes;
 		this.stoppoints = stoppoints;
 		this.servicejourneys = servicejourneys;
+		this.fahrzeugumlaeufe = fahrzeugumlaeufe;
 		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
 			if(!fahrzeugumlaeufe.get(i).isFeasible(stoppoints, servicejourneys, deadruntimes)){
 				System.out.println();
 			}
 		}
-		this.globalBest =  new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
+		//this.globalBest =  new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
 		this.localBest = new Schedule(new Vector<Fahrzeugumlauf>(fahrzeugumlaeufe), stoppoints);
 	}
 	
@@ -102,7 +104,7 @@ public class variableNeighborhoodSearch {
 					if(zweiNeu.isFeasible(stoppoints, servicejourneys, deadruntimes)){ // falls zweiNeu feasible ist
 						if(!eins.equals(einsNeu) && einsNeu != null){ // falls einsNeu ungleich eins und einsNeu nicht leer ist						// falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
 							// Frequenzen der Ladungen an den Haltestellen aktualisieren
-		
+							/**
 							// Frequency aller Ladestationen von eins um 1 abziehen
 							for (int k = 0; k < eins.getLaden().size(); k++) { // jede Ladestationen von eins
 								if(!eins.getLaden().contains(null)){ // falls die Ladenliste nicht leer ist
@@ -143,7 +145,7 @@ public class variableNeighborhoodSearch {
 									zweiNeu.getLaden().get(k).setLadestation(true);
 								}
 							}
-							
+							*/
 							String id2 = shaking.getUmlaufplan().get(random2).getId(); // ID des Umlaufs zwei
 							shaking.getUmlaufplan().remove(random1); // entferne Umlauf eins aus shaking
 							for (int i = 0; i <= random2; i++) { 
@@ -157,6 +159,8 @@ public class variableNeighborhoodSearch {
 							}
 							shaking.getUmlaufplan().add(einsNeu); // fuege einsNeu in Shaking hinzu
 							shaking.getUmlaufplan().add(zweiNeu); // fuege zweiNeu in Shaking hinzu
+							
+							shaking.berechneFrequenzen();
 						}
 					}
 				}
@@ -231,7 +235,7 @@ public class variableNeighborhoodSearch {
 				nachbarschaft++; // erhoehe die Nachbarschaft um 1
 			}
 			else{ // wenn durch die aktuelle Nachbarschaft gespart wird
-				
+				/**
 				// Frequency aller Ladestationen von altEins um 1 abziehen
 				Fahrzeugumlauf altEins = shaking.getUmlaufplan().get(best.getIndexAltEins());
 				for (int k = 0; k < altEins.getLaden().size(); k++) { // fuer jede Ladestation von altEins
@@ -255,7 +259,7 @@ public class variableNeighborhoodSearch {
 						}
 					}
 				}
-				
+				*/
 				// localBest = globalBest;
 				String id2 = localBest.getUmlaufplan().get(best.getIndexAltZwei()).getId();
 				localBest.getUmlaufplan().remove(best.getIndexAltEins()); // entferne altEins aus der lokal besten Loesung
@@ -268,10 +272,12 @@ public class variableNeighborhoodSearch {
 				localBest.getUmlaufplan().add(best.getEins()); // fuege Eins in Lokalbest hinzu
 				localBest.getUmlaufplan().add(best.getZwei()); // fuege Zwei in Lokalbest hinzu
 				
+				localBest.berechneFrequenzen();
+				
 				int anzahlSFNach = 0;
-				for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
-					for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
-						if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+				for (int i1 = 0; i1 < fahrzeugumlaeufe.size(); i1++) {
+					for (int j = 0; j < fahrzeugumlaeufe.get(i1).size(); j++) {
+						if(fahrzeugumlaeufe.get(i1).getFahrten().get(j) instanceof Servicejourney){
 							anzahlSFNach++;
 						}
 					}
@@ -282,7 +288,7 @@ public class variableNeighborhoodSearch {
 				
 				
 				
-				
+				/**
 				// Frequency aller Ladestationen von Eins (neuer Umlauf) um 1 erhoehen
 				for (int k = 0; k < best.getEins().getLaden().size(); k++) {
 					if(!best.getEins().getLaden().contains(null)){
@@ -300,6 +306,7 @@ public class variableNeighborhoodSearch {
 						best.getZwei().getLaden().get(k).setLadestation(true);
 					}
 				}
+				*/
 				//System.out.println(nachbarschaft);
 				break;
 			}
@@ -326,24 +333,17 @@ public class variableNeighborhoodSearch {
 		while(localBest.getUmlaufplan().get(gross).equals(minimal.get(randomMinimal))){
 			gross = (int)(Math.random()*localBest.getUmlaufplan().size()); // index eines beliebigen Umlaufs in Lokalbest
 		}
-		int anzahlSF = 0;
-		for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
-			for (int j = 0; j < localBest.getUmlaufplan().get(i).size(); j++) {
-				if(localBest.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
-					anzahlSF++;
-				}
-			}
-		}
+
 		sfUmlegen(minimal.get(randomMinimal), localBest.getUmlaufplan().get(gross)); // Umlegen minimal und gross
 		int anzahlSFNach = 0;
-		for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
-			for (int j = 0; j < localBest.getUmlaufplan().get(i).size(); j++) {
-				if(localBest.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
+		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) {
+			for (int j = 0; j < fahrzeugumlaeufe.get(i).size(); j++) {
+				if(fahrzeugumlaeufe.get(i).getFahrten().get(j) instanceof Servicejourney){
 					anzahlSFNach++;
 				}
 			}
 		}
-		if(anzahlSF - anzahlSFNach != 0){
+		if(anzahlSFNach != 433){
 			System.out.println();
 		}
 		return localBest; // lokal beste Loesung zurueckgeben
@@ -451,6 +451,7 @@ public class variableNeighborhoodSearch {
 									if(localBest.getUmlaufplan().get(j).getId().equals(gross.getId())){
 										localBest.getUmlaufplan().remove(j); // entferne gross aus Lokalbest
 										localBest.getUmlaufplan().add(neuGross); // fuege neuGross in Lokalbest hinzu
+										/**
 										for (int x = 0; x < gross.getLaden().size(); x++) { // aktualisiere Frequency von Ladestationen in gross
 											if(!gross.getLaden().contains(null)){
 												int frequency = gross.getLaden().get(x).getFrequency() - 1;
@@ -468,8 +469,21 @@ public class variableNeighborhoodSearch {
 												neuGross.getLaden().get(x).setLadestation(true);
 											}
 										}
+										*/
+									}
+									int anzahlSFNach = 0;
+									for (int x = 0; x < fahrzeugumlaeufe.size(); x++) {
+										for (int j1 = 0; j1 < fahrzeugumlaeufe.get(x).size(); j1++) {
+											if(fahrzeugumlaeufe.get(x).getFahrten().get(j1) instanceof Servicejourney){
+												anzahlSFNach++;
+											}
+										}
+									}
+									if(anzahlSFNach != 433){
+										System.out.println();
 									}
 								}
+								
 
 								gross.getFahrten().clear(); 
 								gross.addFahrten(neuGross.getFahrten()); // aktualisiere gross durch neuGross
@@ -480,6 +494,7 @@ public class variableNeighborhoodSearch {
 										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){ //suche nach klein in Lokalbest
 											localBest.getUmlaufplan().remove(j); // entferne klein
 											localBest.getUmlaufplan().add(neuKlein); // fuege neuKlein hinzu
+											/**
 											for (int x = 0; x < neuKlein.getLaden().size(); x++) { // aktualisiere Frequency der Ladestationen in neuKlein
 												if(!neuKlein.getLaden().contains(null)){
 													int frequency = neuKlein.getLaden().get(x).getFrequency() + 1;
@@ -487,7 +502,34 @@ public class variableNeighborhoodSearch {
 													neuKlein.getLaden().get(x).setLadestation(true);
 												}
 											}
+											*/
 										}
+									}
+									int anzahlSFNach = 0;
+									for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
+										for (int j = 0; j < localBest.getUmlaufplan().get(i1).size(); j++) {
+											if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+												anzahlSFNach++;
+											}
+										}
+									}
+									if(anzahlSFNach != 433){
+
+										List<String> sf = new LinkedList<String>();
+										for (int i1 = 0; i1 < localBest.getUmlaufplan().size(); i1++) {
+											for (int j = 0; j < localBest.getUmlaufplan().get(i1).getFahrten().size(); j++) {
+												if(localBest.getUmlaufplan().get(i1).getFahrten().get(j) instanceof Servicejourney){
+													anzahlSF++;
+													if(sf.contains(localBest.getUmlaufplan().get(i1).getFahrten().get(j).getId())){
+														System.out.println("Fehler"+ localBest.getUmlaufplan().get(i1).getFahrten().get(j).getId());
+													}
+													else{
+														sf.add(localBest.getUmlaufplan().get(i1).getFahrten().get(j).getId());
+													}
+												}
+											}	
+										}
+										System.out.println();
 									}
 
 								}
@@ -497,9 +539,20 @@ public class variableNeighborhoodSearch {
 											localBest.getUmlaufplan().remove(j); // entferne klein aus Lokalbest
 										}
 									}
+									int anzahlSFNach = 0;
+									for (int x = 0; x < localBest.getUmlaufplan().size(); x++) {
+										for (int j = 0; j < localBest.getUmlaufplan().get(x).size(); j++) {
+											if(localBest.getUmlaufplan().get(x).getFahrten().get(j) instanceof Servicejourney){
+												anzahlSFNach++;
+											}
+										}
+									}
+									if(anzahlSFNach != 433){
+										System.out.println();
+									}
 
 								}
-
+								/**
 								for (int j = 0; j < klein.getLaden().size(); j++) { // aktualisiere Frequency der Ladestationen von klein
 									if(!klein.getLaden().contains(null)){
 										int frequency = klein.getLaden().get(j).getFrequency() - 1;
@@ -510,7 +563,7 @@ public class variableNeighborhoodSearch {
 										}
 									}
 								}
-
+								*/
 								
 								if (klein.size() > 3) {
 									klein.getFahrten().clear();
@@ -541,6 +594,9 @@ public class variableNeighborhoodSearch {
 			if(anzahlSFNach != 433){
 				System.out.println();
 			}
+			
+			localBest.berechneFrequenzen();
+			
 		}
 
 	}

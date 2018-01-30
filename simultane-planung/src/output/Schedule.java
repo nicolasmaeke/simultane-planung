@@ -14,6 +14,8 @@ public class Schedule {
 	private int anzahlLadestationen;
 	private int anzahlBusse;
 	private double variableKosten;
+	private HashMap<String, Stoppoint> stoppoints;
+
 	
 	public Schedule(Vector<Fahrzeugumlauf> fahrzeugumlaeufe, HashMap<String,Stoppoint> stoppoints){
 		this.umlaufplan = fahrzeugumlaeufe;
@@ -27,6 +29,7 @@ public class Schedule {
 		for (int i = 0; i < umlaufplan.size(); i++) {
 				variableKosten = variableKosten + umlaufplan.get(i).getKostenMitLadestationen();
 		}
+		this.stoppoints = stoppoints;
 	}
 	
 	public double berechneKosten(){
@@ -74,5 +77,27 @@ public class Schedule {
 		this.variableKosten = variableKosten;
 	}
 
+	public void berechneFrequenzen(){
+		for (Map.Entry e: stoppoints.entrySet()){
+			Stoppoint i1 = stoppoints.get(e.getKey());
+			int counter = 0;
+			for (int i = 0; i < umlaufplan.size(); i++) {
+				for (int j = 0; j < umlaufplan.get(i).getLaden().size(); j++) {
+					if(umlaufplan.get(i).getLaden().get(j).getId().equals(i1.getId())){
+						counter ++;
+					}
+				}
+			}
+			if(counter == 0){
+				i1.setFrequency(counter);
+				i1.setLadestation(false);
+			}
+			else{
+				i1.setFrequency(counter);
+				i1.setLadestation(true);
+			}
+			
+		}
+	}
 	
 }
