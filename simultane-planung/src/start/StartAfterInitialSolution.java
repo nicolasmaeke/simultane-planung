@@ -93,7 +93,7 @@ public class StartAfterInitialSolution {
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 500);
+		} while (counter < 250); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
@@ -101,7 +101,7 @@ public class StartAfterInitialSolution {
 		
 		for (Map.Entry e: globalSolution.getStoppoints().entrySet()){
 			Stoppoint i1 = globalSolution.getStoppoints().get(e.getKey());
-			System.out.println(""+ i1.isLadestation() + i1.getFrequency());
+			System.out.println("Haltestelle " + i1.getId() + " hat Ladestation: " + i1.isLadestation() + " " + i1.getFrequency());
 		}
 		
 		
@@ -109,8 +109,9 @@ public class StartAfterInitialSolution {
 		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			System.out.println(globalSolution.getUmlaufplan().get(i).toString());
-			System.out.println(globalSolution.getUmlaufplan().get(i).getLadenString());
-			System.out.println(globalSolution.getUmlaufplan().get(i).getStellen());
+			System.out.println("Ladestationen: " + globalSolution.getUmlaufplan().get(i).getLadenString());
+			System.out.println("An welcher SF wird geladen: " + globalSolution.getUmlaufplan().get(i).getStellen());
+			System.out.println();
 			anzahlUmlaeufe ++;
 		}
 		
