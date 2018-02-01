@@ -34,6 +34,19 @@ public class StartAfterInitialSolution {
 		numberOfLoadingStations = globalSolution.getAnzahlLadestationen();
 		Double initialCost = globalSolution.berechneKosten();
 		System.out.println(initialCost);
+		
+		double verbrauchInit = 0;
+		double zeitInit = 0;
+		
+		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+			for (int j = 0; j < globalSolution.getUmlaufplan().get(i).getFahrten().size(); j++) {
+				verbrauchInit = verbrauchInit + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getVerbrauch();
+				zeitInit = zeitInit + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getRuntime();
+			}
+		}
+		System.out.println("Gesamtverbrauch in kWh: " + verbrauchInit);
+		System.out.println("Zeitdauer: " + zeitInit/1000/60/60);
+		
 		System.out.println(globalSolution.getVariableKosten() - numberOfLoadingStations*250000);
 		System.out.println(numberOfLoadingStations);
 		System.out.println();

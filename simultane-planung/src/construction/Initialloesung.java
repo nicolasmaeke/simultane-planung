@@ -148,7 +148,7 @@ public class Initialloesung {
 	 */
 	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys) {
 		double saving = 0;
-		long zeitpuffer = feasibilityHelper.zeitpufferZwischenServicefahrten(i.getFahrten().get(i.size()-2).getId(), j.getFahrten().get(1).getId(), deadruntimes, servicejourneys);
+		double zeitpuffer = feasibilityHelper.zeitpufferZwischenServicefahrten(i.getFahrten().get(i.size()-2).getId(), j.getFahrten().get(1).getId(), deadruntimes, servicejourneys);
 		double d1 = j.getFahrten().getFirst().getDistance(); // Distanz zwischen Depot und Servicefahrt
 		double d2 = i.getFahrten().getLast().getDistance(); // Distanz zwischen Servicefahrt und Depot
 		saving = d1 + d2 - deadrun.getDistance() + 400000 - (zeitpuffer/1000); // Distanz zwischen beiden Servicefahrten

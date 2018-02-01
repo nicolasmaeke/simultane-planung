@@ -60,8 +60,14 @@ public class Servicejourney implements Journey {
             System.out.println(e);
         }
         this.sfArrTime = zeit;
-    	
-    	this.setRuntime((sfArrTime.getTime() - sfDepTime.getTime())); 
+    	if(sfDepTime.getTime() > sfArrTime.getTime()){
+    		sfArrTime.setTime(sfArrTime.getTime() + 24*60*60*1000);
+    	}
+    	this.setRuntime((sfArrTime.getTime() - sfDepTime.getTime()));
+    	if(sfRuntime < 0){
+    		System.out.println();
+    	}
+
     	this.setSfVerbrauch(Distance/1000 * 2.0);  // Annahme: 2kWh/km
     }
 
