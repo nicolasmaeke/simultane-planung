@@ -271,11 +271,11 @@ public class ProjectReadInWithInitialSolution {
             System.out.println(e);
         }
         
-        local.setAnzahlBusse(local.getUmlaufplan().size());
+        local.setAnzahlBusse();
         local.setAnzahlLadestationen();
         local.setVariableKosten();
        
-        global.setAnzahlBusse(global.getUmlaufplan().size());
+        global.setAnzahlBusse();
         global.setAnzahlLadestationen();
         global.setVariableKosten();
         

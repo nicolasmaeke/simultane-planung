@@ -13,4 +13,6 @@ public interface Journey {
 	public String getToStopId();
 	
 	public double getVerbrauch();
+	
+	public double getRuntime();
 }

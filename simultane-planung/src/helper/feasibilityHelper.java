@@ -24,8 +24,8 @@ public class feasibilityHelper {
 	 * @param servicejourney
 	 * @return
 	 */
-	public static long zeitpufferZwischenServicefahrten(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
-		long result = 0;
+	public static double zeitpufferZwischenServicefahrten(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
+		double result = 0;
 		Servicejourney eins = servicejourneys.get(i);
 		Servicejourney zwei = servicejourneys.get(j);
 		String deadrunId = ""+eins.getToStopId()+zwei.getFromStopId();

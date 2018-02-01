@@ -61,23 +61,19 @@ public class Servicejourney implements Journey {
         }
         this.sfArrTime = zeit;
     	
-    	this.setSfRuntime((sfArrTime.getTime() - sfDepTime.getTime())); 
+    	this.setRuntime((sfArrTime.getTime() - sfDepTime.getTime())); 
     	this.setSfVerbrauch(Distance/1000 * 2.0);  // Annahme: 2kWh/km
     }
-
-	public double getSfVerbrauch() {
-		return sfVerbrauch;
-	}
 
 	public void setSfVerbrauch(double sfVerbrauch) {
 		this.sfVerbrauch = sfVerbrauch;
 	}
 
-	public double getSfRuntime() {
+	public double getRuntime() {
 		return sfRuntime;
 	}
 
-	public void setSfRuntime(double sfRuntime) {
+	public void setRuntime(double sfRuntime) {
 		this.sfRuntime = sfRuntime;
 	}
 
@@ -162,5 +158,6 @@ public class Servicejourney implements Journey {
 		// TODO Auto-generated method stub
 		return sfVerbrauch;
 	}
+
 
 }

@@ -11,7 +11,7 @@ public class Deadruntime implements Journey {
 	private String fromStopId;
     private String toStopId;
     private double distance;
-    int runtime;
+    double runtime;
     private double verbrauch;
     
     /**
@@ -64,12 +64,8 @@ public class Deadruntime implements Journey {
 		this.distance = distance;
 	}
 
-	public int getRuntime() {
+	public double getRuntime() {
 		return runtime;
-	}
-
-	public void setRuntime(int runtime) {
-		this.runtime = runtime;
 	}
 
 	public String getId() {
@@ -82,5 +78,9 @@ public class Deadruntime implements Journey {
 	
 	public String toString(){
 		return "LF von " + fromStopId + " zu " + toStopId + "hat Verbrauch: " + getVerbrauch();
+	}
+
+	public void setRuntime(double runtime) {
+		this.runtime = runtime;
 	}
 }

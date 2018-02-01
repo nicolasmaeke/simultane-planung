@@ -347,9 +347,7 @@ public class variableNeighborhoodSearch {
 									if(localBest.getUmlaufplan().get(j).getId().equals(gross.getId())){
 										localBest.getUmlaufplan().remove(j); // entferne gross aus Lokalbest
 										localBest.getUmlaufplan().add(neuGross); // fuege neuGross in Lokalbest hinzu
-										
 									}
-									
 								}
 								
 

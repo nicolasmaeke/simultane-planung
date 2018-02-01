@@ -40,6 +40,7 @@ public class Schedule {
 	}
 	
 	public double berechneKosten(){
+		kosten = 0;
 		kosten = anzahlBusse * 400000 + variableKosten;
 		return kosten;
 	}
@@ -78,8 +79,8 @@ public class Schedule {
 		return anzahlBusse;
 	}
 
-	public void setAnzahlBusse(int anzahlBusse) {
-		this.anzahlBusse = anzahlBusse;
+	public void setAnzahlBusse() {
+		anzahlBusse = umlaufplan.size();
 	}
 
 	public double getVariableKosten() {
@@ -87,6 +88,7 @@ public class Schedule {
 	}
 
 	public void setVariableKosten() {
+		variableKosten = 0;
 		for (int i = 0; i < umlaufplan.size(); i++) {
 			variableKosten = variableKosten + umlaufplan.get(i).getKostenMitLadestationen();
 	}
@@ -172,6 +174,12 @@ public class Schedule {
 								letzteLadung = 1;
 								umlauf.getStellen().add(letzteLadung);
 							}
+							else{
+								umlauf.getLaden().clear();
+								umlauf.getStellen().clear();
+								umlauf.getStellen().add(100000000);
+								return false;
+							}
 						}
 						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
 							umlauf.getLaden().clear();
@@ -231,6 +239,12 @@ public class Schedule {
 								i = 1;
 								letzteLadung = 1;
 								umlauf.getStellen().add(letzteLadung);
+							}
+							else{
+								umlauf.getLaden().clear();
+								umlauf.getStellen().clear();
+								umlauf.getStellen().add(100000000);
+								return false;
 							}
 						}
 						else{

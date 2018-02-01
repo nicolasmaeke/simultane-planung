@@ -101,130 +101,6 @@ public class Fahrzeugumlauf {
 		this.id = id;
 	}
 
-	/**
-	public boolean isFeasible(HashMap<String, Servicejourney> servicejourneys,
-			HashMap<String, Deadruntime> deadruntimes) {
-		
-		if (!(fahrten.get(0) instanceof Deadruntime) || !(fahrten.get(fahrten.size()-1) instanceof Deadruntime)){
-			return false;
-		}
-		laden.clear();
-		stellen.clear();
-		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
-		int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
-		
-		for (int i = 0; i < fahrten.size(); i++) { // fuer jede Fahrt i im zusammengesetzten Fahrzeugumlauf
-			
-			if (kapazitaet - fahrten.get(i).getVerbrauch() < 0){ // falls Verbrauch von Fahrt i die Restkapazitaet nicht abdeckt
-				
-				if(fahrten.get(i) instanceof Servicejourney){ // falls Fahrt i eine Servicefahrt ist 
-					int x = 0;
-					while((i-2-x) > letzteLadung){ //solange wir nicht die erste SF oder die LetzteLadung erreichen
-						if(feasibilityHelper.zeitpufferFuerLadezeit(fahrten.get(i-2-x).getId(), fahrten.get(i-x).getId(), deadruntimes, servicejourneys, kapazitaet)){
-							//wenn genug Zeit zum Laden vorhanden ist
-							if(x==0){ //falls direkt bei der betroffenen SF geladen werden kann
-								if (stoppoints.get(fahrten.get(i).getFromStopId()).isLadestation()){ //falls noch keine Ladestation an dieser Stelle vorhanden ist
-									kapazitaet = 80; // Kapazitaet wieder voll geladen
-									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
-									laden.add(stoppoints.get(fahrten.get(i).getFromStopId()));
-									stellen.add(letzteLadung);									
-									break;
-								} 
-							}else{ // falls nicht direkt in i geladen werden kann und damit die vorherigen SF anschauen muss
-								if (stoppoints.get(fahrten.get(i-2-x).getToStopId()).isLadestation()){ // 
-									kapazitaet = 80; // Kapazitaet wieder voll geladen
-									laden.add(stoppoints.get(fahrten.get(i-2-x).getToStopId()));
-									letzteLadung = i - 2 - x; 
-									stellen.add(letzteLadung);
-									i = letzteLadung + 1;	
-									break;
-								} 
-							}
-						}
-						x = x + 2;
-					}
-					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
-						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
-							if (stoppoints.get(fahrten.get(1).getFromStopId()).isLadestation()){ // falls vor SF1 noch keine Ladestation gebaut wird
-								kapazitaet = 80;
-								laden.add(stoppoints.get(fahrten.get(1).getFromStopId()));
-								i = 1;
-								letzteLadung = 1;
-								stellen.add(letzteLadung);
-							}
-						}
-						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
-							laden.clear();
-							stellen.clear();
-							return false;
-						}
-					}
-				}	
-
-				if(fahrten.get(i) instanceof Deadruntime){ // falls Fahrt i eine Leerfahrt ist
-					int x = 0;
-					while(((i - x - 1) > letzteLadung)){ //solange die LetzteLadung nicht wieder erreicht wird
-						if(i == fahrten.size()-1 && x == 0){ //falls i die letzte Leerfahrt ist
-							if (stoppoints.get(fahrten.get(i-1).getToStopId()).isLadestation()){ //falls keine Ladestation vorhanden an Endhaltestelle von SF (i-1)
-								kapazitaet = 80;
-								laden.add(stoppoints.get(fahrten.get(i-1).getToStopId()));
-								letzteLadung = i - 1;
-								stellen.add(letzteLadung);
-								i = i - 1;
-								break;
-							}
-							else{
-								x = x + 2;
-							}
-						}
-						else if(x==0){
-							if(feasibilityHelper.zeitpufferFuerLadezeit(fahrten.get(i-1).getId(), fahrten.get(i+1).getId(), deadruntimes, servicejourneys, kapazitaet)){					
-								if (stoppoints.get(fahrten.get(i-1).getToStopId()).isLadestation()){
-									kapazitaet = 80;
-									laden.add(stoppoints.get(fahrten.get(i-1).getToStopId()));
-									letzteLadung = i-1;
-									stellen.add(letzteLadung);
-									break;
-								} 
-							}
-							x = x + 2;
-						}else{
-							if(feasibilityHelper.zeitpufferFuerLadezeit(fahrten.get(i-2-x+1).getId(), fahrten.get(i-x+1).getId(), deadruntimes, servicejourneys, kapazitaet)){
-								if (stoppoints.get(fahrten.get(i-x-1).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
-									kapazitaet = 80;
-									laden.add(stoppoints.get(fahrten.get(i-x-1).getToStopId()));
-									letzteLadung = i - x - 1;
-									stellen.add(letzteLadung);
-									i = i - x;
-									break;
-								} 
-							}
-							x = x + 2;
-						}
-					}	
-					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
-						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
-							if (stoppoints.get(fahrten.get(1).getFromStopId()).isLadestation()){
-								laden.add(stoppoints.get(fahrten.get(1).getFromStopId()));
-								kapazitaet = 80;
-								i = 1;
-								letzteLadung = 1;
-								stellen.add(letzteLadung);
-							}
-						}
-						else{
-							laden.clear();
-							stellen.clear();
-							return false; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
-						}
-					}
-				}	
-			}
-			kapazitaet = kapazitaet - fahrten.get(i).getVerbrauch(); // aktualisiere die Kapazitaet nach Fahrt i, falls Fahrt i noch gefahren werden kann
-		}
-		return true;
-	}
-	*/
 	public List<Journey> getFahrtenVonBis(int i, int j) {
 		LinkedList<Journey> fahrten = new LinkedList<Journey>();
 		for (int k = i; k <= j; k++) {
@@ -261,13 +137,10 @@ public class Fahrzeugumlauf {
 				ladestationsAnteil = ladestationsAnteil + 250000*(1.0/test);// Kosten fuer Ladestationen werden anteilig auf die nutzenden Fahrzeugumlaeufe verteilt
 			}	 
 		}
-		Servicejourney sEins = (Servicejourney) fahrten.get(1);
-		Servicejourney sZwei = (Servicejourney) fahrten.get(fahrten.size()-2);
-		Deadruntime dEins = (Deadruntime) fahrten.get(0);
-		Deadruntime dZwei = (Deadruntime) fahrten.get(fahrten.size()-1);
-		double personalkosten = (sZwei.getSfArrTime().getTime() + dZwei.runtime) - (sEins.getSfDepTime().getTime() - dEins.runtime);
+		double personalkosten = 0;
 		for (int i = 0; i < fahrten.size(); i++) {
 			verbrauchsKosten = verbrauchsKosten + fahrten.get(i).getVerbrauch();
+			personalkosten = personalkosten + fahrten.get(i).getRuntime();
 		}
 		personalkosten = personalkosten * 20 / 1000 / 60 / 60;
 		return verbrauchsKosten * 0.1 + personalkosten + ladestationsAnteil;

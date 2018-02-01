@@ -66,34 +66,6 @@ public class StartAfterInitialSolution {
 			if(localCost < globalCost){ // wenn die Kosten der lokalen Loesung geringer, dann überschreibe globale Loesung
 				globalCost = localCost;
 				
-				/**
-				Vector<Fahrzeugumlauf> copy = new Vector<Fahrzeugumlauf>();
-				for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
-					Fahrzeugumlauf neu = new Fahrzeugumlauf(localSolution.getUmlaufplan().get(i).getId());
-					neu.addFahrten(localSolution.getUmlaufplan().get(i).getFahrten());
-					neu.setLaden(new LinkedList<Stoppoint>(localSolution.getUmlaufplan().get(i).getLaden()));
-					copy.add(neu);
-				}
-				HashMap<String, Stoppoint> stoppoints = new  HashMap<String, Stoppoint>();
-				
-				for (Map.Entry e: test.global.getStoppoints().entrySet()){
-					Stoppoint neu = new Stoppoint(test.global.getStoppoints().get(e.getKey()).getId());
-					stoppoints.put(test.global.getStoppoints().get(e.getKey()).getId(), neu);
-				}
-				// Erstelle Kopie der lokalen Loesung zum Ueberschreiben der globalen Loesung
-				Schedule globalCopy = new Schedule(copy, test.servicejourneys, test.deadruntimes, stoppoints);
-				
-				globalCopy.berechneFrequenzen();
-				
-				for (int i = 0; i < globalCopy.getUmlaufplan().size(); i++) {
-					if(!globalCopy.isFeasible(globalCopy.getUmlaufplan().get(i))){
-						System.err.println("Is not Feasible!");
-					}
-				}
-				
-				globalSolution = globalCopy;
-				*/
-				
 				Cloner clone = new Cloner();
 				globalSolution = clone.deepClone(localSolution);
 				for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
@@ -107,7 +79,7 @@ public class StartAfterInitialSolution {
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 350); // Abbruchkriterium fuer Heuristik
+		} while (counter < 300); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
@@ -140,20 +112,36 @@ public class StartAfterInitialSolution {
 		System.out.println("Ersparnis: " + (initialCost - globalCost));
 		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
 		
+		double verbrauch = 0;
+		double	zeit = 0;
+		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+			for (int j = 0; j < globalSolution.getUmlaufplan().get(i).getFahrten().size(); j++) {
+				verbrauch = verbrauch + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getVerbrauch();
+				zeit = zeit + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getRuntime();
+			}
 			if(!globalSolution.isFeasible(globalSolution.getUmlaufplan().get(i))){
 				System.err.println(globalSolution.getUmlaufplan().get(i).getId() + " Is not Feasible!");
 			}
+			if(globalSolution.getUmlaufplan().get(i).size() > 20 && globalSolution.getUmlaufplan().get(i).getLaden().size() < 1){
+				globalSolution.isFeasible(globalSolution.getUmlaufplan().get(i));
+			}
 		}
-	
+		System.out.println("Gesamtverbrauch in kWh: " + verbrauch);
+		System.out.println("Zeitdauer: " + zeit/1000/60/60);
 		
 		// teste, ob die Anzahl der SF noch korrekt ist und ob keine SF doppelt vorkommt
 		int anzahlSF = 0;
+		double verbrauchSF = 0;
+		double zeitSF = 0;
+		
 		List<String> sf = new LinkedList<String>();
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			for (int j = 0; j < globalSolution.getUmlaufplan().get(i).getFahrten().size(); j++) {
 				if(globalSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
 					anzahlSF++;
+					verbrauchSF = verbrauchSF + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getVerbrauch();
+					zeitSF = zeitSF + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getRuntime();
 					if(sf.contains(globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getId())){
 						System.out.println("Fehler"+ globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getId());
 					}
@@ -164,7 +152,8 @@ public class StartAfterInitialSolution {
 			}	
 		}
 		System.out.println("Anzahl Servicefahrten: " + anzahlSF);
-		
+		System.out.println(verbrauchSF);
+		System.out.println(zeitSF/1000/60/60);
 	}
 	
 	
