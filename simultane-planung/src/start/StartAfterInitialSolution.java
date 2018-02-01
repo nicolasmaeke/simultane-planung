@@ -1,13 +1,11 @@
 package start;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-
+import com.rits.cloning.Cloner;
 import heuristic.variableNeighborhoodSearch;
-import model.Fahrzeugumlauf;
 import model.Servicejourney;
 import model.Stoppoint;
 import output.Schedule;
@@ -36,6 +34,7 @@ public class StartAfterInitialSolution {
 		numberOfLoadingStations = globalSolution.getAnzahlLadestationen();
 		Double initialCost = globalSolution.berechneKosten();
 		System.out.println(initialCost);
+		System.out.println(globalSolution.getVariableKosten() - numberOfLoadingStations*250000);
 		System.out.println(numberOfLoadingStations);
 		System.out.println();
 		
@@ -59,9 +58,15 @@ public class StartAfterInitialSolution {
 			localSolution = verbesserung.bestImprovement(14, shakingSolution); // starte bestImrpvement mit der shaking-Loesung
 			
 			double localCost = localSolution.berechneKosten();
+			for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
+				if(!localSolution.isFeasible(localSolution.getUmlaufplan().get(i))){
+					System.err.println(i + "Local is not Feasible!");
+				}
+			}
 			if(localCost < globalCost){ // wenn die Kosten der lokalen Loesung geringer, dann überschreibe globale Loesung
 				globalCost = localCost;
 				
+				/**
 				Vector<Fahrzeugumlauf> copy = new Vector<Fahrzeugumlauf>();
 				for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
 					Fahrzeugumlauf neu = new Fahrzeugumlauf(localSolution.getUmlaufplan().get(i).getId());
@@ -79,31 +84,45 @@ public class StartAfterInitialSolution {
 				Schedule globalCopy = new Schedule(copy, test.servicejourneys, test.deadruntimes, stoppoints);
 				
 				globalCopy.berechneFrequenzen();
-				/**
+				
 				for (int i = 0; i < globalCopy.getUmlaufplan().size(); i++) {
 					if(!globalCopy.isFeasible(globalCopy.getUmlaufplan().get(i))){
 						System.err.println("Is not Feasible!");
 					}
 				}
-				*/
+				
 				globalSolution = globalCopy;
+				*/
+				
+				Cloner clone = new Cloner();
+				globalSolution = clone.deepClone(localSolution);
+				for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
+					if(!globalSolution.isFeasible(globalSolution.getUmlaufplan().get(i))){
+						System.err.println(i + "Global is not Feasible!");
+					}
+				}
 				System.out.println("global aktualisiert!");
 			}
 			
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 250); // Abbruchkriterium fuer Heuristik
+		} while (counter < 350); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
 		numberOfLoadingStations = globalSolution.getAnzahlLadestationen();
+		List<Stoppoint> ladestationen = new ArrayList<Stoppoint>();
 		
 		for (Map.Entry e: globalSolution.getStoppoints().entrySet()){
 			Stoppoint i1 = globalSolution.getStoppoints().get(e.getKey());
 			System.out.println("Haltestelle " + i1.getId() + " hat Ladestation: " + i1.isLadestation() + " " + i1.getFrequency());
+			if(i1.isLadestation()){
+				ladestationen.add(i1);
+			}
 		}
 		
+		System.out.println("List of Loadingstations: " + ladestationen);
 		
 		int anzahlUmlaeufe = 0;
 		
@@ -116,6 +135,7 @@ public class StartAfterInitialSolution {
 		}
 		
 		System.out.println("Kosten nach Verbesserung: " + globalCost);
+		System.out.println("Variable Kosten: " + (globalSolution.getVariableKosten() - numberOfLoadingStations*250000));
 		System.out.println("Anzahl Umlaeufe: " + anzahlUmlaeufe);
 		System.out.println("Ersparnis: " + (initialCost - globalCost));
 		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);

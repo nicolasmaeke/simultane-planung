@@ -81,6 +81,6 @@ public class Deadruntime implements Journey {
 	}
 	
 	public String toString(){
-		return "LF von " + fromStopId + " zu " + toStopId;
+		return "LF von " + fromStopId + " zu " + toStopId + "hat Verbrauch: " + getVerbrauch();
 	}
 }

@@ -41,7 +41,7 @@ public class feasibilityHelper {
 	 */
 	public static boolean zeitpufferFuerLadezeit(String i, String j, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys, double restkapazitaet){
 		double result = 0;
-		double ladezeit = (80 - restkapazitaet) / ((7.5 / 60) / 1000);
+		double ladezeit = (80 - restkapazitaet) / ((7.5 / 60) / 1000); //in Milisekunden
 		Servicejourney eins = servicejourneys.get(i);
 		Servicejourney zwei = servicejourneys.get(j);
 		String deadrunId = ""+eins.getToStopId()+zwei.getFromStopId();

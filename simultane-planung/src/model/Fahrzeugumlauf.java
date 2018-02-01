@@ -20,7 +20,6 @@ public class Fahrzeugumlauf {
 	// Typ der Liste ist Journey, damit sowohl Servicefahrten als auch Leerfahrten hinzugefuegt werden koennen
 	private LinkedList<Journey> fahrten; 
 	private double laenge = 0;
-	private double energieVerbrauch = 0;
 	private long kosten = 0;
 	private LinkedList<Stoppoint> laden;
 	private LinkedList<Integer> stellen;
@@ -34,7 +33,6 @@ public class Fahrzeugumlauf {
 		this.id = i;
 		for (int j = 0; j < fahrten.size(); j++) {
 			laenge = laenge + fahrten.get(j).getDistance();
-			energieVerbrauch = energieVerbrauch + fahrten.get(j).getVerbrauch();
 		}
 		this.laden = new LinkedList<Stoppoint>();
 		this.stellen = new LinkedList<Integer>();
@@ -260,7 +258,7 @@ public class Fahrzeugumlauf {
 				if(test == 0){
 					System.err.println();
 				}
-				ladestationsAnteil = ladestationsAnteil + 250000*(1/(this.getLaden().get(i).getFrequency()));// Kosten fuer Ladestationen werden anteilig auf die nutzenden Fahrzeugumlaeufe verteilt
+				ladestationsAnteil = ladestationsAnteil + 250000*(1.0/test);// Kosten fuer Ladestationen werden anteilig auf die nutzenden Fahrzeugumlaeufe verteilt
 			}	 
 		}
 		Servicejourney sEins = (Servicejourney) fahrten.get(1);
@@ -271,8 +269,8 @@ public class Fahrzeugumlauf {
 		for (int i = 0; i < fahrten.size(); i++) {
 			verbrauchsKosten = verbrauchsKosten + fahrten.get(i).getVerbrauch();
 		}
-		
-		return verbrauchsKosten * 0.1 + (personalkosten * 20 / 60 / 1000 / 1000) + ladestationsAnteil;
+		personalkosten = personalkosten * 20 / 1000 / 60 / 60;
+		return verbrauchsKosten * 0.1 + personalkosten + ladestationsAnteil;
 	}
 
 	public void addFahrten(List<Journey> list) {
@@ -287,13 +285,6 @@ public class Fahrzeugumlauf {
 		this.laenge = laenge;
 	}
 
-	public double getEnergieVerbrauch() {
-		return energieVerbrauch;
-	}
-
-	public void setEnergieVerbrauch(double energieVerbrauch) {
-		this.energieVerbrauch = energieVerbrauch;
-	}
 
 	public String getLadenString() {
 		String result = "[";

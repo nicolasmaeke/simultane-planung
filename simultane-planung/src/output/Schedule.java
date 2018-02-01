@@ -65,6 +65,7 @@ public class Schedule {
 	}
 
 	public void setAnzahlLadestationen() {
+		anzahlLadestationen = 0;
 		for (Map.Entry e: stoppoints.entrySet()){
 			Stoppoint i = stoppoints.get(e.getKey());
 			if (i.isLadestation()) {
@@ -175,6 +176,7 @@ public class Schedule {
 						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
 							umlauf.getLaden().clear();
 							umlauf.getStellen().clear();
+							umlauf.getStellen().add(1000000);
 							return false;
 						}
 					}
@@ -234,6 +236,7 @@ public class Schedule {
 						else{
 							umlauf.getLaden().clear();
 							umlauf.getStellen().clear();
+							umlauf.getStellen().add(100000000);
 							return false; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
 						}
 					}

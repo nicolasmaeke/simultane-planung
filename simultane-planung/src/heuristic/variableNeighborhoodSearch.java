@@ -108,8 +108,13 @@ public class variableNeighborhoodSearch {
 								System.out.println();
 							}
 							shaking.getUmlaufplan().add(einsNeu); // fuege einsNeu in Shaking hinzu
+							if(!shaking.isFeasible(einsNeu)){
+								System.out.println("Not Feasible Shaking!");
+							}
 							shaking.getUmlaufplan().add(zweiNeu); // fuege zweiNeu in Shaking hinzu
-							
+							if(!shaking.isFeasible(zweiNeu)){
+								System.out.println("Not Feasible Shaking!");
+							}
 							shaking.berechneFrequenzen();
 						}
 					}
@@ -137,6 +142,9 @@ public class variableNeighborhoodSearch {
 	 * @return
 	 */
 	public Schedule bestImprovement(int kMax, Schedule shaking){
+		if(kMax > shaking.getUmlaufplan().size()){
+			kMax = shaking.getUmlaufplan().size();
+		}
 		// waehle zufaellig zwei Fahrzeugumlaeufe aus
 		int random1 = (int)(Math.random()*shaking.getUmlaufplan().size()); // index eines beliebigen Umlaufs aus dem geshakten Umlaufplan
 		localBest = shaking; // initialisiere Umlaufplan Lokal beste Loesung
@@ -196,11 +204,16 @@ public class variableNeighborhoodSearch {
 					}
 				}
 				localBest.getUmlaufplan().add(best.getEins()); // fuege Eins in Lokalbest hinzu
+				if(!localBest.isFeasible(best.getEins())){
+					System.out.println("Not Feasible zweiOpt!");
+				}
 				localBest.getUmlaufplan().add(best.getZwei()); // fuege Zwei in Lokalbest hinzu
-				
+				if(!localBest.isFeasible(best.getZwei())){
+					System.out.println("Not Feasible zweiOpt!");
+				}
 				localBest.berechneFrequenzen();
 
-				
+				System.out.println(nachbarschaft);
 				break;
 			}
 		}
@@ -329,7 +342,7 @@ public class variableNeighborhoodSearch {
 								} 
 									
 							}
-							if(!localBest.isFeasible(neuGross)){ // wenn neuGross feasible ist
+							if(localBest.isFeasible(neuGross)){ // wenn neuGross feasible ist
 								for (int j = 0; j < localBest.getUmlaufplan().size(); j++) { // suche gross in Lokalbest
 									if(localBest.getUmlaufplan().get(j).getId().equals(gross.getId())){
 										localBest.getUmlaufplan().remove(j); // entferne gross aus Lokalbest
@@ -352,8 +365,9 @@ public class variableNeighborhoodSearch {
 											
 										}
 									}
-									
-
+									if(!localBest.isFeasible(neuKlein)){
+										System.out.println("NeuKlein Not Feasible sfUmlegen!");
+									}
 								}
 								else{ // wenn neuGross feasible ist und klein nur eine SF hat
 									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
@@ -372,6 +386,9 @@ public class variableNeighborhoodSearch {
 									klein.setLaden(neuKlein.getLaden());
 								}
 								
+								if(!localBest.isFeasible(neuGross)){
+									System.out.println("Neu Gross Not Feasible sfUmlegen!");
+								}
 								break;
 							}
 							else{
