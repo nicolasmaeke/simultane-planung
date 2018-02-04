@@ -17,8 +17,6 @@ public class StartAfterInitialSolution {
 		
 		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung.txt");
 		
-		//System.out.println(test.validEdges);
-		
 		for (int i = 0; i < test.global.getUmlaufplan().size(); i++) {
 			if(!test.global.isFeasible(test.global.getUmlaufplan().get(i))){
 				System.err.println("Is not Feasible!");
@@ -68,7 +66,7 @@ public class StartAfterInitialSolution {
 			
 			shakingSolution = verbesserung.shaking(); // starte shaking
 			
-			localSolution = verbesserung.bestImprovement(14, shakingSolution); // starte bestImrpvement mit der shaking-Loesung
+			localSolution = verbesserung.bestImprovement(50, shakingSolution); // starte bestImrpvement mit der shaking-Loesung
 			
 			double localCost = localSolution.berechneKosten();
 			for (int i = 0; i < localSolution.getUmlaufplan().size(); i++) {
@@ -92,7 +90,7 @@ public class StartAfterInitialSolution {
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 500); // Abbruchkriterium fuer Heuristik
+		} while (counter < 5000); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();

@@ -26,9 +26,15 @@ import model.Stoppoint;
 public class Initialloesung {
 	
 	private Vector<Fahrzeugumlauf> fahrzeugumlaeufe;
+	HashMap<String, Stoppoint> stoppoints;
+	HashMap<String, Deadruntime> deadruntimes;
+	HashMap<String, Servicejourney> servicejourneys;
 	
-	public Initialloesung(){
+	public Initialloesung(HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys, HashMap<String, Stoppoint> stoppoints){
 		fahrzeugumlaeufe = new Vector<Fahrzeugumlauf>();
+		this.stoppoints = stoppoints;
+		this.servicejourneys = servicejourneys;
+		this.deadruntimes = deadruntimes;
 	}
 	public Vector<Fahrzeugumlauf> getFahrzeugumlauf(){
 		return fahrzeugumlaeufe;	
@@ -169,7 +175,6 @@ public class Initialloesung {
 		
 		String temp;
 		int n;
-		int test = 0;
 		List<String> keys = new ArrayList<String>(); // alle temp, die schon dran waren
 		LinkedList<Journey> neu = null; // neu ist eine Liste von Fahrten, die zusammengelegt werden sollen
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewLoadingStations = null;
@@ -198,17 +203,7 @@ public class Initialloesung {
 				neu = umlaeufeZusammenlegen(temp, deadruntimes);
 				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys);
 			}
-			//keys.add(temp); // temp wird als beruecksichtigt gespeichert 
-			
-			if (iteration == 333) {
-				System.out.println(test);
-				test ++;
-			}
-			
-			if (test == 9) {
-				test = 9;
-			}
-			
+
 		} while (temp != getHighestSaving(savings)); //solange temp nicht der groesste Saving ist
 		
 		ArrayList<Stoppoint> buildLoadingStations = numberOfNewLoadingStations.get(temp); //Liste der Haltestelle in temp, wo Ladestation gebaut werden muss
@@ -229,7 +224,9 @@ public class Initialloesung {
 		
 		for (int i = 0; i < fahrzeugumlaeufe.size(); i++) { // fuer jeden Fahrzeugumlauf i
 			if(fahrzeugumlaeufe.get(i).getId() == umlaeufe.get(0).getId()){ // falls ID von i gleich ID vom ersten der zusammengelegten Umlaeufen
+				
 				fahrzeugumlaeufe.get(i).setFahrten(neu); //aktualisiere die Fahrten von Fahrzeugumlauf i
+				isFeasible(fahrzeugumlaeufe.get(i));
 			}
 		}
 		for(int i = 0; i < fahrzeugumlaeufe.size(); i++){ // fuer jeden Fahrzeugumlauf i
@@ -269,7 +266,9 @@ public class Initialloesung {
 				}
 			}
 		}
-		ArrayList umlaeufe = new ArrayList<Fahrzeugumlauf>(); // eine ArrayList von Fahrzeugumlaeufen
+
+		
+		ArrayList<Fahrzeugumlauf> umlaeufe = new ArrayList<Fahrzeugumlauf>(); // eine ArrayList von Fahrzeugumlaeufen
 		umlaeufe.add(eins);
 		umlaeufe.add(zwei);
 		return umlaeufe; // Liste von zwei Fahrzeugumlaeufen, welche jeweils key1 und key2 beinhalten 
@@ -303,6 +302,7 @@ public class Initialloesung {
 		neu.add(deadruntimes.get(eins.getLast().getToStopId()+zwei.getFirst().getFromStopId())); // neu entstehende Leerfahrt zwischen eins und zwei
 		neu.addAll(zwei);
 		
+	
 		return neu; // neu ist der zusammengelegte Umlauf (als LinkedList von Fahrten gespeichert): Depot - key1 - key2 - Depot 
 	}
 	
@@ -469,11 +469,6 @@ private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Jour
 		return numberOfNewStations;	
 	}
 	
-	private HashMap<String, Deadruntime> getId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/** 
 	 * Methode zum Finden der Schluessel vom groessten Saving
 	 * 
@@ -498,6 +493,151 @@ private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Jour
 
 	public void setInitialloesung(Vector<Fahrzeugumlauf> initialloesung) {
 		this.fahrzeugumlaeufe = initialloesung;
+	}
+	
+public boolean isFeasible(Fahrzeugumlauf umlauf) {
+		
+		if (!(umlauf.getFahrten().get(0) instanceof Deadruntime) || !(umlauf.getFahrten().get(umlauf.size()-1) instanceof Deadruntime)){
+			return false;
+		}
+		
+		for (int i = 1; i < umlauf.size()-3; i = i + 2) {
+			Servicejourney temp = (Servicejourney) umlauf.getAtIndex(i);
+			Servicejourney next = (Servicejourney) umlauf.getAtIndex(i+2);
+			if((temp.getSfArrTime().getTime() + umlauf.getAtIndex(i+1).getRuntime()) > next.getSfDepTime().getTime()){
+				return false;
+			}
+		}
+		
+		umlauf.getLaden().clear();
+		umlauf.getStellen().clear();
+		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
+		int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
+		
+		for (int i = 0; i < umlauf.getFahrten().size(); i++) { // fuer jede Fahrt i im zusammengesetzten Fahrzeugumlauf
+			
+			if (kapazitaet - umlauf.getFahrten().get(i).getVerbrauch() < 0){ // falls Verbrauch von Fahrt i die Restkapazitaet nicht abdeckt
+				
+				if(umlauf.getFahrten().get(i) instanceof Servicejourney){ // falls Fahrt i eine Servicefahrt ist 
+					int x = 0;
+					while((i-2-x) > letzteLadung){ //solange wir nicht die erste SF oder die LetzteLadung erreichen
+						if(feasibilityHelper.zeitpufferFuerLadezeit(umlauf.getFahrten().get(i-2-x).getId(), umlauf.getFahrten().get(i-x).getId(), deadruntimes, servicejourneys, kapazitaet)){
+							//wenn genug Zeit zum Laden vorhanden ist
+							if(x==0){ //falls direkt bei der betroffenen SF geladen werden kann
+								if (stoppoints.get(umlauf.getFahrten().get(i).getFromStopId()).isLadestation()){ //falls noch keine Ladestation an dieser Stelle vorhanden ist
+									kapazitaet = 80; // Kapazitaet wieder voll geladen
+									letzteLadung = i; // merkt sich, an i die letzte Ladung erfolgt ist
+									umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(i).getFromStopId()));
+									umlauf.getStellen().add(letzteLadung);									
+									break;
+								} 
+							}else{ // falls nicht direkt in i geladen werden kann und damit die vorherigen SF anschauen muss
+								if (stoppoints.get(umlauf.getFahrten().get(i-2-x).getToStopId()).isLadestation()){ // 
+									kapazitaet = 80; // Kapazitaet wieder voll geladen
+									umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(i-2-x).getToStopId()));
+									letzteLadung = i - 2 - x; 
+									umlauf.getStellen().add(letzteLadung);
+									i = letzteLadung + 1;	
+									break;
+								} 
+							}
+						}
+						x = x + 2;
+					}
+					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
+						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
+							if (stoppoints.get(umlauf.getFahrten().get(1).getFromStopId()).isLadestation()){ // falls vor SF1 noch keine Ladestation gebaut wird
+								kapazitaet = 80;
+								umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(1).getFromStopId()));
+								i = 1;
+								letzteLadung = 1;
+								umlauf.getStellen().add(letzteLadung);
+							}
+							else{
+								umlauf.getLaden().clear();
+								umlauf.getStellen().clear();
+								umlauf.getStellen().add(100000000);
+								return false;
+							}
+						}
+						else{ // es wird zum zweiten mal versucht an der gleichen Haltestelle zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich
+							umlauf.getLaden().clear();
+							umlauf.getStellen().clear();
+							umlauf.getStellen().add(1000000);
+							return false;
+						}
+					}
+				}	
+
+				if(umlauf.getFahrten().get(i) instanceof Deadruntime){ // falls Fahrt i eine Leerfahrt ist
+					int x = 0;
+					while(((i - x - 1) > letzteLadung)){ //solange die LetzteLadung nicht wieder erreicht wird
+						if(i == umlauf.getFahrten().size()-1 && x == 0){ //falls i die letzte Leerfahrt ist
+							if (stoppoints.get(umlauf.getFahrten().get(i-1).getToStopId()).isLadestation()){ //falls keine Ladestation vorhanden an Endhaltestelle von SF (i-1)
+								kapazitaet = 80;
+								umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(i-1).getToStopId()));
+								letzteLadung = i - 1;
+								umlauf.getStellen().add(letzteLadung);
+								i = i - 1;
+								break;
+							}
+							else{
+								x = x + 2;
+							}
+						}
+						else if(x==0){
+							if(feasibilityHelper.zeitpufferFuerLadezeit(umlauf.getFahrten().get(i-1).getId(), umlauf.getFahrten().get(i+1).getId(), deadruntimes, servicejourneys, kapazitaet)){					
+								if (stoppoints.get(umlauf.getFahrten().get(i-1).getToStopId()).isLadestation()){
+									kapazitaet = 80;
+									umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(i-1).getToStopId()));
+									letzteLadung = i-1;
+									umlauf.getStellen().add(letzteLadung);
+									break;
+								} 
+							}
+							x = x + 2;
+						}else{
+							if(feasibilityHelper.zeitpufferFuerLadezeit(umlauf.getFahrten().get(i-2-x+1).getId(), umlauf.getFahrten().get(i-x+1).getId(), deadruntimes, servicejourneys, kapazitaet)){
+								if (stoppoints.get(umlauf.getFahrten().get(i-x-1).getToStopId()).isLadestation()){ // i - x ist die Starthaltestelle der Servicefahrt i
+									kapazitaet = 80;
+									umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(i-x-1).getToStopId()));
+									letzteLadung = i - x - 1;
+									umlauf.getStellen().add(letzteLadung);
+									i = i - x;
+									break;
+								} 
+							}
+							x = x + 2;
+						}
+					}	
+					if(kapazitaet != 80){ // wenn nicht geladen werden konnte, dann lade vor Servicefahrt 1 (da geht es zeitlich immer)
+						if(letzteLadung == 0){ // schon einmal vor Servicefahrt 1 geladen?
+							if (stoppoints.get(umlauf.getFahrten().get(1).getFromStopId()).isLadestation()){
+								umlauf.getLaden().add(stoppoints.get(umlauf.getFahrten().get(1).getFromStopId()));
+								kapazitaet = 80;
+								i = 1;
+								letzteLadung = 1;
+								umlauf.getStellen().add(letzteLadung);
+							}
+							else{
+								umlauf.getLaden().clear();
+								umlauf.getStellen().clear();
+								umlauf.getStellen().add(100000000);
+								return false;
+							}
+						}
+						else{
+							umlauf.getLaden().clear();
+							umlauf.getStellen().clear();
+							umlauf.getStellen().add(100000000);
+							return false; // es wird zum zweiten mal versucht vor Servicefahrt 1 zu laden --> Endlosschleife: Fahrzeugumlauf nicht moeglich 
+						}
+					}
+				}	
+			}
+			kapazitaet = kapazitaet - umlauf.getFahrten().get(i).getVerbrauch(); // aktualisiere die Kapazitaet nach Fahrt i, falls Fahrt i noch gefahren werden kann
+		}
+		return true;
 	}
 	
 }

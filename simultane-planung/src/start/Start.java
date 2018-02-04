@@ -22,9 +22,9 @@ public class Start {
 
 	public static void main(String[] args) {
 
-		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
 		
-		Initialloesung p = new Initialloesung();
+		Initialloesung p = new Initialloesung(test.deadruntimes, test.servicejourneys, test.stoppoints);
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes, test.stoppoints);
 		HashMap<String, Double> savings;
 		int numberOfLoadingStations = 0;
@@ -38,7 +38,7 @@ public class Start {
 		
 		//neu
 		try {
-			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung.txt", true);
+			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 

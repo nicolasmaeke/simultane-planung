@@ -130,6 +130,15 @@ public class Schedule {
 		if (!(umlauf.getFahrten().get(0) instanceof Deadruntime) || !(umlauf.getFahrten().get(umlauf.size()-1) instanceof Deadruntime)){
 			return false;
 		}
+		
+		for (int i = 1; i < umlauf.size()-3; i = i + 2) {
+			Servicejourney temp = (Servicejourney) umlauf.getAtIndex(i);
+			Servicejourney next = (Servicejourney) umlauf.getAtIndex(i+2);
+			if((temp.getSfArrTime().getTime() + umlauf.getAtIndex(i+1).getRuntime()) > next.getSfDepTime().getTime()){
+				return false;
+			}
+		}
+		
 		umlauf.getLaden().clear();
 		umlauf.getStellen().clear();
 		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
