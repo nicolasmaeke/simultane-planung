@@ -1,6 +1,11 @@
 package start;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +63,29 @@ public class StartAfterInitialSolution {
 			}
 		}
 		
+		//neu
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+		PrintWriter pw = null;
+		
+		//neu
+		try {
+			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_ergebnis.txt", true);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} 
+		bw = new BufferedWriter(fw); 
+		pw = new PrintWriter(bw);
+		
+		pw.println("*;;;;;;;;;;");
+		pw.println("* Ergebnis;;;;;;;;;;");
+		pw.println("*;;;;;;;;;;");
+		pw.println("Ergebnis: Iteration; Kosten");
+		
 		int counter = 0;
 		double globalCost = initialCost;
+		//HashMap<Integer, Double> ersparnisKurve = new HashMap<Integer, Double>();
+		//ersparnisKurve.put(0, initialCost);
 		do {
 
 			variableNeighborhoodSearch verbesserung = new variableNeighborhoodSearch(localSolution, test.validEdges, test.deadruntimes, test.servicejourneys);
@@ -85,12 +111,15 @@ public class StartAfterInitialSolution {
 					}
 				}
 				System.out.println("global aktualisiert!");
+				//ersparnisKurve.put(counter, globalCost);
 			}
-			
+			pw.println(counter + ";" + globalCost);
+			pw.flush();
+		
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 5000); // Abbruchkriterium fuer Heuristik
+		} while (counter < 1000); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
@@ -165,7 +194,6 @@ public class StartAfterInitialSolution {
 		System.out.println("Anzahl Servicefahrten: " + anzahlSF);
 		System.out.println(verbrauchSF);
 		System.out.println(zeitSF/1000/60/60);
+	
 	}
-	
-	
 }
