@@ -70,7 +70,7 @@ public class StartAfterInitialSolution {
 		
 		//neu
 		try {
-			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_ergebnis.txt", true);
+			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/867_SF_207_50kMax_100000Iteration_ergebnis.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
@@ -80,10 +80,14 @@ public class StartAfterInitialSolution {
 		pw.println("*;;;;;;;;;;");
 		pw.println("* Ergebnis;;;;;;;;;;");
 		pw.println("*;;;;;;;;;;");
-		pw.println("Ergebnis: Iteration; Kosten");
+		pw.println("Ergebnis: Iteration; Kosten; Fahrzeuge; Ladestationen");
 		
 		int counter = 0;
 		double globalCost = initialCost;
+		
+		pw.println(counter + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
+		pw.flush();
+		
 		//HashMap<Integer, Double> ersparnisKurve = new HashMap<Integer, Double>();
 		//ersparnisKurve.put(0, initialCost);
 		do {
@@ -113,13 +117,13 @@ public class StartAfterInitialSolution {
 				System.out.println("global aktualisiert!");
 				//ersparnisKurve.put(counter, globalCost);
 			}
-			pw.println(counter + ";" + globalCost);
+			pw.println(counter + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
 			pw.flush();
 		
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 1000); // Abbruchkriterium fuer Heuristik
+		} while (counter < 100000); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
