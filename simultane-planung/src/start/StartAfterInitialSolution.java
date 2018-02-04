@@ -92,7 +92,7 @@ public class StartAfterInitialSolution {
 			counter ++;
 			System.err.println(counter);
 
-		} while (counter < 300); // Abbruchkriterium fuer Heuristik
+		} while (counter < 500); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
