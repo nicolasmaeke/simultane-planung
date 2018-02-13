@@ -5,13 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.rits.cloning.Cloner;
 import heuristic.variableNeighborhoodSearch;
-import model.Servicejourney;
 import model.Stoppoint;
 import output.Schedule;
 import parser.ProjectReadInWithInitialSolution;
@@ -20,26 +17,30 @@ public class StartAfterInitialSolution {
 
 	public static void main(String[] args) {
 		
+		//Lese Initialleosung ein
 		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung.txt");
 		
+		//Teste, ob die eingelesene Initialloesung zulaessig ist
 		for (int i = 0; i < test.global.getUmlaufplan().size(); i++) {
 			if(!test.global.isFeasible(test.global.getUmlaufplan().get(i))){
 				System.err.println("Is not Feasible!");
 			}
 		}
 		
+		//Gebe Initialloesung aus
 		for (int i = 0; i < test.global.getUmlaufplan().size(); i++) {
 			System.out.println(test.global.getUmlaufplan().get(i).toString());
 		}
-		int numberOfLoadingStations = 0;
 		
+		//Setze und initialisiere Variablen
+		double verbrauchInit = 0;
+		double zeitInit = 0;
+		int numberOfLoadingStations = 0;
 		Schedule globalSolution = test.global;
 		numberOfLoadingStations = globalSolution.getAnzahlLadestationen();
 		Double initialCost = globalSolution.berechneKosten();
-		System.out.println(initialCost);
-		
-		double verbrauchInit = 0;
-		double zeitInit = 0;
+		Schedule shakingSolution = null;
+		Schedule localSolution = test.local;
 		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			for (int j = 0; j < globalSolution.getUmlaufplan().get(i).getFahrten().size(); j++) {
@@ -47,30 +48,22 @@ public class StartAfterInitialSolution {
 				zeitInit = zeitInit + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getRuntime();
 			}
 		}
+		
+		//Gebe Kennzahlen vor der Verbesserung aus
 		System.out.println("Gesamtverbrauch in kWh: " + verbrauchInit);
 		System.out.println("Zeitdauer: " + zeitInit/1000/60/60);
-		
+		System.out.println(initialCost);
 		System.out.println(globalSolution.getVariableKosten() - numberOfLoadingStations*250000);
 		System.out.println(numberOfLoadingStations);
 		System.out.println();
-		
-		Schedule shakingSolution = null;
-		Schedule localSolution = test.local;
-		
-		for (int i = 0; i < test.global.getUmlaufplan().size(); i++) {
-			if(!test.global.isFeasible(test.global.getUmlaufplan().get(i))){
-				System.err.println("Is not Feasible!");
-			}
-		}
-		
-		//neu
+
+		//Schreibe eine neue Datei mit der Loesung
 		FileWriter fw = null;
 		BufferedWriter bw = null;
 		PrintWriter pw = null;
 		
-		//neu
 		try {
-			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/867_SF_207_50kMax_100000Iteration_ergebnis.txt", true);
+			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung_ergebnis.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
@@ -85,11 +78,9 @@ public class StartAfterInitialSolution {
 		int counter = 0;
 		double globalCost = initialCost;
 		
-		pw.println(counter + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
+		pw.println(counter + ";" + globalSolution.berechneKosten() + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
 		pw.flush();
-		
-		//HashMap<Integer, Double> ersparnisKurve = new HashMap<Integer, Double>();
-		//ersparnisKurve.put(0, initialCost);
+
 		do {
 
 			variableNeighborhoodSearch verbesserung = new variableNeighborhoodSearch(localSolution, test.validEdges, test.deadruntimes, test.servicejourneys);
@@ -115,21 +106,22 @@ public class StartAfterInitialSolution {
 					}
 				}
 				System.out.println("global aktualisiert!");
-				//ersparnisKurve.put(counter, globalCost);
 			}
-			pw.println(counter + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
-			pw.flush();
-		
+
 			counter ++;
 			System.err.println(counter);
+			
+			pw.println(counter + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
+			pw.flush();
 
-		} while (counter < 100000); // Abbruchkriterium fuer Heuristik
+		} while (counter < 1000); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
 		numberOfLoadingStations = globalSolution.getAnzahlLadestationen();
-		List<Stoppoint> ladestationen = new ArrayList<Stoppoint>();
 		
+		//Erstelle eine Liste der Ladestationen mit ihren Ladefrequenzen und gebe sie aus
+		List<Stoppoint> ladestationen = new ArrayList<Stoppoint>();
 		for (Map.Entry e: globalSolution.getStoppoints().entrySet()){
 			Stoppoint i1 = globalSolution.getStoppoints().get(e.getKey());
 			System.out.println("Haltestelle " + i1.getId() + " hat Ladestation: " + i1.isLadestation() + " " + i1.getFrequency());
@@ -137,11 +129,10 @@ public class StartAfterInitialSolution {
 				ladestationen.add(i1);
 			}
 		}
-		
 		System.out.println("List of Loadingstations: " + ladestationen);
 		
+		//Berechne Anzahl Umlaeufe und gebe Umlaeufe aus
 		int anzahlUmlaeufe = 0;
-		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			System.out.println(globalSolution.getUmlaufplan().get(i).toString());
 			System.out.println("Ladestationen: " + globalSolution.getUmlaufplan().get(i).getLadenString());
@@ -150,15 +141,16 @@ public class StartAfterInitialSolution {
 			anzahlUmlaeufe ++;
 		}
 		
+		//Gebe Kennzahlen nach der Verbesserung aus
 		System.out.println("Kosten nach Verbesserung: " + globalCost);
 		System.out.println("Variable Kosten: " + (globalSolution.getVariableKosten() - numberOfLoadingStations*250000));
 		System.out.println("Anzahl Umlaeufe: " + anzahlUmlaeufe);
 		System.out.println("Ersparnis: " + (initialCost - globalCost));
 		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
 		
+		//Berechne den Verbrauch und die Dauer des Umlaufplans
 		double verbrauch = 0;
 		double	zeit = 0;
-		
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			for (int j = 0; j < globalSolution.getUmlaufplan().get(i).getFahrten().size(); j++) {
 				verbrauch = verbrauch + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getVerbrauch();
@@ -174,30 +166,14 @@ public class StartAfterInitialSolution {
 		System.out.println("Gesamtverbrauch in kWh: " + verbrauch);
 		System.out.println("Zeitdauer: " + zeit/1000/60/60);
 		
-		// teste, ob die Anzahl der SF noch korrekt ist und ob keine SF doppelt vorkommt
-		int anzahlSF = 0;
-		double verbrauchSF = 0;
-		double zeitSF = 0;
-		
-		List<String> sf = new LinkedList<String>();
+		//Berechne die durchschnittliche Laenge der Fahrzeugumlaeufe
+		double durchschnittLaengeFahrzeugumlaeufe = 0.0;
 		for (int i = 0; i < globalSolution.getUmlaufplan().size(); i++) {
 			for (int j = 0; j < globalSolution.getUmlaufplan().get(i).getFahrten().size(); j++) {
-				if(globalSolution.getUmlaufplan().get(i).getFahrten().get(j) instanceof Servicejourney){
-					anzahlSF++;
-					verbrauchSF = verbrauchSF + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getVerbrauch();
-					zeitSF = zeitSF + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getRuntime();
-					if(sf.contains(globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getId())){
-						System.out.println("Fehler"+ globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getId());
-					}
-					else{
-						sf.add(globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getId());
-					}
-				}
-			}	
+				durchschnittLaengeFahrzeugumlaeufe = durchschnittLaengeFahrzeugumlaeufe + globalSolution.getUmlaufplan().get(i).getFahrten().get(j).getDistance();
+			}
 		}
-		System.out.println("Anzahl Servicefahrten: " + anzahlSF);
-		System.out.println(verbrauchSF);
-		System.out.println(zeitSF/1000/60/60);
-	
+		durchschnittLaengeFahrzeugumlaeufe = durchschnittLaengeFahrzeugumlaeufe * 1/(globalSolution.getAnzahlBusse());
+		System.out.println("durchschnittliche Laenge eines Umlaufs: " + durchschnittLaengeFahrzeugumlaeufe);
 	}
 }

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.Map.Entry;
 
-import construction.Initialloesung;
+import heuristic.Initialloesung;
 import model.Deadruntime;
 import model.Fahrzeugumlauf;
 import model.Stoppoint;
@@ -22,10 +22,10 @@ public class Start {
 
 	public static void main(String[] args) {
 
-		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints.txt");
 		
 		Initialloesung p = new Initialloesung(test.deadruntimes, test.servicejourneys, test.stoppoints);
-		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung(test.servicejourneys, test.deadruntimes, test.stoppoints);
+		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung();
 		HashMap<String, Double> savings;
 		int numberOfLoadingStations = 0;
 		int iteration = 0;
@@ -38,7 +38,7 @@ public class Start {
 		
 		//neu
 		try {
-			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_433_SF_207_stoppoints_initialloesung.txt", true);
+			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/867_SF_207_HS_initialloesung_mitAlternativenKostenLadestation.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
@@ -53,7 +53,7 @@ public class Start {
 				System.out.println(initialloesung.get(j).getFahrten().toString());
 			}
 			*/
-			savings = p.savings(test.validEdges, test.deadruntimes, test.servicejourneys);
+			savings = p.savings(test.validEdges);
 			
 			
 			//System.out.println("Savings-Matrix: " + savings);
@@ -79,7 +79,7 @@ public class Start {
 			System.out.println(iteration);
 			
 			
-			p.neuerUmlaufplan(savings, test.deadruntimes, test.stoppoints, test.servicejourneys, iteration);
+			p.neuerUmlaufplan(savings, iteration);
 			
 			iteration ++;
 			

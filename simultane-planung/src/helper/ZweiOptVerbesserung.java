@@ -2,9 +2,9 @@ package helper;
 
 import model.Fahrzeugumlauf;
 
-public class ZweiOptVerbesserung {
+public class ZweiOptVerbesserung implements VerbesserungsObjekte {
 	
-	double costs = 0;
+	double savings = 0;
 	Fahrzeugumlauf eins = null;
 	Fahrzeugumlauf zwei = null;
 	int indexAltEins = 0;
@@ -16,17 +16,17 @@ public class ZweiOptVerbesserung {
 	public ZweiOptVerbesserung(double savings, Fahrzeugumlauf eins, Fahrzeugumlauf zwei, int indexAltEins, int indexAltZwei){
 		this.eins = eins;
 		this.zwei = zwei;
-		this.costs = savings;
+		this.savings = savings;
 		this.indexAltEins = indexAltEins;
 		this.indexAltZwei = indexAltZwei;
 	}
 
-	public double getCosts() {
-		return costs;
+	public double getSavings() {
+		return savings;
 	}
 
-	public void setCosts(double savings) {
-		this.costs = savings;
+	public void setSavings(double savings) {
+		this.savings = savings;
 	}
 
 	public Fahrzeugumlauf getEins() {

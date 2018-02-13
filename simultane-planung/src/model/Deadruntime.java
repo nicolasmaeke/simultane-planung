@@ -11,7 +11,7 @@ public class Deadruntime implements Journey {
 	private String fromStopId;
     private String toStopId;
     private double distance;
-    double runtime;
+    private double runtime;
     private double verbrauch;
     
     /**

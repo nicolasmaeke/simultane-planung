@@ -12,14 +12,14 @@ import model.Stoppoint;
 
 public class Schedule {
 	
-	Vector<Fahrzeugumlauf> umlaufplan;
+	private Vector<Fahrzeugumlauf> umlaufplan;
 	private double kosten; 
 	private int anzahlLadestationen;
 	private int anzahlBusse;
 	private double variableKosten;
 	private HashMap<String, Stoppoint> stoppoints;
-	HashMap<String, Servicejourney> servicejourneys;
-	HashMap<String, Deadruntime> deadruntimes;
+	private HashMap<String, Servicejourney> servicejourneys;
+	private HashMap<String, Deadruntime> deadruntimes;
 	
 	public Schedule(Vector<Fahrzeugumlauf> fahrzeugumlaeufe, HashMap<String, Servicejourney> servicejourneys,
 			HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints){

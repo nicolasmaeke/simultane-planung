@@ -1,12 +1,7 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import helper.feasibilityHelper;
 
 /**
  * 
@@ -20,7 +15,7 @@ public class Fahrzeugumlauf {
 	// Typ der Liste ist Journey, damit sowohl Servicefahrten als auch Leerfahrten hinzugefuegt werden koennen
 	private LinkedList<Journey> fahrten; 
 	private double laenge = 0;
-	private long kosten = 0;
+	//private long kosten = 0;
 	private LinkedList<Stoppoint> laden;
 	private LinkedList<Integer> stellen;
 	
@@ -116,7 +111,7 @@ public class Fahrzeugumlauf {
 		Servicejourney sZwei = (Servicejourney) fahrten.get(fahrten.size()-2);
 		Deadruntime dEins = (Deadruntime) fahrten.get(0);
 		Deadruntime dZwei = (Deadruntime) fahrten.get(fahrten.size()-1);
-		double personalkosten = (sZwei.getSfArrTime().getTime() + dZwei.runtime) - (sEins.getSfDepTime().getTime() - dEins.runtime);
+		double personalkosten = (sZwei.getSfArrTime().getTime() + dZwei.getRuntime()) - (sEins.getSfDepTime().getTime() - dEins.getRuntime());
 		for (int i = 0; i < fahrten.size(); i++) {
 			verbrauchsKosten = verbrauchsKosten + fahrten.get(i).getVerbrauch();
 		}
@@ -177,10 +172,6 @@ public class Fahrzeugumlauf {
 
 	public void setLaden(LinkedList<Stoppoint> laden) {
 		this.laden = laden;
-	}
-
-	public void setKosten(long kosten) {
-		this.kosten = kosten;
 	}
 
 	public LinkedList<Integer> getStellen() {

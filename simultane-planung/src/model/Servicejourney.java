@@ -16,7 +16,7 @@ public class Servicejourney implements Journey {
     private String toStopId;
     private Date sfDepTime;
     private Date sfArrTime;
-    double Distance; // in Meter
+    private double Distance; // in Meter
     private double sfRuntime; // in Milisekunden
     private double sfVerbrauch;
     /**

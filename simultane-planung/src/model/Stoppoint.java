@@ -8,7 +8,6 @@ package model;
 public class Stoppoint {
 
 	private String id;
-	private String code;
 	private String name;
 	private boolean ladestation;
 	private int frequency;
@@ -19,7 +18,6 @@ public class Stoppoint {
 	 */
 	public Stoppoint(String id){
 		this.setId(id);
-		this.setCode(id);
 		this.setName("Haltestelle " + id);
 		setLadestation(false);
 		this.frequency = 0;
@@ -31,14 +29,6 @@ public class Stoppoint {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String id2) {
-		this.code = id2;
 	}
 
 	public String getName() {

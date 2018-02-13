@@ -1,3 +1,12 @@
+Kosten nach Verbesserung: 3.111275572297222E7
+Variable Kosten: 12755.722972222138
+Anzahl Umlaeufe: 74
+Ersparnis: 2.1499600264427774E7
+Anzahl Ladestationen: 6
+Gesamtverbrauch in kWh: 20324.520499999846
+Zeitdauer: 536.3613888888889
+Anzahl Servicefahrten: 867
+
 *;;;;;;;;;;
 * Ergebnis;;;;;;;;;;
 *;;;;;;;;;;

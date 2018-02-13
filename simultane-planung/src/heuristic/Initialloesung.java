@@ -1,4 +1,4 @@
-package construction;
+package heuristic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public class Initialloesung {
 	 * @param deadruntimes
 	 * @return eine Liste von Fahrzeugumlaeufen
 	 */
-	public Vector<Fahrzeugumlauf> erstelleInitialloesung(HashMap<String, Servicejourney> servicejourneys, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints){
+	public Vector<Fahrzeugumlauf> erstelleInitialloesung(){
 		
 		for (Entry<String, Servicejourney> i: servicejourneys.entrySet()){ //fuer jede Servicefahrt i
 			Fahrzeugumlauf j = new Fahrzeugumlauf(i.getKey()); //erstelle einen neuen Fahrzeugumlauf mit dieser Servicefahrt
@@ -86,7 +86,7 @@ public class Initialloesung {
 	 * @param deadruntimes
 	 * @return ein Hashmap mit key ist zwei IDs von SF, value ist der Saving
 	 */
-	public HashMap<String, Double> savings(HashMap<String, Integer> validEdges, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys){
+	public HashMap<String, Double> savings(HashMap<String, Integer> validEdges){
 		
 		// Key: IDs der beiden Servicefahrten, die zusammengelegt werden sollen
 		// Value: Savings, falls die beiden Servicefahrten zusammengelegt werden
@@ -126,7 +126,7 @@ public class Initialloesung {
 					 */
 					if(validEdges.get(""+keyEkFu1+keySkFu2) == 1){ // falls Verbindung zwischen letzter SF von i und erster SF von j zulaessig
 						neu = deadruntimes.get(""+endknotenVonFu1.getToStopId()+startknotenVonFu2.getFromStopId()); //neue Leerfahrt hinzufuegen
-						savings.put(""+keyEkFu1+keySkFu2, calculateSavings(fahrzeugumlaeufe.get(i),fahrzeugumlaeufe.get(j), neu, deadruntimes, servicejourneys)); //berechne Saving
+						savings.put(""+keyEkFu1+keySkFu2, calculateSavings(fahrzeugumlaeufe.get(i),fahrzeugumlaeufe.get(j), neu)); //berechne Saving
 					}
 					
 					/**
@@ -135,7 +135,7 @@ public class Initialloesung {
 					 */
 					if(validEdges.get(""+keyEkFu2+keySkFu1) == 1){ // falls Verbindung zwischen letzter SF von j und erster SF von i zulaessig
 						neu = deadruntimes.get(""+endknotenVonFu2.getToStopId()+startknotenVonFu1.getFromStopId()); //neue Leerfarht hinzufuegen
-						savings.put(""+keyEkFu2+keySkFu1, calculateSavings(fahrzeugumlaeufe.get(j),fahrzeugumlaeufe.get(i), neu, deadruntimes, servicejourneys)); //berechne Saving
+						savings.put(""+keyEkFu2+keySkFu1, calculateSavings(fahrzeugumlaeufe.get(j),fahrzeugumlaeufe.get(i), neu)); //berechne Saving
 					}
 				}	
 			}
@@ -152,7 +152,7 @@ public class Initialloesung {
 	 * @param deadrun
 	 * @return Saving
 	 */
-	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Servicejourney> servicejourneys) {
+	private double calculateSavings(Fahrzeugumlauf i, Fahrzeugumlauf j, Deadruntime deadrun) {
 		double saving = 0;
 		double zeitpuffer = feasibilityHelper.zeitpufferZwischenServicefahrten(i.getFahrten().get(i.size()-2).getId(), j.getFahrten().get(1).getId(), deadruntimes, servicejourneys);
 		double d1 = j.getFahrten().getFirst().getDistance(); // Distanz zwischen Depot und Servicefahrt
@@ -171,7 +171,7 @@ public class Initialloesung {
 	 * @param servicejourneys
 	 * @return eine Liste von Fahrzeugumlaeufen
 	 */
-	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys, Integer iteration){
+	public Vector<Fahrzeugumlauf> neuerUmlaufplan(HashMap<String, Double> savings, Integer iteration){
 		
 		String temp;
 		int n;
@@ -188,8 +188,8 @@ public class Initialloesung {
 				return fahrzeugumlaeufe; // hoert auf & aktuelle Fahrzeugumlaeufe zurueckgeben
 			}
 			if(!keys.contains(temp)){ // falls temp noch nicht beruecksichtigt wird
-				neu = umlaeufeZusammenlegen(temp, deadruntimes); // Fahrten von temp werden zusammengelegt und in neu eingepackt
-				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys); 
+				neu = umlaeufeZusammenlegen(temp); // Fahrten von temp werden zusammengelegt und in neu eingepackt
+				numberOfNewLoadingStations = newLoadingstations(neu, temp); 
 				if (numberOfNewLoadingStations.get(temp) == null){ // falls keine Ladestation gebaut werden kann
 					savings.replace(temp, 0.0); // Saving von temp ist 0
 				}else{ // falls Ladestationen gebaut werden koennen
@@ -200,8 +200,8 @@ public class Initialloesung {
 				keys.add(temp); // temp wird als beruecksichtigt gespeichert 
 			}
 			else {
-				neu = umlaeufeZusammenlegen(temp, deadruntimes);
-				numberOfNewLoadingStations = newLoadingstations(neu, temp, deadruntimes, stoppoints, servicejourneys);
+				neu = umlaeufeZusammenlegen(temp);
+				numberOfNewLoadingStations = newLoadingstations(neu, temp);
 			}
 
 		} while (temp != getHighestSaving(savings)); //solange temp nicht der groesste Saving ist
@@ -282,7 +282,7 @@ public class Initialloesung {
 	 * @param deadruntimes
 	 * @return zusammengelegter Umlauf als Liste von Fahrten (Depot - SF1 - SF2 - Depot)
 	 */	
-	private LinkedList<Journey> umlaeufeZusammenlegen(String keyOfHighestSavings, HashMap<String, Deadruntime> deadruntimes){
+	private LinkedList<Journey> umlaeufeZusammenlegen(String keyOfHighestSavings){
 
 		String key = keyOfHighestSavings; //Schluessel vom groessten Saving 
 		int n = key.length()/2;
@@ -313,7 +313,7 @@ public class Initialloesung {
 	 * @param 
 	 * @return
 	 */	
-private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Journey> neu, String keyOfHighestValue, HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints, HashMap<String, Servicejourney> servicejourneys){
+	private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Journey> neu, String keyOfHighestValue){
 		
 		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
 		HashMap <String, ArrayList<Stoppoint>> numberOfNewStations = new HashMap<String, ArrayList<Stoppoint>>();
@@ -495,7 +495,7 @@ private HashMap<String, ArrayList<Stoppoint>> newLoadingstations(LinkedList<Jour
 		this.fahrzeugumlaeufe = initialloesung;
 	}
 	
-public boolean isFeasible(Fahrzeugumlauf umlauf) {
+	public boolean isFeasible(Fahrzeugumlauf umlauf) {
 		
 		if (!(umlauf.getFahrten().get(0) instanceof Deadruntime) || !(umlauf.getFahrten().get(umlauf.size()-1) instanceof Deadruntime)){
 			return false;

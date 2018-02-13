@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
-
 import helper.SfUmlegen;
 import helper.ZweiOptVerbesserung;
 import model.Deadruntime;
@@ -189,7 +188,7 @@ public class variableNeighborhoodSearch {
 				ZweiOptVerbesserung tempOpt = zweiOpt(randoms.get(i), randoms.get(randoms.size()-1)); // setze Methode Zweioptverbesserung ein
 			
 				if(tempOpt != null){ // falls eine Verbesserung vorhanden ist
-					if(tempOpt.getCosts() > bestOpt.getCosts()){ // falls durch temp mehr gespart wird als durch best
+					if(tempOpt.getSavings() > bestOpt.getSavings()){ // falls durch temp mehr gespart wird als durch best
 						bestOpt = tempOpt; // ersetzte best durch temp
 					}
 				}
@@ -200,17 +199,17 @@ public class variableNeighborhoodSearch {
 				SfUmlegen tempUmlegen = sfUmlegen(randoms.get(i), randoms.get(randoms.size()-1)); // Umlegen minimal und gross
 				
 				if(tempUmlegen != null){ // falls eine Verbesserung vorhanden ist
-					if(tempUmlegen.getCosts() > bestUmlegen.getCosts()){ // falls durch temp mehr gespart wird als durch best
+					if(tempUmlegen.getSavings() > bestUmlegen.getSavings()){ // falls durch temp mehr gespart wird als durch best
 						bestUmlegen = tempUmlegen; // ersetzte best durch temp
 					}
 				}
 			}
 			
 			
-			if(bestOpt.getCosts() == 0 && bestUmlegen.getCosts() == 0){ // wenn durch die aktuelle Nachbarschaft nichts gespart wird
+			if(bestOpt.getSavings() == 0 && bestUmlegen.getSavings() == 0){ // wenn durch die aktuelle Nachbarschaft nichts gespart wird
 				nachbarschaft++; // erhoehe die Nachbarschaft um 1
 			}
-			else if(bestOpt.getCosts() >= bestUmlegen.getCosts()){
+			else if(bestOpt.getSavings() >= bestUmlegen.getSavings()){
 			 // wenn durch das ZweiOpt mehr gespart wird als durch SfUmlegen
 				String id2 = localBest.getUmlaufplan().get(bestOpt.getIndexAltZwei()).getId();
 				localBest.getUmlaufplan().remove(bestOpt.getIndexAltEins()); // entferne altEins aus der lokal besten Loesung
@@ -360,7 +359,7 @@ public class variableNeighborhoodSearch {
 								savings = savings + 400000/((klein.getFahrten().size())-1)/2;
 								
 								result.setZwei(neuGross);
-								result.setCosts(savings);
+								result.setSavings(savings);
 
 								/**
 								for (int j = 0; j < localBest.getUmlaufplan().size(); j++) { // suche gross in Lokalbest

@@ -1,0 +1,13 @@
+*;;;;;;;;;;
+* Ergebnis;;;;;;;;;;
+*;;;;;;;;;;
+Ergebnis: Iteration; Kosten; Fahrzeuge; Ladestationen
+0;5.2612355987399995E7;79;42
+*;;;;;;;;;;
+* Ergebnis;;;;;;;;;;
+*;;;;;;;;;;
+Ergebnis: Iteration; Kosten; Fahrzeuge; Ladestationen
+0;5.2612355987399995E7;79;42
+1;4.2112355987399995E7;79;42
+2;4.2112355987399995E7;79;42
+3;4.1862377666261114E7;79;41
