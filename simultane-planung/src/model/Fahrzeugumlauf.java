@@ -150,7 +150,7 @@ public class Fahrzeugumlauf {
 	}
 
 	public void setLaenge(double laenge) {
-		this.laenge = laenge;
+
 	}
 
 

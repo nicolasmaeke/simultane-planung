@@ -356,7 +356,15 @@ public class variableNeighborhoodSearch {
 							}
 							if(localBest.isFeasible(neuGross)){ // wenn neuGross feasible ist
 								
-								savings = savings + 400000/((klein.getFahrten().size())-1)/2;
+								double verbrauchsKosten = 0.0;
+								double personalkosten = 0.0;
+								for (int i1 = 0; i1 < neuGross.getFahrten().size(); i1++) {
+									verbrauchsKosten = verbrauchsKosten + neuGross.getFahrten().get(i1).getVerbrauch();
+									personalkosten = personalkosten + neuGross.getFahrten().get(i1).getRuntime();
+								}
+								personalkosten = personalkosten * 20 / 1000 / 60 / 60;
+								
+								savings = (savings + 400000/((klein.getFahrten().size())-1)/2) - (verbrauchsKosten + personalkosten);
 								
 								result.setZwei(neuGross);
 								result.setSavings(savings);

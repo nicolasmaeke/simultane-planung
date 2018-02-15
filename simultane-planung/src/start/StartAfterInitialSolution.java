@@ -56,6 +56,7 @@ public class StartAfterInitialSolution {
 		System.out.println(globalSolution.getVariableKosten() - numberOfLoadingStations*250000);
 		System.out.println(numberOfLoadingStations);
 		System.out.println();
+		System.out.println(1.0512355987399999E7-numberOfLoadingStations*250000);
 
 		//Schreibe eine neue Datei mit der Loesung
 		FileWriter fw = null;
