@@ -3,24 +3,27 @@ package output;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
 import helper.feasibilityHelper;
 import model.Deadruntime;
 import model.Fahrzeugumlauf;
 import model.Servicejourney;
 import model.Stoppoint;
 
+/**
+ * Klasse repraesentiert einen Umlaufplan und damit die Loesung des Problems.
+ * 
+ */
 public class Schedule {
-	
+
 	private Vector<Fahrzeugumlauf> umlaufplan;
 	private double kosten; 
-	private int anzahlLadestationen;
+	private int anzahlLadestationen; // entspricht size von umlaufplan
 	private int anzahlBusse;
 	private double variableKosten;
 	private HashMap<String, Stoppoint> stoppoints;
 	private HashMap<String, Servicejourney> servicejourneys;
 	private HashMap<String, Deadruntime> deadruntimes;
-	
+
 	public Schedule(Vector<Fahrzeugumlauf> fahrzeugumlaeufe, HashMap<String, Servicejourney> servicejourneys,
 			HashMap<String, Deadruntime> deadruntimes, HashMap<String, Stoppoint> stoppoints){
 		this.umlaufplan = fahrzeugumlaeufe;
@@ -35,10 +38,10 @@ public class Schedule {
 			}
 		}
 		for (int i = 0; i < umlaufplan.size(); i++) {
-				variableKosten = variableKosten + umlaufplan.get(i).getKostenMitLadestationen();
+			variableKosten = variableKosten + umlaufplan.get(i).getKostenMitLadestationen();
 		}
 	}
-	
+
 	public double berechneKosten(){
 		kosten = 0;
 		kosten = anzahlBusse * 400000 + variableKosten;
@@ -91,7 +94,7 @@ public class Schedule {
 		variableKosten = 0;
 		for (int i = 0; i < umlaufplan.size(); i++) {
 			variableKosten = variableKosten + umlaufplan.get(i).getKostenMitLadestationen();
-	}
+		}
 	}
 
 	public void berechneFrequenzen(){
@@ -113,7 +116,7 @@ public class Schedule {
 				i1.setFrequency(counter);
 				i1.setLadestation(true);
 			}
-			
+
 		}
 	}
 
@@ -124,13 +127,24 @@ public class Schedule {
 	public void setStoppoints(HashMap<String, Stoppoint> stoppoints) {
 		this.stoppoints = stoppoints;
 	}
-	
+
+	/**
+	 * Methode zur Pruefung der Zulaessigkeit eines Fahrzeugumlaufs.
+	 * Dabei werden folgenden Kriterien geprueft:
+	 * 1. Start und Ende mit Leerfahrt zum Depot
+	 * 2. Zeitliche Zulaessigkeit
+	 * 3. Batterie-Kapazitaet ausreichend
+	 * @param umlauf
+	 * @return
+	 */
 	public boolean isFeasible(Fahrzeugumlauf umlauf) {
-		
-		if (!(umlauf.getFahrten().get(0) instanceof Deadruntime) || !(umlauf.getFahrten().get(umlauf.size()-1) instanceof Deadruntime)){
+
+		// 1. Start und Ende mit Leerfahrt zum Depot
+		if(!(umlauf.getFahrten().get(0).getId().startsWith("00001")) || !(umlauf.getFahrten().get(umlauf.size()-1).getId().endsWith("00001"))){
 			return false;
 		}
-		
+
+		// 2. Zeitliche Zulaessigkeit
 		for (int i = 1; i < umlauf.size()-3; i = i + 2) {
 			Servicejourney temp = (Servicejourney) umlauf.getAtIndex(i);
 			Servicejourney next = (Servicejourney) umlauf.getAtIndex(i+2);
@@ -138,16 +152,17 @@ public class Schedule {
 				return false;
 			}
 		}
-		
+
+		// 3. Batterie-Kapazitaet ausreichend
 		umlauf.getLaden().clear();
 		umlauf.getStellen().clear();
 		double kapazitaet = 80.0; // Batteriekapazitaet in kWh 
 		int letzteLadung = 0; // ID der Fahrt im Fahrzeugumlauf, wo zuletzt geladen wird
-		
+
 		for (int i = 0; i < umlauf.getFahrten().size(); i++) { // fuer jede Fahrt i im zusammengesetzten Fahrzeugumlauf
-			
+
 			if (kapazitaet - umlauf.getFahrten().get(i).getVerbrauch() < 0){ // falls Verbrauch von Fahrt i die Restkapazitaet nicht abdeckt
-				
+
 				if(umlauf.getFahrten().get(i) instanceof Servicejourney){ // falls Fahrt i eine Servicefahrt ist 
 					int x = 0;
 					while((i-2-x) > letzteLadung){ //solange wir nicht die erste SF oder die LetzteLadung erreichen

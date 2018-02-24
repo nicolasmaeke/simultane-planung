@@ -1,30 +1,23 @@
 package parser;
 
-
-
 import helper.feasibilityHelper;
 import model.Deadruntime;
 import model.Servicejourney;
 import model.Stoppoint;
-import output.Schedule;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Vector;
 
 /**
+ * Parser Klasse, die eine Datei ohne Initialloesung einliest.
+ * Nur die Parameter der Daten werden eingelesen, die fuer die Problemstellung
+ * des Projektes relevant sind.
  * 
- * Parser Klassen, die nur die Instanzen der Daten einliest,
- * die fuer die Problemstellung unseres Projektes notwendig sind.
- *
  */
 public class ProjectReadIn {
 

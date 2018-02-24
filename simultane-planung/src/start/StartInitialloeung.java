@@ -1,8 +1,6 @@
 package start;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,34 +8,36 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.Map.Entry;
-
 import heuristic.Initialloesung;
-import model.Deadruntime;
 import model.Fahrzeugumlauf;
 import model.Stoppoint;
-import output.Schedule;
 import parser.ProjectReadIn;
 
-public class Start {
+/**
+ * Klasse startet die Eroeffnungsheuristik.
+ * @input: Eine Datei mit Rohdaten muss eingelesen werden.
+ * @output: Am Ende wird eine neue Datei mit Rohdaten und Initialloesung geschrieben.
+ *
+ */
+public class StartInitialloeung {
 
 	public static void main(String[] args) {
 
+		//Lese Daten ein (fuer den Pfad siehe data --> Rechtsklick auf die gewuenschte Datei --> Properties)
 		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints.txt");
 		
 		Initialloesung p = new Initialloesung(test.deadruntimes, test.servicejourneys, test.stoppoints);
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung();
 		HashMap<String, Double> savings;
-		int numberOfLoadingStations = 0;
 		int iteration = 0;
 		double valueSaving = 0.0;
 		
-		//neu
 		FileWriter fw = null;
 		BufferedWriter bw = null;
 		PrintWriter pw = null;
 		
-		//neu
 		try {
+			// waehle Zielpfad und Name der Ergebnis-Datei aus
 			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/867_SF_207_HS_initialloesung_mitAlternativenKostenLadestation.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -48,80 +48,36 @@ public class Start {
 		
 		do {
 			valueSaving = 0.0;
-			/**
-			for (int j = 0; j < initialloesung.size(); j++) {
-				System.out.println(initialloesung.get(j).getFahrten().toString());
-			}
-			*/
+			
 			savings = p.savings(test.validEdges);
-			
-			
-			//System.out.println("Savings-Matrix: " + savings);
-			
-			/**
-			for (Map.Entry e: test.stoppoints.entrySet()){
-				Stoppoint i1 = test.stoppoints.get(e.getKey());
-				if (i1.isLadestation()) {
-					System.out.println("Ladestationen Haltestelle: " + i1.getId());
-					numberOfLoadingStations ++;
-				}
-			}
-			
-			*/
-			//Schedule ergebnis = new Schedule(p.getInitialloesung(), test.stoppoints);
-			
-			//System.out.println("Kosten für den Umlaufplan: " + ergebnis.berechneKosten());
-			
-			//System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
-			
-			//numberOfLoadingStations = 0;
-
+		
 			System.out.println(iteration);
-			
 			
 			p.neuerUmlaufplan(savings, iteration);
 			
 			iteration ++;
-			
-			if(iteration == 225){
-				iteration = 225;
-			}	
-			
+
 			for (Entry<String, Double> e: savings.entrySet()){ 
 				if(e.getValue() > valueSaving){
 					valueSaving = e.getValue();
 				}
 			}
-			
+		// Terminierungskriterium: Die Savings-Matrix ist leer oder es sind keine positiven Savings mehr vorhanden
 		}while(!savings.isEmpty() && !(valueSaving <= 0)) ;
 	
-		
-		for (Map.Entry e: test.stoppoints.entrySet()){
-			Stoppoint i1 = test.stoppoints.get(e.getKey());
-			if (i1.isLadestation()) {
-				System.out.println("Ladestationen Haltestelle: " + i1.getId());
-				numberOfLoadingStations ++;
-			}
-		}
-		
-		
-		Schedule ergebnis = new Schedule(p.getInitialloesung(), test.servicejourneys, test.deadruntimes, test.stoppoints);
-		
-		System.out.println("Kosten für den Umlaufplan: " + ergebnis.berechneKosten());
-		
-		for (int i = 0; i < p.getInitialloesung().size(); i++) {
-			if(!ergebnis.isFeasible(p.getInitialloesung().get(i))){
-				System.err.println("Is not Feasible!");
-			}
-		}
-		
-		
-		
+		/**
+		 * Erzeuge in der Datei eine neue Relation fuer die Haltestellen
+		 */
 		pw.println("*;;;;;;;;;;");
 		pw.println("* Initialloesung;;;;;;;;;;");
 		pw.println("*;;;;;;;;;;");
 		pw.println("$INITIALSTOPPOINT:ID;isLoadingstation;frequency");
 		
+		/**
+		 * Durchlaufe alle Haltestellen und pruefe, ob eine Ladestation gebaut wurde
+		 * und wie die Frequentierung an dieser Ladestation ist.
+		 * Erzeuge daraus String, um sie in die Datei zu schreiben.
+		 */
 		for (Map.Entry e: test.stoppoints.entrySet()){
 			Stoppoint i1 = test.stoppoints.get(e.getKey());
 			String stoppointId = i1.getId();
@@ -149,14 +105,14 @@ public class Start {
 			pw.flush();
 		}
 		
-		System.out.println("Anzahl Ladestationen: " + numberOfLoadingStations);
-		
+		/**
+		 * Erzeuge in der Datei eine neue Relation für den Umlaufplan der Initialloesung
+		 */
 		pw.println("*;;;;;;;;;;");
 		pw.println("* Initialloesung;;;;;;;;;;");
 		pw.println("*;;;;;;;;;;");
 		pw.println("$Umlauf:ID;Fahrten;;;;;;;;");
 		
-		//neu
 		for (int j = 0; j < initialloesung.size(); j++) {
 			String umlaufId = String.valueOf(j);
 			System.out.println(umlaufId + ";" + initialloesung.get(j).toStringIds());

@@ -11,21 +11,21 @@ import java.util.Date;
  */
 public class Servicejourney implements Journey {
 
-    private String id;
-    private String fromStopId;
-    private String toStopId;
-    private Date sfDepTime;
-    private Date sfArrTime;
-    private double Distance; // in Meter
-    private double sfRuntime; // in Milisekunden
-    private double sfVerbrauch;
-    /**
-     * Hilfsvariablen zur Berechnung der Runtime
-     */
-    public DateFormat zformat = new SimpleDateFormat("HH:mm:ss");
-    private String help;
+	private String id;
+	private String fromStopId;
+	private String toStopId;
+	private Date sfDepTime;
+	private Date sfArrTime;
+	private double Distance; // in Meter
+	private double sfRuntime; // in Milisekunden
+	private double sfVerbrauch; // Distance/1000 * 2.0
+	/**
+	 * Hilfsvariablen zur Berechnung der Runtime
+	 */
+	public DateFormat zformat = new SimpleDateFormat("HH:mm:ss");
+	private String help;
 	private Date zeit;
-    
+
 	/**
 	 * Konstruktor: initialisiert Variablen und berechnet Runtime sowie Verbrauch der Servicefahrt
 	 * @param id
@@ -35,41 +35,41 @@ public class Servicejourney implements Journey {
 	 * @param ArrTime
 	 * @param Distance
 	 */
-    public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
-    	this.id = id;
-    	this.setFromStopId(FromStopId);
-    	this.setToStopId(ToStopId);
-    	this.Distance = Distance;
-    	
-    	help = DepTime;
-    	zeit = null;
+	public Servicejourney(String id, String FromStopId, String ToStopId, String DepTime, String ArrTime, double Distance){
+		this.id = id;
+		this.setFromStopId(FromStopId);
+		this.setToStopId(ToStopId);
+		this.Distance = Distance;
 
-        try {
-            zeit = zformat.parse(help.split(":")[1] + ":" + help.split(":")[2] + ":" + help.split(":")[3]);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        this.sfDepTime = zeit;
-        
-        zeit = null;
-    	help = ArrTime;
+		help = DepTime;
+		zeit = null;
 
-        try {
-            zeit = zformat.parse(help.split(":")[1] + ":" + help.split(":")[2] + ":" + help.split(":")[3]);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        this.sfArrTime = zeit;
-    	if(sfDepTime.getTime() > sfArrTime.getTime()){
-    		sfArrTime.setTime(sfArrTime.getTime() + 24*60*60*1000);
-    	}
-    	this.setRuntime((sfArrTime.getTime() - sfDepTime.getTime()));
-    	if(sfRuntime < 0){
-    		System.out.println();
-    	}
+		try {
+			zeit = zformat.parse(help.split(":")[1] + ":" + help.split(":")[2] + ":" + help.split(":")[3]);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.sfDepTime = zeit;
 
-    	this.setSfVerbrauch(Distance/1000 * 2.0);  // Annahme: 2kWh/km
-    }
+		zeit = null;
+		help = ArrTime;
+
+		try {
+			zeit = zformat.parse(help.split(":")[1] + ":" + help.split(":")[2] + ":" + help.split(":")[3]);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.sfArrTime = zeit;
+		if(sfDepTime.getTime() > sfArrTime.getTime()){
+			sfArrTime.setTime(sfArrTime.getTime() + 24*60*60*1000);
+		}
+		this.setRuntime((sfArrTime.getTime() - sfDepTime.getTime()));
+		if(sfRuntime < 0){
+			System.out.println();
+		}
+
+		this.setSfVerbrauch(Distance/1000 * 2.0);  // Annahme: 2kWh/km
+	}
 
 	public void setSfVerbrauch(double sfVerbrauch) {
 		this.sfVerbrauch = sfVerbrauch;
@@ -154,7 +154,7 @@ public class Servicejourney implements Journey {
 	public void setZeit(Date zeit) {
 		this.zeit = zeit;
 	}
-	
+
 	public String toString(){
 		return "SF: " + id + "hat Verbrauch: " + getVerbrauch();
 	}

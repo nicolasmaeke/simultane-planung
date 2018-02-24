@@ -10,7 +10,7 @@ import java.util.List;
  * und mit einer Leerfahrt von einer Servicefahrt zum Depot enden.
  */
 public class Fahrzeugumlauf {
-	
+
 	private String id;
 	// Typ der Liste ist Journey, damit sowohl Servicefahrten als auch Leerfahrten hinzugefuegt werden koennen
 	private LinkedList<Journey> fahrten; 
@@ -18,7 +18,7 @@ public class Fahrzeugumlauf {
 	//private long kosten = 0;
 	private LinkedList<Stoppoint> laden;
 	private LinkedList<Integer> stellen;
-	
+
 	/**
 	 * Konstruktor
 	 * @param i
@@ -40,7 +40,7 @@ public class Fahrzeugumlauf {
 	public void addFahrt(Journey j){
 		fahrten.add(j);
 	}
-	
+
 	/**
 	 * fuegt eine Fahrt nach der Stelle index zum Fahrzeugumlauf hinzu
 	 * @param index
@@ -49,13 +49,13 @@ public class Fahrzeugumlauf {
 	public void addFahrtAfterFahrt(int index, Journey j){
 		fahrten.add(index, j);
 	}
-	
+
 	public Journey getAtIndex(int index){
 		Journey result = fahrten.get(index);
 		return result;
 	}
-	
-	
+
+
 	public LinkedList<Journey> getFahrten() {
 		return fahrten;
 	}
@@ -63,8 +63,8 @@ public class Fahrzeugumlauf {
 	public void setFahrten(LinkedList<Journey> fahrten) {
 		this.fahrten = fahrten;
 	}
-	
-	
+
+
 	/**
 	 * gibt die Anzahl der Fahrten im Fahrzeugumlauf zurueck
 	 * @return
@@ -72,12 +72,12 @@ public class Fahrzeugumlauf {
 	public int size(){
 		return fahrten.size();
 	}
-	
+
 	public String toString(){
 		String result = "Fahrzeugumlauf " + id + " : " + getFahrten();
 		return result;
 	}
-	
+
 	public String toStringIds(){
 		String result = "[";
 		for (int i = 0; i < fahrten.size(); i++) {
@@ -117,13 +117,13 @@ public class Fahrzeugumlauf {
 		}
 		return verbrauchsKosten * 0.1 + personalkosten * 20 / 60 / 1000 / 1000;
 	}
-	
+
 	public double getKostenMitLadestationen() {
 		double verbrauchsKosten = 0;
 		double ladestationsAnteil = 0;
-		
+
 		for (int i = 0; i < this.getLaden().size(); i++) {
-			
+
 			if(!this.getLaden().contains(null)){
 				int test = this.getLaden().get(i).getFrequency();
 				if(test == 0){
@@ -165,7 +165,7 @@ public class Fahrzeugumlauf {
 		result = result + "]";
 		return result;
 	}
-	
+
 	public LinkedList<Stoppoint> getLaden(){
 		return laden;
 	}

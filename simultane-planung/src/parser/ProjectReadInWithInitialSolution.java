@@ -1,32 +1,26 @@
 package parser;
 
-
-
 import helper.feasibilityHelper;
 import model.Deadruntime;
 import model.Fahrzeugumlauf;
 import model.Servicejourney;
 import model.Stoppoint;
 import output.Schedule;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
 /**
- * 
- * Parser Klassen, die nur die Instanzen der Daten einliest,
- * die fuer die Problemstellung unseres Projektes notwendig sind.
+ * Parser Klasse, die eine Datei mit Initialloesung einliest.
+ * Nur die Parameter der Daten werden eingelesen, die fuer die Problemstellung
+ * des Projektes relevant sind.
  *
  */
 public class ProjectReadInWithInitialSolution {
@@ -40,9 +34,6 @@ public class ProjectReadInWithInitialSolution {
     public double durchschnittsruntime;
     public double maxloading;
 
-    // 1.1 Variablen fuer Streckennetz und Ladeinfrastruktur erstellen
-    
-   
     // 1.1.2 Servicefahrten
     public HashMap<String, Servicejourney> servicejourneys;
    
