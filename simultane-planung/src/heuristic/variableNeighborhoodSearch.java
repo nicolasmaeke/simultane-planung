@@ -14,7 +14,7 @@ import output.Schedule;
 /** Klasse beinhaltet Methode für Variable Neighborhood Search
  */
 public class variableNeighborhoodSearch {
-	
+
 	Schedule localBest; // lokal beste Löoesung
 	Schedule shaking; // Loesung nach dem Shaking
 	HashMap<String, Integer> validEdges;
@@ -32,7 +32,7 @@ public class variableNeighborhoodSearch {
 		}
 		this.localBest = new Schedule(globalCopy.getUmlaufplan(), servicejourneys, deadruntimes, globalCopy.getStoppoints());
 	}
-	
+
 	/** Shaking: Methode -> zufaellig die aktuelle Loesung (den aktuellen Umlaufplan) manipulieren (Verschlechterung wird zugelassen)
 	 * 
 	 */
@@ -50,7 +50,7 @@ public class variableNeighborhoodSearch {
 			while(random1 == random2 || localBest.getUmlaufplan().get(random2).size() <= 3){
 				random2 = (int)(Math.random()*localBest.getUmlaufplan().size()); // nicht den gleichen Umlauf nehmen
 			}
-			
+
 			// Zwei beliebige Servicefahrten aus den zwei gewaehlten Umlaefen 
 			int randomI = (int)((Math.random()*localBest.getUmlaufplan().get(random1).size())); // Index einer beliebigen SF aus Umlauf mit der ID ramdom1
 			while(randomI % 2 == 0){ 
@@ -59,7 +59,7 @@ public class variableNeighborhoodSearch {
 			if(randomI == 1){
 				randomI = 3;
 			}
-			
+
 			int randomJ = (int)(Math.random()*(localBest.getUmlaufplan().get(random2).size()-2)); // Index einer beliebigen SF aus Umlauf mit der ID random2
 			if(localBest.getUmlaufplan().get(random2).size() <= 3){ // falls der Umlauf nur noch eine Servicefahrt beinhaltet
 				randomJ = 1; // ID = 1
@@ -69,17 +69,17 @@ public class variableNeighborhoodSearch {
 					randomJ = (int)(Math.random()*(localBest.getUmlaufplan().get(random2).size()-2));
 				}
 			}
-			
+
 			Fahrzeugumlauf eins = localBest.getUmlaufplan().get(random1); // eins ist der erste gewaehlte Umlauf
 			Fahrzeugumlauf zwei = localBest.getUmlaufplan().get(random2); // zwei ist der zweite gewaehlte Umlauf
-			
+
 			for (int i = 0; i < localBest.getUmlaufplan().size(); i++) {
 				if(!localBest.isFeasible(localBest.getUmlaufplan().get(i))){
 					System.out.println();
 				}
 			}
 			shaking = new Schedule(new Vector<Fahrzeugumlauf>(localBest.getUmlaufplan()), servicejourneys, deadruntimes, localBest.getStoppoints()); // neuer Fahrzeugumlauf für Shaking 
-			
+
 			if(validEdges.get(zwei.getAtIndex(randomJ).getId() + eins.getAtIndex(randomI).getId()) == 1){ // j mit i verbinden
 				// falls zwischen zwei gewaehlten SFs eine Verbindung zeitlich moeglich ist
 				String deadruntimeId = zwei.getAtIndex(randomJ).getToStopId() + eins.getAtIndex(randomI).getFromStopId(); // ID der Leerfahrt
@@ -95,7 +95,7 @@ public class variableNeighborhoodSearch {
 					zweiNeu.addFahrten(zwei.getFahrtenVonBis(randomJ+2, zwei.size() - 1)); 
 					if(localBest.isFeasible(zweiNeu)){ // falls zweiNeu feasible ist
 						if(!eins.equals(einsNeu) && einsNeu != null){ // falls einsNeu ungleich eins und einsNeu nicht leer ist						// falls mindestens eine Verbesserung vorhanden ist, wird die Beste zurueckgegeben
-							
+
 							String id2 = shaking.getUmlaufplan().get(random2).getId(); // ID des Umlaufs zwei
 							shaking.getUmlaufplan().remove(random1); // entferne Umlauf eins aus shaking
 							for (int i = 0; i <= random2; i++) { 
@@ -120,7 +120,7 @@ public class variableNeighborhoodSearch {
 					}
 				}
 			}
-			
+
 			counter ++;
 			//System.out.println(counter);
 			if(counter >= 100){
@@ -129,12 +129,12 @@ public class variableNeighborhoodSearch {
 			if(!localBest.getUmlaufplan().equals(shaking.getUmlaufplan())){ // wenn nicht Feasible, dann noch einmal Shaking
 				condition = false;
 			}
-			
+
 		}
-		
+
 		return shaking;  // den Umlaufplan nach dem Shaking zurueckgeben
 	}
-	
+
 	/** BestImprovement: Methode zum Bestimmen der best moeglichen Verbesserung innerhalb einem Umlaufplan
 	 * 
 	 * @param kMax - maximale Anzahl der Nachbarschaften
@@ -182,35 +182,35 @@ public class variableNeighborhoodSearch {
 				randomNeu = (int)(Math.random()*shaking.getUmlaufplan().size()); 
 			}
 			randoms.add(randomNeu); // fuege randomNeu in die Liste randoms hinzu
-			
+
 			for (int i = 0; i < randoms.size()-1; i++) { // fuer jede random Wert bis zu dem letzten
-						
+
 				ZweiOptVerbesserung tempOpt = zweiOpt(randoms.get(i), randoms.get(randoms.size()-1)); // setze Methode Zweioptverbesserung ein
-			
+
 				if(tempOpt != null){ // falls eine Verbesserung vorhanden ist
 					if(tempOpt.getSavings() > bestOpt.getSavings()){ // falls durch temp mehr gespart wird als durch best
 						bestOpt = tempOpt; // ersetzte best durch temp
 					}
 				}
 			}
-			
+
 			for (int i = 0; i < randoms.size()-1; i++) {
-				
+
 				SfUmlegen tempUmlegen = sfUmlegen(randoms.get(i), randoms.get(randoms.size()-1)); // Umlegen minimal und gross
-				
+
 				if(tempUmlegen != null){ // falls eine Verbesserung vorhanden ist
 					if(tempUmlegen.getSavings() > bestUmlegen.getSavings()){ // falls durch temp mehr gespart wird als durch best
 						bestUmlegen = tempUmlegen; // ersetzte best durch temp
 					}
 				}
 			}
-			
-			
+
+
 			if(bestOpt.getSavings() == 0 && bestUmlegen.getSavings() == 0){ // wenn durch die aktuelle Nachbarschaft nichts gespart wird
 				nachbarschaft++; // erhoehe die Nachbarschaft um 1
 			}
 			else if(bestOpt.getSavings() >= bestUmlegen.getSavings()){
-			 // wenn durch das ZweiOpt mehr gespart wird als durch SfUmlegen
+				// wenn durch das ZweiOpt mehr gespart wird als durch SfUmlegen
 				String id2 = localBest.getUmlaufplan().get(bestOpt.getIndexAltZwei()).getId();
 				localBest.getUmlaufplan().remove(bestOpt.getIndexAltEins()); // entferne altEins aus der lokal besten Loesung
 				for (int i = 0; i <= bestOpt.getIndexAltZwei(); i++) { 
@@ -248,7 +248,7 @@ public class variableNeighborhoodSearch {
 						System.out.println("Not Feasible SfUmlegen!");
 					}
 				}
-				
+
 				localBest.getUmlaufplan().add(bestUmlegen.getZwei()); // fuege Zwei in Lokalbest hinzu
 				if(!localBest.isFeasible(bestUmlegen.getZwei())){
 					System.out.println("Not Feasible SfUmlegen!");
@@ -261,7 +261,7 @@ public class variableNeighborhoodSearch {
 		}
 		return localBest; // lokal beste Loesung zurueckgeben
 	}
-		
+
 	/** sfUmlegen: Methode zum Umlegen von zwei Fahrzeugumlaeufen
 	 * 
 	 * @param random1 - kleinerer Umlauf
@@ -269,13 +269,13 @@ public class variableNeighborhoodSearch {
 	 * @return 
 	 */
 	public SfUmlegen sfUmlegen(Integer random1, Integer random2){
-		
+
 		double savings = 0.0;
 		SfUmlegen result = new SfUmlegen(savings, null, null, 0, 0);
-		
+
 		Fahrzeugumlauf klein;
 		Fahrzeugumlauf gross;
-		
+
 		if(localBest.getUmlaufplan().get(random1).size() < localBest.getUmlaufplan().get(random2).size()){
 			klein = localBest.getUmlaufplan().get(random1); 
 			gross = localBest.getUmlaufplan().get(random2); 
@@ -287,7 +287,7 @@ public class variableNeighborhoodSearch {
 			result.setIndexAltEins(random2);
 			result.setIndexAltZwei(random1);
 		}
-	
+
 		ArrayList<Servicejourney> sfVonKlein = new ArrayList<Servicejourney>(); // Liste aller SF vom kleineren Umlauf
 		for (int i = 1; i < klein.size()-1; i = i + 2) {
 			sfVonKlein.add((Servicejourney)klein.getAtIndex(i)); 
@@ -297,7 +297,7 @@ public class variableNeighborhoodSearch {
 		}
 		for (int k = 0; k < sfVonKlein.size(); k++) { // fuer jede SF aus dem kleineren Umlauf
 			Servicejourney kleinSf = sfVonKlein.get(k);
-			
+
 			for (int i = 3; i < gross.size()-3; i = i + 2) { // fuer jede SF aus dem groeßeren Umlauf
 				int index = 0; 
 				for (int j = 0; j < klein.size(); j++) {
@@ -309,7 +309,7 @@ public class variableNeighborhoodSearch {
 				Fahrzeugumlauf neuGross = new Fahrzeugumlauf(gross.getId());
 				Fahrzeugumlauf neuKlein = new Fahrzeugumlauf(klein.getId());
 				Servicejourney temp = (Servicejourney) gross.getAtIndex(i); 
-				
+
 				if(kleinSf.getSfArrTime().getTime() <= temp.getSfDepTime().getTime()){ // passen die Servicefahrten zeitlich?
 					Deadruntime nachSf = deadruntimes.get(kleinSf.getToStopId() + temp.getFromStopId()); // ID der Nach-Leerfahrt
 					if (kleinSf.getSfArrTime().getTime()+nachSf.getRuntime() <= temp.getSfDepTime().getTime()) { // passt die SF + die Leerfahrt danach zeitlich?
@@ -355,7 +355,7 @@ public class variableNeighborhoodSearch {
 								} 		
 							}
 							if(localBest.isFeasible(neuGross)){ // wenn neuGross feasible ist
-								
+
 								double verbrauchsKosten = 0.0;
 								double personalkosten = 0.0;
 								for (int i1 = 0; i1 < neuGross.getFahrten().size(); i1++) {
@@ -363,9 +363,9 @@ public class variableNeighborhoodSearch {
 									personalkosten = personalkosten + neuGross.getFahrten().get(i1).getRuntime();
 								}
 								personalkosten = personalkosten * 20 / 1000 / 60 / 60;
-								
+
 								savings = (savings + 400000/((klein.getFahrten().size())-1)/2) - (verbrauchsKosten + personalkosten);
-								
+
 								result.setZwei(neuGross);
 								result.setSavings(savings);
 
@@ -376,18 +376,18 @@ public class variableNeighborhoodSearch {
 										localBest.getUmlaufplan().add(neuGross); // fuege neuGross in Lokalbest hinzu
 									}
 								}
-								
+
 
 								gross.getFahrten().clear(); 
 								gross.addFahrten(neuGross.getFahrten()); // aktualisiere gross durch neuGross
 								gross.setLaden(neuGross.getLaden()); // aktualisiere Ladenliste von gross durch Ladenliste von neuGross
-								
+
 								if(klein.size() > 3){ // wenn neuGross feasible ist und klein mehr als eine SF hat
 									for (int j = 0; j < localBest.getUmlaufplan().size(); j++) {
 										if(localBest.getUmlaufplan().get(j).getId().equals(klein.getId())){ //suche nach klein in Lokalbest
 											localBest.getUmlaufplan().remove(j); // entferne klein
 											localBest.getUmlaufplan().add(neuKlein); // fuege neuKlein hinzu
-											
+
 										}
 									}
 									if(!localBest.isFeasible(neuKlein)){
@@ -401,24 +401,24 @@ public class variableNeighborhoodSearch {
 										}
 									}
 								}
-								
+
 								if (klein.size() > 3) {
 									klein.getFahrten().clear();
 									klein.addFahrten(neuKlein.getFahrten());
 									klein.setLaden(neuKlein.getLaden());
 								}
-								
+
 								if(!localBest.isFeasible(neuGross)){
 									System.out.println("Neu Gross Not Feasible sfUmlegen!");
 								}
-								*/
+								 */
 								return result;
 							}
 							/**
 							else{
 								break;
 							}
-							*/
+							 */
 						}
 					}
 				}
@@ -434,18 +434,18 @@ public class variableNeighborhoodSearch {
 	 * @return 
 	 */
 	public ZweiOptVerbesserung zweiOpt(int random1, int random2){ 
-		
+
 		ZweiOptVerbesserung result = null;
-		
+
 		Fahrzeugumlauf eins = localBest.getUmlaufplan().get(random1); // 
 		Fahrzeugumlauf zwei = localBest.getUmlaufplan().get(random2); // 
-		
+
 		double currentCostValue = eins.getKostenMitLadestationen() + zwei.getKostenMitLadestationen(); //aktuelle Gesamtkosten von Fahrzeugumlauf eins und zwei
 		double initialCostValue = currentCostValue;
-		
+
 		Fahrzeugumlauf betterEins = null;
 		Fahrzeugumlauf betterZwei = null;
-		
+
 		for (int i = -1; i < eins.size()-2; i = i + 2) { // es werden nur Servicefahrten aus dem ersten Umlauf betrachtet, daher i + 2
 			if(i == -1){ // falls i = -1 (Depotknoten im ersten Umlauf)
 				for (int j = 3; j < zwei.size(); j = j + 2) { //die erste LF von j darf nicht geloescht werden
@@ -477,36 +477,36 @@ public class variableNeighborhoodSearch {
 			else{ // falls i ungleich -1, also SF vom ersten Umlauf
 				String id = eins.getAtIndex(i).getId(); 
 				for (int j = 1; j < zwei.size(); j = j + 2) { // alle SF vom zweiten Umlauf
-				id = eins.getAtIndex(i).getId();
-				if(j == zwei.size() && i > eins.size() - 4){ // die letzten SF duerfen nicht miteinander verbunden werden
-					break;
-				}
-				id = id + zwei.getAtIndex(j).getId();
-				if (validEdges.get(id) == 1) { // falls zeitlich von i zu j möglich ist 
-					if (j < 2) { // die erste SF vom zweiten Umlauf, weil dann Depotkante geloescht wird
-						Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(eins.getId());
-						einsNeu.addFahrten(eins.getFahrtenVonBis(0, i));
-						String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
-						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
-						einsNeu.addFahrten(zwei.getFahrtenVonBis(j, zwei.size()-1));
-						if(localBest.isFeasible(einsNeu)){
-							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId());
-							deadruntimeId = "00001" + eins.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
-							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
-							zweiNeu.addFahrten(eins.getFahrtenVonBis(i+2, eins.size()-1));
-							if(localBest.isFeasible(zweiNeu)){
-								// neue Umlaeufe speichern, falls besser
-								double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
-								if(newCostValue < currentCostValue){
-									currentCostValue = newCostValue;
-									betterEins = einsNeu;
-									betterZwei = zweiNeu;
+					id = eins.getAtIndex(i).getId();
+					if(j == zwei.size() && i > eins.size() - 4){ // die letzten SF duerfen nicht miteinander verbunden werden
+						break;
+					}
+					id = id + zwei.getAtIndex(j).getId();
+					if (validEdges.get(id) == 1) { // falls zeitlich von i zu j möglich ist 
+						if (j < 2) { // die erste SF vom zweiten Umlauf, weil dann Depotkante geloescht wird
+							Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(eins.getId());
+							einsNeu.addFahrten(eins.getFahrtenVonBis(0, i));
+							String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
+							einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
+							einsNeu.addFahrten(zwei.getFahrtenVonBis(j, zwei.size()-1));
+							if(localBest.isFeasible(einsNeu)){
+								Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(zwei.getId());
+								deadruntimeId = "00001" + eins.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
+								zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
+								zweiNeu.addFahrten(eins.getFahrtenVonBis(i+2, eins.size()-1));
+								if(localBest.isFeasible(zweiNeu)){
+									// neue Umlaeufe speichern, falls besser
+									double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
+									if(newCostValue < currentCostValue){
+										currentCostValue = newCostValue;
+										betterEins = einsNeu;
+										betterZwei = zweiNeu;
+									}
+								}	
 							}
-						}	
-					}
-					}
-					else{ // ab dem zweiten SF vom zweiten Umlauf
-						//if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
+						}
+						else{ // ab dem zweiten SF vom zweiten Umlauf
+							//if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
 							Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(eins.getId());
 							einsNeu.addFahrten(eins.getFahrtenVonBis(0, i));
 							String deadruntimeId = eins.getAtIndex(i).getToStopId() + zwei.getAtIndex(j).getFromStopId(); 
@@ -525,14 +525,14 @@ public class variableNeighborhoodSearch {
 										currentCostValue = newCostValue;
 										betterEins = einsNeu;
 										betterZwei = zweiNeu;
+									}
+
 								}
-								
+							}
 						}
+
 					}
 				}
-			
-			}
-			}
 			}
 		}
 		// Kopie von oben; es werden eins und zwei vertauscht, um auch Rueckwaertskanten zu betrachten
@@ -567,36 +567,36 @@ public class variableNeighborhoodSearch {
 			else{ // falls i ungleich -1, also SF vom ersten Umlauf
 				String id = zwei.getAtIndex(i).getId(); 
 				for (int j = 1; j < eins.size(); j = j + 2) { // alle SF vom zweiten Umlauf
-				id = zwei.getAtIndex(i).getId();
-				if(j == eins.size() && i > zwei.size() - 4){ // die letzten SF duerfen nicht miteinander verbunden werden
-					break;
-				}
-				id = id + eins.getAtIndex(j).getId();
-				if (validEdges.get(id) == 1) { // falls zeitlich von i zu j möglich ist 
-					if (j < 2) { // die erste SF vom zweiten Umlauf, weil dann Depotkante geloescht wird
-						Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(zwei.getId());
-						einsNeu.addFahrten(zwei.getFahrtenVonBis(0, i));
-						String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
-						einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
-						einsNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size()-1));
-						if(localBest.isFeasible(einsNeu)){
-							Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
-							deadruntimeId = "00001" + zwei.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
-							zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
-							zweiNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size()-1));
-							if(localBest.isFeasible(zweiNeu)){
-								// neue Umlaeufe speichern, falls besser
-								double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
-								if(newCostValue < currentCostValue){
-									currentCostValue = newCostValue;
-									betterEins = einsNeu;
-									betterZwei = zweiNeu;
+					id = zwei.getAtIndex(i).getId();
+					if(j == eins.size() && i > zwei.size() - 4){ // die letzten SF duerfen nicht miteinander verbunden werden
+						break;
+					}
+					id = id + eins.getAtIndex(j).getId();
+					if (validEdges.get(id) == 1) { // falls zeitlich von i zu j möglich ist 
+						if (j < 2) { // die erste SF vom zweiten Umlauf, weil dann Depotkante geloescht wird
+							Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(zwei.getId());
+							einsNeu.addFahrten(zwei.getFahrtenVonBis(0, i));
+							String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
+							einsNeu.addFahrt(deadruntimes.get(deadruntimeId));
+							einsNeu.addFahrten(eins.getFahrtenVonBis(j, eins.size()-1));
+							if(localBest.isFeasible(einsNeu)){
+								Fahrzeugumlauf zweiNeu = new Fahrzeugumlauf(eins.getId());
+								deadruntimeId = "00001" + zwei.getAtIndex(i+2).getFromStopId(); // neue Depotkante muss hinzugefuegt werden
+								zweiNeu.addFahrt(deadruntimes.get(deadruntimeId));
+								zweiNeu.addFahrten(zwei.getFahrtenVonBis(i+2, zwei.size()-1));
+								if(localBest.isFeasible(zweiNeu)){
+									// neue Umlaeufe speichern, falls besser
+									double newCostValue = einsNeu.getKostenMitLadestationen() + zweiNeu.getKostenMitLadestationen();
+									if(newCostValue < currentCostValue){
+										currentCostValue = newCostValue;
+										betterEins = einsNeu;
+										betterZwei = zweiNeu;
+									}
+								}	
 							}
-						}	
-					}
-					}
-					else{ // ab dem zweiten SF vom zweiten Umlauf
-						//if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
+						}
+						else{ // ab dem zweiten SF vom zweiten Umlauf
+							//if(validEdges.get(zwei.getAtIndex(j-2).getId() + eins.getAtIndex(i+2).getId()) == 1){ // kann raus, wurde schon beim if ueberprueft
 							Fahrzeugumlauf einsNeu = new Fahrzeugumlauf(zwei.getId());
 							einsNeu.addFahrten(zwei.getFahrtenVonBis(0, i));
 							String deadruntimeId = zwei.getAtIndex(i).getToStopId() + eins.getAtIndex(j).getFromStopId(); 
@@ -615,12 +615,12 @@ public class variableNeighborhoodSearch {
 										currentCostValue =  newCostValue;
 										betterEins = einsNeu;
 										betterZwei = zweiNeu;
+									}
 								}
+							}
 						}
 					}
 				}
-			}
-			}
 			}
 		}
 		double savings = 0;
@@ -631,7 +631,7 @@ public class variableNeighborhoodSearch {
 			savings = initialCostValue - currentCostValue;
 			result = new ZweiOptVerbesserung(savings, betterEins, betterZwei, random1, random2);
 		}
-		
+
 		return result;
 	}
 }

@@ -9,9 +9,9 @@ public class Stoppoint {
 
 	private String id;
 	private String name;
-	private boolean ladestation;
-	private int frequency;
-	
+	private boolean ladestation; // hat diese Haltestelle eine Ladestation
+	private int frequency; // mit welcher Frequentierung wird an dieser Haltestelle geladen (0, wenn isLadestation = false)
+
 	/**
 	 * Konstruktor
 	 * @param id
@@ -46,7 +46,7 @@ public class Stoppoint {
 	public void setLadestation(boolean ladestation) {
 		this.ladestation = ladestation;
 	}
-	
+
 	public String toString(){
 		if(isLadestation()){
 			return this.name + " hat eine Ladestation";

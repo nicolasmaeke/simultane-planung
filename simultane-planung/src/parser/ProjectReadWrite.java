@@ -10,7 +10,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
 
-
+/**
+ * Klasse liest Datei mit Rohdaten ein 
+ * und erganezt fehlende Wertemit Durchschnittswerten.
+ *
+ */
 public class ProjectReadWrite {
 	public File f;
     public BufferedWriter output;

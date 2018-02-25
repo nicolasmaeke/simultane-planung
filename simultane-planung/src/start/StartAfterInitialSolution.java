@@ -13,11 +13,17 @@ import model.Stoppoint;
 import output.Schedule;
 import parser.ProjectReadInWithInitialSolution;
 
+/**
+ * Klasse startet die Verbesserungsheuristik.
+ * @input: Eine Datei mit Initialloesung muss eingelesen werden.
+ * @output: Eine Ergebnisdatei wird neu geschrieben.
+ *  
+ */
 public class StartAfterInitialSolution {
 
 	public static void main(String[] args) {
 		
-		//Lese Initialleosung ein
+		//Lese Initialleosung ein (fuer den Pfad siehe data --> Rechtsklick auf die gewuenschte Datei --> Properties)
 		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung.txt");
 		
 		//Teste, ob die eingelesene Initialloesung zulaessig ist
@@ -64,6 +70,7 @@ public class StartAfterInitialSolution {
 		PrintWriter pw = null;
 		
 		try {
+			// waehle Zielpfad und Name der Ergebnis-Datei aus
 			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung_ergebnis.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
