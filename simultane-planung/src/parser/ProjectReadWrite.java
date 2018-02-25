@@ -60,7 +60,7 @@ public class ProjectReadWrite {
         
 
 		try {
-			writer = new PrintWriter(new FileOutputStream("/Users/XuanSon/Desktop/Uni/Master/WS1718/Java/project/simultan/ReadAndWrite/data/newFile.txt", false));
+			writer = new PrintWriter(new FileOutputStream("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/full_sample_real_1296_SF_88_stoppoints.txt", false));
 		} catch (FileNotFoundException e1) {
 			System.out.println(e1);
 		}
@@ -120,62 +120,42 @@ public class ProjectReadWrite {
 
                     while (temp != null && !ersteszeichen.equals("*")) {
 
-                        // String sfId = (temp.split(";")[0]); // ID
+                        String sfId = (temp.split(";")[0]); // ID
                         String sfFromStopID = (temp.split(";")[2]); // Starthaltestelle
                         String sfToStopID = (temp.split(";")[3]); // Endhaltestelle
                         // String sfDepTime = temp.split(";")[4]; // Abfahrtszeit
                         // String sfArrTime = temp.split(";")[5]; // Ankunftszeit
-                        int sfDistance = Integer.parseInt(temp.split(";")[11]); // Distanz wird in Kilometer umgerechnet
+                        // int sfDistance = Integer.parseInt(temp.split(";")[11]); // Distanz wird in Kilometer umgerechnet
                         
-                        do {
+                        while (sfId.length() < 8) {
+                        	sfId = "0" + sfId;
+                        }; // solange Ziffern von sfID < 8, füge 0 vorne hinzu 
+                        
+                        while (sfFromStopID.length() < 5) {
                         	sfFromStopID = "0" + sfFromStopID;
-                        	
-                        } while (sfFromStopID.length() < 5); // solange Ziffern von FromStopID < 5, füge 0 vorne hinzu
+                        }; // solange Ziffern von FromStopID < 5, füge 0 vorne hinzu
                         
-                        do {
+                        while (sfToStopID.length() < 5) {
                         	sfToStopID = "0" + sfToStopID;
-                        	
-                        } while (sfToStopID.length() < 5);  // solange Ziffern von ToStopID < 5, füge 0 vorne hinzu
+                        };  // solange Ziffern von ToStopID < 5, füge 0 vorne hinzu
                         
-                        listFromToServiceJourney.add(sfFromStopID + sfToStopID);
-                        listDistanceServiceJourney.add(sfDistance);
-                        temp = temp.replace(temp.split(";")[2], sfFromStopID); // aktuellisiere neue FromStopID
-                        temp = temp.replace(temp.split(";")[3], sfToStopID); // aktuallisiere neue TopStopID
+                        //listFromToServiceJourney.add(sfFromStopID + sfToStopID);
+                        //listDistanceServiceJourney.add(sfDistance);
+                        
+                        // aktuellisiere neue FromStopID & neue ToStopID to aktuelle Zeile
+                        String rest = "";
+                        for (int i = 4; i < temp.split(";").length; i++) {
+                        	rest += ";" + temp.split(";")[i];
+						}
+                        
+                        temp = sfId + ";" + temp.split(";")[1] + ";" + sfFromStopID + ";" + sfToStopID + rest; 
                         
                         writer.println(temp); // schreie Zeile mit neuen IDs
                         writer.flush();
                         temp = reader.readLine(); // lese nächste Zeile
                         ersteszeichen = temp.substring(0, 1); // erstes Zeichen  
    
-                    } // end while
-                    
-                    for(int i = 0; i < listDistanceServiceJourney.size(); i++) {
-                    	totaldistanceservicejourney += listDistanceServiceJourney.get(i);
-                    } 
-                    durchschnittsdistanceservicejourney = totaldistanceservicejourney / listDistanceServiceJourney.size();
-                    
-                    double y = factorial(listStopPoints.size()-2);
-                    double x = factorial(listStopPoints.size());
-                    double max = (x /y);
-                    
-                    do {
- 
-                    for (String i : listStopPoints){
-                		for (String j : listStopPoints){
-                			if (!listFromToServiceJourney.contains(i+j) && (!i.equals(j))) {
-                				String fromStopID = i;
-                				String toStopID = j;
-                            
-                				listFromToServiceJourney.add(fromStopID+toStopID);	
-                				
-                                writer.println("0;" + "0;" + fromStopID + ";" + toStopID + ";0;0;0;0;0;0;0;" + durchschnittsdistanceservicejourney);
-                                writer.flush();
-                			} 
-                		}
-                		
-                	}  
-                  } 
-                    while (listFromToServiceJourney.size() < max);
+                    } // end while         
                     
                     continue;
                 } // end if
@@ -187,32 +167,28 @@ public class ProjectReadWrite {
                     temp = reader.readLine(); // nächste Zeile
                     ersteszeichen = temp.substring(0, 1); // erstes Zeichen
            
-
                     while (temp != null && !ersteszeichen.equals("*")) {
 
                         String fromStopID = (temp.split(";")[0]); // ID
                         String toStopID = (temp.split(";")[1]); // ID
                         String distance = (temp.split(";")[4]);
                         int runtime = Integer.parseInt(temp.split(";")[5]);
-                        
-                        do {
-                        	fromStopID = "0" + fromStopID;
-                        	
-                        } while (fromStopID.length() < 5);
-                        
-                        
-                        do {
-                        	toStopID = "0" + toStopID;
 
-                        } while (toStopID.length() < 5);
+                        while (fromStopID.length() < 5) {
+                        	fromStopID = "0" + fromStopID;
+                        }; 
                         
-                        temp = temp.replace(temp.split(";")[0], fromStopID);
-                        temp = temp.replace(temp.split(";")[1], toStopID);
+                        while (toStopID.length() < 5) {
+                        	toStopID = "0" + toStopID;
+                        }; 
+                        
+                     // aktuellisiere neue FromStopID & neue ToStopID to aktuelle Zeile					
+                        temp = fromStopID + ";" + toStopID + ";" + temp.split(";")[2] + ";" + temp.split(";")[3] + ";" + distance + ";" + runtime; 
                         
                         listDeadRun.add(fromStopID);
                         listRunTimeDeadRun.add(runtime);
                         listDistanceDeadRun.add(Integer.valueOf(distance));
-                        listFromToDeadRun.add(fromStopID+toStopID);
+                        listFromToDeadRun.add(fromStopID+toStopID);                 
                         
                         writer.println(temp);
                         writer.flush();
@@ -231,12 +207,8 @@ public class ProjectReadWrite {
                     } 
                     durchschnittsdistancedeadrun = totaldistance / listDistanceDeadRun.size();                     
                     
-                    double y = factorial(listStopPoints.size()-2);
-                    double x = factorial(listStopPoints.size());
-                    double max = (x /y);
-                    
-                    do {
-                    for (String i : listStopPoints){
+                    if (listFromToDeadRun.size() < listStopPoints.size()*listStopPoints.size()){ 
+                    	for (String i : listStopPoints){
                     		for (String j : listStopPoints){
                     			if (!listFromToDeadRun.contains(i+j) && (!i.equals(j))) {
                     				String fromStopID = i;
@@ -248,19 +220,31 @@ public class ProjectReadWrite {
                     				listDistanceDeadRun.add(distance);
                     				listRunTimeDeadRun.add(runtime);
                     				
-                    				writer.println(fromStopID + ";" + toStopID + ";000:00:00:00;001:12:00:00;" + durchschnittsdistancedeadrun + ";" + durchschnittsruntimedeadrun + ";;;;;");
+                    				writer.println(fromStopID + ";" + toStopID + ";000:00:00:00;001:12:00:00;" + durchschnittsdistancedeadrun + ";" + durchschnittsruntimedeadrun);
                                     writer.flush();
-                    			} 
-                    		}
-                    	  	
+                    			}
+                    			else if (!listFromToDeadRun.contains(i+j) && (i.equals(j))) {
+                    				String fromStopID = i;
+                    				String toStopID = j;
+                    				int distance = 0;
+                    				int runtime = 0;                   				
+
+                    				listFromToDeadRun.add(fromStopID+toStopID);	
+                    				listDistanceDeadRun.add(distance);
+                    				listRunTimeDeadRun.add(runtime);
+                    				
+                    				writer.println(fromStopID + ";" + toStopID + ";000:00:00:00;001:12:00:00;" + "0" + ";" + "0");
+                                    writer.flush();
+                    			}
+                    		}                    	  	
                     	}  
                     }
-                    while (listFromToDeadRun.size() < max); 
+                }
             
                     continue;
                  // end if
                 	
-               }} // end outer while
+               } // end outer while
         } catch (IOException e) {
             System.out.println(e);
         }
