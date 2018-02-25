@@ -3,5 +3,9 @@
 	<classpathentry kind="src" path="simultane-planung/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/ReadAndWrite/ReadAndWrite/data/guava-21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/XuanSon/Desktop/Java/clone-jar/cloning-1.9.9-bundle.jar"/>
+	<classpathentry kind="lib" path="/Users/XuanSon/Desktop/Java/clone-jar/cloning-1.9.9-sources.jar"/>
+	<classpathentry kind="lib" path="/Users/XuanSon/Desktop/Java/clone-jar/cloning-1.9.9.jar"/>
+	<classpathentry kind="lib" path="/Users/XuanSon/Desktop/Java/clone-jar/objenesis-2.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

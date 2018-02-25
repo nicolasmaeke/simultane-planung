@@ -24,7 +24,7 @@ public class StartInitialloeung {
 	public static void main(String[] args) {
 
 		//Lese Daten ein (fuer den Pfad siehe data --> Rechtsklick auf die gewuenschte Datei --> Properties)
-		ProjectReadIn test = new ProjectReadIn("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints.txt");
+		ProjectReadIn test = new ProjectReadIn("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/full_sample_real_1296_SF_88_stoppoints.txt");
 		
 		Initialloesung p = new Initialloesung(test.deadruntimes, test.servicejourneys, test.stoppoints);
 		Vector<Fahrzeugumlauf> initialloesung = p.erstelleInitialloesung();
@@ -38,7 +38,7 @@ public class StartInitialloeung {
 		
 		try {
 			// waehle Zielpfad und Name der Ergebnis-Datei aus
-			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/867_SF_207_HS_initialloesung_mitAlternativenKostenLadestation.txt", true);
+			fw = new FileWriter("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/1296_SF_88_HS_initialloesung_mitAlternativenKostenLadestation.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 

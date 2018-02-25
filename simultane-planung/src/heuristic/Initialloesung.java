@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import helper.feasibilityHelper;
@@ -67,7 +68,15 @@ public class Initialloesung {
 			
 			boolean feasibility = feasibilityHelper.isUmlaufFeasible(j, stoppoints);
 			if (!feasibility) {
-				System.out.println("nicht moeglich!");
+				System.out.println("Kapazitaet reicht nicht fuer Pendeltouren aus. Deswegen Ladestation bauen!");
+				for (Map.Entry e: stoppoints.entrySet()){
+					Stoppoint i1 = stoppoints.get(e.getKey());
+					//System.out.println("Haltestelle " + i1.getId() + " hat Ladestation: " + i1.isLadestation() + " " + i1.getFrequency());
+					if (i1.getId().equals(test.getToStopId())){
+						i1.setLadestation(true);
+						i1.setFrequency(1);
+					}
+				}
 			}
 			
 			fahrzeugumlaeufe.add(j); // fuege den Fahrzeugumlauf j zu der Gesamtliste 

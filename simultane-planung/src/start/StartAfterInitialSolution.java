@@ -24,7 +24,7 @@ public class StartAfterInitialSolution {
 	public static void main(String[] args) {
 		
 		//Lese Initialleosung ein (fuer den Pfad siehe data --> Rechtsklick auf die gewuenschte Datei --> Properties)
-		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung.txt");
+		ProjectReadInWithInitialSolution test = new ProjectReadInWithInitialSolution("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/1296_SF_88_HS_initialloesung_mitAlternativenKostenLadestation.txt");
 		
 		//Teste, ob die eingelesene Initialloesung zulaessig ist
 		for (int i = 0; i < test.global.getUmlaufplan().size(); i++) {
@@ -62,7 +62,8 @@ public class StartAfterInitialSolution {
 		System.out.println(globalSolution.getVariableKosten() - numberOfLoadingStations*250000);
 		System.out.println(numberOfLoadingStations);
 		System.out.println();
-		System.out.println(1.0512355987399999E7-numberOfLoadingStations*250000);
+		System.out.println("Start Verbesserung");
+		//System.out.println(6513613.940244446-numberOfLoadingStations*250000);
 
 		//Schreibe eine neue Datei mit der Loesung
 		FileWriter fw = null;
@@ -71,7 +72,7 @@ public class StartAfterInitialSolution {
 		
 		try {
 			// waehle Zielpfad und Name der Ergebnis-Datei aus
-			fw = new FileWriter("/Users/nicolasmaeke/gitproject/simultane-planung/simultane-planung/data/full_sample_real_867_SF_207_stoppoints_initialloesung_ergebnis.txt", true);
+			fw = new FileWriter("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/1Stunde_1296_SF_88_stoppoints_Ergebnisse.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
@@ -88,6 +89,12 @@ public class StartAfterInitialSolution {
 		
 		pw.println(counter + ";" + globalSolution.berechneKosten() + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
 		pw.flush();
+		
+		//Terminierungskriterium: Laufzeit
+		double start = System.currentTimeMillis(); //Startzeit in Milisekunden
+		double end = start + 60*60*1000; // Endzeit in Milisekunden
+		double jetzt; 
+		double dauer; 
 
 		do {
 
@@ -116,13 +123,20 @@ public class StartAfterInitialSolution {
 				System.out.println("global aktualisiert!");
 			}
 
-			counter ++;
-			System.err.println(counter);
+			//counter ++;
+			//System.err.println(counter);
 			
-			pw.println(counter + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
+			jetzt = System.currentTimeMillis();
+			dauer = (jetzt-start)/60/1000 ; //Dauer in Minuten
+			dauer = Math.round(1000*dauer);
+			dauer = dauer/1000; //runden
+			
+			System.err.println(dauer);
+			
+			pw.println(dauer + ";" + globalCost + ";" + globalSolution.getAnzahlBusse() + ";" + globalSolution.getAnzahlLadestationen());
 			pw.flush();
 
-		} while (counter < 1000); // Abbruchkriterium fuer Heuristik
+		} while (System.currentTimeMillis() < end); // Abbruchkriterium fuer Heuristik
 		
 		globalSolution.berechneFrequenzen();
 		globalSolution.setAnzahlLadestationen();
