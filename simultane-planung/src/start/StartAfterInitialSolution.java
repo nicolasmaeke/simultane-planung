@@ -72,7 +72,7 @@ public class StartAfterInitialSolution {
 		
 		try {
 			// waehle Zielpfad und Name der Ergebnis-Datei aus
-			fw = new FileWriter("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/1Stunde_1296_SF_88_stoppoints_Ergebnisse.txt", true);
+			fw = new FileWriter("/Users/XuanSon/Desktop/Java/simultane-planung/simultane-planung/data/2Stunden_1296_SF_88_stoppoints_Ergebnisse.txt", true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
@@ -92,7 +92,7 @@ public class StartAfterInitialSolution {
 		
 		//Terminierungskriterium: Laufzeit
 		double start = System.currentTimeMillis(); //Startzeit in Milisekunden
-		double end = start + 60*60*1000; // Endzeit in Milisekunden
+		double end = start + 120*60*1000; // Endzeit in Milisekunden
 		double jetzt; 
 		double dauer; 
 
